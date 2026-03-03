@@ -71,9 +71,11 @@ export default function ChartCard({
             icon: 'roundRect',
             itemWidth: 12,
             itemHeight: 8,
+            top: 'auto',
+            bottom: 8,
         },
         grid: {
-            left: '3%', right: '4%', bottom: '12%', top: '10%',
+            left: '3%', right: '4%', bottom: '18%', top: '10%',
             containLabel: true,
         },
         tooltip: {
@@ -115,6 +117,7 @@ export default function ChartCard({
             ...option,
             tooltip: mergedTooltip,
             grid: { ...baseTheme.grid, ...(option.grid || {}) },
+            legend: { ...(baseTheme as any).legend, ...(((option as any).legend || {}) as Record<string, unknown>) },
         };
 
         // Fix radar axis names and graph/pie/treemap labels for light mode
@@ -251,7 +254,7 @@ export default function ChartCard({
                             transition={{ type: 'spring', stiffness: 300, damping: 28 }}
                             onClick={(e) => e.stopPropagation()}
                             className="glass-panel overflow-hidden"
-                            style={{ width: '92vw', maxWidth: 1200, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+                            style={{ width: '92vw', maxWidth: 1200, minHeight: '85vh', maxHeight: '95vh', display: 'flex', flexDirection: 'column' }}
                         >
                             {/* Header */}
                             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border-subtle)', flexShrink: 0 }}>
@@ -267,9 +270,11 @@ export default function ChartCard({
                                     <X size={16} />
                                 </button>
                             </div>
-                            {/* Chart fills the rest */}
-                            <div style={{ flex: 1, minHeight: 0, padding: '8px 0' }}>
-                                {chartEl('100%')}
+                            {/* Chart fills the rest — full height so ECharts can use it */}
+                            <div style={{ flex: 1, minHeight: 0, padding: '8px 0', position: 'relative' }}>
+                                <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                                    {chartEl('100%')}
+                                </div>
                             </div>
                         </motion.div>
                     </motion.div>

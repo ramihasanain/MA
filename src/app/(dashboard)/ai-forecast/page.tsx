@@ -21,7 +21,7 @@ export default function AIForecastPage() {
             { name: 'الحد الأعلى', type: 'line', data: forecastData.map((d) => d.upperBound), lineStyle: { opacity: 0 }, itemStyle: { opacity: 0 }, areaStyle: { color: 'rgba(8,145,178,0.06)' }, stack: 'band' },
             { name: 'الحد الأدنى', type: 'line', data: forecastData.map((d) => d.lowerBound), lineStyle: { opacity: 0 }, itemStyle: { opacity: 0 }, areaStyle: { color: 'rgba(8,145,178,0.06)' }, stack: 'band' },
         ],
-        legend: { data: ['الفعلي', 'المتوقع'], top: 0, left: 0 },
+        legend: { data: ['الفعلي', 'المتوقع'], bottom: 0, left: 'center' },
         grid: { bottom: '18%' },
     };
 
@@ -33,7 +33,7 @@ export default function AIForecastPage() {
             { name: 'الأرباح المتوقعة', type: 'bar', data: futureData.map((d) => ({ value: Math.round(d.predicted * 0.35), itemStyle: { color: '#047857', borderRadius: [4, 4, 0, 0] } })), barWidth: 28 },
             { name: 'المبيعات المتوقعة', type: 'line', data: futureData.map((d) => d.predicted), lineStyle: { color: '#0891b2', width: 2 }, itemStyle: { color: '#0891b2' } },
         ],
-        legend: { data: ['الأرباح المتوقعة', 'المبيعات المتوقعة'], top: 0, left: 0 },
+        legend: { data: ['الأرباح المتوقعة', 'المبيعات المتوقعة'], bottom: 0, left: 'center' },
     };
 
     // ── توقع المرتجعات ──

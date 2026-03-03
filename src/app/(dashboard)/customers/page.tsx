@@ -65,7 +65,7 @@ export default function CustomersPage() {
             { name: 'مستخدمي الخصومات', type: 'bar', data: [12000, 14000, 18000, 15000, 16000, 22000, 20000, 19000, 24000, 21000, 28000, 35000].map((v) => ({ value: v, itemStyle: { color: '#047857', borderRadius: [4, 4, 0, 0] } })), barWidth: 18 },
             { name: 'نسبة الاستفادة', type: 'line', yAxisIndex: 1, data: [13, 15, 19, 16, 17, 24, 22, 21, 26, 23, 30, 38], lineStyle: { color: '#d97706', width: 2 }, itemStyle: { color: '#d97706' } },
         ],
-        legend: { data: ['مستخدمي الخصومات', 'نسبة الاستفادة'], top: 0, left: 0 },
+        legend: { data: ['مستخدمي الخصومات', 'نسبة الاستفادة'], bottom: 0, left: 'center' },
     };
 
     // ── قيمة الفاتورة ──

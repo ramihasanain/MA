@@ -126,8 +126,8 @@ export default function DiscountsPage() {
     // ── هامش الربح حسب الفئة ونطاق الخصم ──
     const profitMarginByCatOption = {
         tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const }, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0', fontSize: 10 } },
-        legend: { data: ['0%', '1-2%', '2-5%', '5-10%', '11-25%'], top: 0, right: 0, textStyle: { color: '#64748b', fontSize: 8 } },
-        grid: { left: '20%', right: '6%', top: '14%', bottom: '4%' },
+        legend: { data: ['0%', '1-2%', '2-5%', '5-10%', '11-25%'], bottom: 0, left: 'center', textStyle: { color: '#64748b', fontSize: 8 } },
+        grid: { left: '20%', right: '6%', top: '14%', bottom: '18%' },
         xAxis: { type: 'value' as const, axisLabel: { formatter: '{value}%', fontSize: 8, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } }, max: 100 },
         yAxis: { type: 'category' as const, data: categories.map(c => c.name), axisLabel: { fontSize: 9, color: '#94a3b8' }, axisLine: { show: false }, axisTick: { show: false } },
         series: [
@@ -145,16 +145,41 @@ export default function DiscountsPage() {
             trigger: 'item' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0', fontSize: 10 },
             formatter: (p: { data: [number, number, string] }) => `<b style="color:#00e5a0">${p.data[2]}</b><br/>نسبة الخصم: ${p.data[0]}%<br/>حجم المبيعات: ${p.data[1]}K`,
         },
-        xAxis: { type: 'value' as const, name: 'نسبة الخصم %', nameTextStyle: { color: '#64748b', fontSize: 9 }, axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
-        yAxis: { type: 'value' as const, name: 'حجم مبيعات المنتجات', nameTextStyle: { color: '#64748b', fontSize: 9 }, axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K`, fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
+        xAxis: {
+            name: 'نسبة الخصم %',
+            type: 'value' as const,
+            nameLocation: 'middle' as const,
+            nameGap: 32,
+            nameTextStyle: { color: '#64748b', fontSize: 9 },
+            axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' },
+            splitLine: { lineStyle: { color: '#1e293b' } },
+        },
+        yAxis: {
+            name: 'حجم مبيعات المنتجات',
+            type: 'value' as const,
+            nameLocation: 'middle' as const,
+            nameGap: 40,
+            nameTextStyle: { color: '#64748b', fontSize: 9 },
+            axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K`, fontSize: 9, color: '#64748b' },
+            splitLine: { lineStyle: { color: '#1e293b' } },
+        },
         series: [{
             type: 'scatter',
             symbolSize: (d: number[]) => Math.max(10, Math.sqrt(d[1] / 100)),
             data: categories.map(c => [c.withSales * 5, c.withMargin * 1000, c.name]),
             itemStyle: { color: '#00e5a0', opacity: 0.8, borderColor: 'rgba(0,229,160,0.25)', borderWidth: 1 },
-            label: { show: true, formatter: (p: { data: (number | string)[] }) => String(p.data[2]).split(/[ ،]/)[0], fontSize: 9, color: '#94a3b8', position: 'top' as const },
+            label: { show: false },
+            emphasis: {
+                label: {
+                    show: true,
+                    formatter: (p: { data: (number | string)[] }) => String(p.data[2]).split(/[ ،]/)[0],
+                    fontSize: 9,
+                    color: '#e2e8f0',
+                    position: 'top' as const,
+                },
+            },
         }],
-        grid: { bottom: '12%', top: '14%', left: '12%', right: '5%' },
+        grid: { bottom: '18%', top: '14%', left: '16%', right: '5%' },
     };
 
     // ── صافي المبيعات حسب نطاق الخصم ──

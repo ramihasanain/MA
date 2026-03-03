@@ -95,16 +95,41 @@ export default function ProductsPage() {
     // ── Scatter: حجم المبيعات مقابل هامش الربح ──
     const scatterOption = {
         tooltip: { trigger: 'item' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0', fontSize: 11 }, formatter: (p: { data: [number, number, string] }) => `<b style="color:#00e5a0">${p.data[2]}</b><br/>الحجم: ${fmtK(p.data[0])}<br/>الهامش: ${p.data[1]}%` },
-        xAxis: { name: 'حجم المبيعات', type: 'value' as const, nameTextStyle: { color: '#64748b', fontSize: 9 }, axisLabel: { formatter: (v: number) => fmtK(v), fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
-        yAxis: { name: 'هامش الربح %', type: 'value' as const, nameTextStyle: { color: '#64748b', fontSize: 9 }, axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
+        xAxis: {
+            name: 'حجم المبيعات',
+            type: 'value' as const,
+            nameLocation: 'middle' as const,
+            nameGap: 32,
+            nameTextStyle: { color: '#64748b', fontSize: 9 },
+            axisLabel: { formatter: (v: number) => fmtK(v), fontSize: 9, color: '#64748b' },
+            splitLine: { lineStyle: { color: '#1e293b' } },
+        },
+        yAxis: {
+            name: 'هامش الربح %',
+            type: 'value' as const,
+            nameLocation: 'middle' as const,
+            nameGap: 40,
+            nameTextStyle: { color: '#64748b', fontSize: 9 },
+            axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' },
+            splitLine: { lineStyle: { color: '#1e293b' } },
+        },
         series: [{
             type: 'scatter',
             symbolSize: (d: number[]) => Math.max(14, Math.sqrt(d[0] / 600)),
             data: categories.map(c => [c.volume, c.margin, c.name]),
             itemStyle: { color: (p: { dataIndex: number }) => CAT_COLORS[p.dataIndex % CAT_COLORS.length], opacity: 0.85, borderColor: 'rgba(255,255,255,0.15)', borderWidth: 1 },
-            label: { show: true, formatter: (p: { data: (number | string)[] }) => String(p.data[2]).split(/[ ،]/)[0], fontSize: 9, color: '#94a3b8', position: 'top' as const },
+            label: { show: false },
+            emphasis: {
+                label: {
+                    show: true,
+                    formatter: (p: { data: (number | string)[] }) => String(p.data[2]).split(/[ ،]/)[0],
+                    fontSize: 9,
+                    color: '#e2e8f0',
+                    position: 'top' as const,
+                },
+            },
         }],
-        grid: { bottom: '12%', top: '14%', left: '12%', right: '5%' },
+        grid: { bottom: '18%', top: '14%', left: '16%', right: '5%' },
     };
 
     // ── مخطط أفضل 10 (أشرطة أفقية تدرج) ──
@@ -226,7 +251,7 @@ export default function ProductsPage() {
             { name: 'المرتجعات', type: 'bar', data: [320, 180, 420, 150, 95, 210, 110, 280].map(v => ({ value: v, itemStyle: { color: '#ef4444', borderRadius: [4, 4, 0, 0] } })), barWidth: 14 },
             { name: '% الإرجاع', type: 'line', yAxisIndex: 1, data: [2.1, 1.5, 4.2, 1.2, 0.8, 3.5, 1.8, 3.8], lineStyle: { color: '#f59e0b', width: 2 }, itemStyle: { color: '#f59e0b' }, smooth: true },
         ],
-        legend: { data: ['المرتجعات', '% الإرجاع'], top: 0, left: 0, textStyle: { color: '#64748b', fontSize: 9 } },
+        legend: { data: ['المرتجعات', '% الإرجاع'], bottom: 0, left: 'center', textStyle: { color: '#64748b', fontSize: 9 } },
         grid: { bottom: '20%', top: '16%', containLabel: true },
     };
 

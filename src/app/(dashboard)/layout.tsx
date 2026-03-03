@@ -2,7 +2,6 @@
 
 import React, { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { useSidebarStore } from '@/store/sidebarStore';
 import { useThemeStore } from '@/store/themeStore';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
@@ -11,7 +10,6 @@ import GlobalFilterBar from '@/components/ui/GlobalFilterBar';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-    const isCollapsed = useSidebarStore((s) => s.isCollapsed);
     const mode = useThemeStore((s) => s.mode);
     const router = useRouter();
 
@@ -35,21 +33,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     return (
-        <div className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
-            <Sidebar />
-            <Header />
-            <main
-                className="pt-16 min-h-screen content-transition"
-                style={{ marginRight: isCollapsed ? '72px' : '260px' }}
-            >
-                {/* شريط الفلاتر — فوق كل محتوى الصفحة */}
-                <div style={{ padding: '8px 24px 0' }}>
-                    <GlobalFilterBar />
+        <div className="h-screen overflow-y-auto" style={{ background: 'var(--bg-primary)' }}>
+            <div className="flex min-h-screen flex-row" style={{ background: 'var(--bg-primary)' }} dir="rtl">
+                <Sidebar />
+                <div className="flex-1 flex flex-col min-h-screen min-w-0">
+                <Header />
+                <main className="flex-1 content-transition min-h-0">
+                    {/* شريط الفلاتر — فوق كل محتوى الصفحة */}
+                    <div style={{ padding: '8px 24px 0' }}>
+                        <GlobalFilterBar />
+                    </div>
+                    <div className="p-6 pt-2">
+                        {children}
+                    </div>
+                </main>
                 </div>
-                <div className="p-6 pt-2">
-                    {children}
-                </div>
-            </main>
+            </div>
         </div>
     );
 }

@@ -49,7 +49,7 @@ export default function SalesMethodPage() {
                 symbolSize: 8,
             },
         ],
-        legend: { data: ['صافي المبيعات', 'حجم المبيعات'], top: 0, left: 0 },
+        legend: { data: ['صافي المبيعات', 'حجم المبيعات'], bottom: 0, left: 'center' },
     };
 
     // ── مخطط نوع البيع (أعمدة + خط للكمية) ──
@@ -81,7 +81,7 @@ export default function SalesMethodPage() {
                 symbolSize: 8,
             },
         ],
-        legend: { data: ['صافي المبيعات', 'حجم المبيعات'], top: 0, left: 0 },
+        legend: { data: ['صافي المبيعات', 'حجم المبيعات'], bottom: 0, left: 'center' },
     };
 
     // ── اتجاه طرق الدفع شهرياً ──
@@ -94,7 +94,7 @@ export default function SalesMethodPage() {
             { name: 'كوبون / قسيمة', type: 'line', stack: 'total', data: [80000, 90000, 100000, 110000, 95000, 120000, 115000, 108000, 125000, 118000, 130000, 145000], areaStyle: { opacity: 0.3 }, lineStyle: { color: '#d97706' }, itemStyle: { color: '#d97706' } },
             { name: 'دفع لاحق', type: 'line', stack: 'total', data: [200000, 190000, 210000, 220000, 200000, 230000, 220000, 210000, 240000, 230000, 250000, 280000], areaStyle: { opacity: 0.3 }, lineStyle: { color: '#7c3aed' }, itemStyle: { color: '#7c3aed' } },
         ],
-        legend: { data: ['نقدي', 'فيزا/ماستركارد', 'كوبون / قسيمة', 'دفع لاحق'], top: 0, left: 0 },
+        legend: { data: ['نقدي', 'فيزا/ماستركارد', 'كوبون / قسيمة', 'دفع لاحق'], bottom: 0, left: 'center' },
     };
 
     // ── الإيرادات والهامش حسب الطريقة ──
@@ -108,7 +108,7 @@ export default function SalesMethodPage() {
             { name: 'الإيرادات', type: 'bar', data: [10300000, 6900000, 1200000, 2500000, 800000].map((v) => ({ value: v, itemStyle: { color: '#047857', borderRadius: [4, 4, 0, 0] } })), barWidth: 36 },
             { name: 'هامش الربح', type: 'line', yAxisIndex: 1, data: [22.1, 19.5, 14.3, 15.3, 12.7], lineStyle: { color: '#d97706', width: 2 }, itemStyle: { color: '#d97706' } },
         ],
-        legend: { data: ['الإيرادات', 'هامش الربح'], top: 0, left: 0 },
+        legend: { data: ['الإيرادات', 'هامش الربح'], bottom: 0, left: 'center' },
     };
 
     // ── نوع البيع اتجاه شهري ──
@@ -119,7 +119,7 @@ export default function SalesMethodPage() {
             { name: 'بطاقة عسكرية', type: 'bar', data: [2200000, 2150000, 2400000, 2350000, 2300000, 2600000, 2500000, 2450000, 2700000, 2600000, 2800000, 3100000].map(v => ({ value: v, itemStyle: { color: '#2563eb', borderRadius: [4, 4, 0, 0] } })), barWidth: 14, barGap: '20%' },
             { name: 'مدني', type: 'bar', data: [850000, 830000, 950000, 940000, 920000, 1050000, 1000000, 990000, 1100000, 1050000, 1150000, 1280000].map(v => ({ value: v, itemStyle: { color: '#0891b2', borderRadius: [4, 4, 0, 0] } })), barWidth: 14 },
         ],
-        legend: { data: ['بطاقة عسكرية', 'مدني'], top: 0, left: 0 },
+        legend: { data: ['بطاقة عسكرية', 'مدني'], bottom: 0, left: 'center' },
     };
 
     const fmt = (n: number) => new Intl.NumberFormat('en-US').format(n);

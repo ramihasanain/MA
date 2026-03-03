@@ -44,7 +44,7 @@ export default function DashboardPage() {
                 itemStyle: { color: '#0891b2' },
             },
         ],
-        legend: { data: ['الإيرادات', 'صافي الإيرادات'], top: 0, left: 0 },
+        legend: { data: ['الإيرادات', 'صافي الإيرادات'], bottom: 0, left: 'center' },
     };
 
     const topBranches = [...branches].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
@@ -63,10 +63,15 @@ export default function DashboardPage() {
     };
 
     const categoryOption = {
+        legend: {
+            bottom: 0,
+            left: 'center' as const,
+            data: categories.map((c) => c.nameAr),
+        },
         series: [{
             type: 'pie',
             radius: ['50%', '75%'],
-            center: ['50%', '50%'],
+            center: ['50%', '45%'],
             data: categories.map((c) => ({ name: c.nameAr, value: c.value, itemStyle: { color: c.color } })),
             label: { show: true, position: 'outside' as const, color: '#64748b', fontSize: 11, formatter: '{b}: {d}%' },
             labelLine: { lineStyle: { color: '#334155' } },
@@ -84,7 +89,7 @@ export default function DashboardPage() {
             { name: 'الإيرادات', type: 'bar', data: regions.map((r) => r.revenue), itemStyle: { color: '#2563eb', borderRadius: [4, 4, 0, 0] }, barWidth: 30 },
             { name: 'النمو', type: 'line', yAxisIndex: 1, data: regions.map((r) => r.growth), lineStyle: { color: '#047857', width: 2 }, itemStyle: { color: '#047857' } },
         ],
-        legend: { data: ['الإيرادات', 'النمو'], top: 0, left: 0 },
+        legend: { data: ['الإيرادات', 'النمو'], bottom: 0, left: 'center' },
     };
 
     return (
@@ -103,7 +108,7 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 items-center gap-3">
                     <div className="flex items-center gap-2 px-3 py-2 rounded-lg glass-panel">
                         <Activity size={14} style={{ color: 'var(--accent-green)' }} />
                         <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>صحة النظام:</span>

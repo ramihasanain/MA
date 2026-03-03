@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -54,16 +54,31 @@ const navItems: NavItem[] = [
     { id: 'reports', label: 'مركز التقارير', icon: FileBarChart, href: '/reports', dividerBefore: true },
 ];
 
+const MD_BREAKPOINT = 768;
+
 export default function Sidebar() {
     const { isCollapsed, toggleSidebar } = useSidebarStore();
     const { mode, toggleMode } = useThemeStore();
     const pathname = usePathname();
+    const [isSmallViewport, setIsSmallViewport] = useState(false);
+
+    useEffect(() => {
+        const mql = window.matchMedia(`(max-width: ${MD_BREAKPOINT - 1}px)`);
+        const handler = () => setIsSmallViewport(mql.matches);
+        handler();
+        mql.addEventListener('change', handler);
+        return () => mql.removeEventListener('change', handler);
+    }, []);
+
+    const isOverlay = isSmallViewport && !isCollapsed;
 
     return (
         <motion.aside
-            className="fixed top-0 right-0 h-screen z-40 flex flex-col sidebar-transition overflow-hidden"
+            className={`flex flex-col z-40 sidebar-transition overflow-hidden ${
+                isOverlay ? 'fixed top-0 right-0 h-screen' : 'sticky top-0 h-screen shrink-0'
+            }`}
             style={{
-                width: isCollapsed ? '72px' : '260px',
+                width: isCollapsed ? 72 : 260,
                 background: 'var(--sidebar-bg)',
                 borderLeft: '1px solid var(--sidebar-border)',
             }}
@@ -71,7 +86,7 @@ export default function Sidebar() {
             {/* شعار */}
             <div className="flex items-center gap-3 px-4 h-16 border-b" style={{ borderColor: 'var(--sidebar-border)' }}>
                 <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                     style={{ background: 'var(--sidebar-logo-gradient)' }}
                 >
                     <Shield size={20} color="#ffffff" strokeWidth={2.5} />
@@ -125,7 +140,7 @@ export default function Sidebar() {
 
                                     <Icon
                                         size={20}
-                                        className="flex-shrink-0 transition-colors"
+                                        className="shrink-0 transition-colors"
                                     />
 
                                     <AnimatePresence>

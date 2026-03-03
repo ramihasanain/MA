@@ -224,7 +224,7 @@ export default function BranchesPage() {
                     {/* Gauge */}
                     <div className="p-4 border-b xl:border-b-0 xl:border-l" style={{ borderColor: 'var(--border-subtle)' }}>
                         <p className="text-[11px] font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>متوسط درجة أداء الفروع الكلية</p>
-                        <ChartCard title="" option={overallGaugeOption} height="200px" />
+                        <ChartCard title="" option={overallGaugeOption} height="500px" />
                     </div>
 
                     {/* الأوزان المعيارية */}

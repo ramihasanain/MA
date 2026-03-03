@@ -46,20 +46,29 @@ export default function AIBasketPage() {
             { name: 'حليب ← خبز', type: 'line', data: [75, 78, 80, 77, 82, 90, 85], lineStyle: { color: '#2563eb', width: 2 }, itemStyle: { color: '#2563eb' } },
             { name: 'دجاج ← أرز', type: 'line', data: [70, 72, 68, 75, 85, 60, 55], lineStyle: { color: '#d97706', width: 2 }, itemStyle: { color: '#d97706' } },
         ],
-        legend: { data: ['أرز ← زيت', 'حليب ← خبز', 'دجاج ← أرز'], top: 0, left: 0 },
+        legend: { data: ['أرز ← زيت', 'حليب ← خبز', 'دجاج ← أرز'], bottom: 0, left: 'center' },
     };
 
     // ── ترابط حسب الأسواق ──
     const marketCorrelationOption = {
-        xAxis: { type: 'value' as const, name: 'قوة الترابط %' },
-        yAxis: { type: 'category' as const, data: ['عمّان المركزي', 'إربد', 'الزرقاء', 'العقبة', 'السلط'], inverse: true },
+        xAxis: {
+            type: 'value' as const,
+            name: 'قوة الترابط %',
+            nameLocation: 'middle' as const,
+            nameGap: 32,
+        },
+        yAxis: {
+            type: 'category' as const,
+            data: ['عمّان المركزي', 'إربد', 'الزرقاء', 'العقبة', 'السلط'],
+            inverse: true,
+        },
         series: [
             { name: 'أرز ← زيت', type: 'bar', data: [88, 82, 85, 78, 80], itemStyle: { color: '#047857' }, barWidth: 10 },
             { name: 'حليب ← خبز', type: 'bar', data: [80, 85, 78, 72, 76], itemStyle: { color: '#2563eb' }, barWidth: 10 },
             { name: 'دجاج ← أرز', type: 'bar', data: [75, 70, 72, 68, 65], itemStyle: { color: '#d97706' }, barWidth: 10 },
         ],
-        legend: { data: ['أرز ← زيت', 'حليب ← خبز', 'دجاج ← أرز'], top: 0, left: 0 },
-        grid: { left: '22%', right: '8%', top: '12%', bottom: '8%' },
+        legend: { data: ['أرز ← زيت', 'حليب ← خبز', 'دجاج ← أرز'], bottom: 0, left: 'center' },
+        grid: { left: '22%', right: '8%', top: '12%', bottom: '22%' },
     };
 
     // ── توقع المبيعات حسب الفرع / الموسم ──
@@ -71,7 +80,7 @@ export default function AIBasketPage() {
             { name: 'موسمي (رمضان)', type: 'bar', stack: 'forecast', data: [180000, 130000, 110000, 95000, 72000].map((v) => ({ value: v, itemStyle: { color: '#d97706' } })), barWidth: 30 },
             { name: 'عروض', type: 'bar', stack: 'forecast', data: [95000, 70000, 60000, 50000, 38000].map((v) => ({ value: v, itemStyle: { color: '#7c3aed', borderRadius: [4, 4, 0, 0] } })), barWidth: 30 },
         ],
-        legend: { data: ['يومي (عادي)', 'موسمي (رمضان)', 'عروض'], top: 0, left: 0 },
+        legend: { data: ['يومي (عادي)', 'موسمي (رمضان)', 'عروض'], bottom: 0, left: 'center' },
     };
 
     return (

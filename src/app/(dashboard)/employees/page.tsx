@@ -100,13 +100,19 @@ export default function EmployeesPage() {
                 `<b style="color:#00e5a0">${p.data[3]}</b><br/>معدل الإلغاء: ${p.data[0]}%<br/>ATV: ${p.data[1].toFixed(2)}<br/>المعاملات: ${fmtN(p.data[2])}`,
         },
         xAxis: {
-            name: 'معدل الإلغاء %', type: 'value' as const,
+            name: 'معدل الإلغاء %',
+            type: 'value' as const,
+            nameLocation: 'middle' as const,
+            nameGap: 32,
             nameTextStyle: { color: '#64748b', fontSize: 9 },
             axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' },
             splitLine: { lineStyle: { color: '#1e293b' } },
         },
         yAxis: {
-            name: 'متوسط ATV', type: 'value' as const,
+            name: 'متوسط ATV',
+            type: 'value' as const,
+            nameLocation: 'middle' as const,
+            nameGap: 40,
             nameTextStyle: { color: '#64748b', fontSize: 9 },
             axisLabel: { fontSize: 9, color: '#64748b' },
             splitLine: { lineStyle: { color: '#1e293b' } },
@@ -119,9 +125,18 @@ export default function EmployeesPage() {
                 color: (p: { data: number[] }) => scoreColor(cashiers.find(c => c.transactions === p.data[2])?.score ?? 50),
                 opacity: 0.85, borderColor: '#1e293b', borderWidth: 1,
             },
-            label: { show: true, formatter: (p: { data: (number | string)[] }) => String(p.data[3]).split(' ')[0], fontSize: 9, color: '#94a3b8', position: 'top' as const },
+            label: { show: false },
+            emphasis: {
+                label: {
+                    show: true,
+                    formatter: (p: { data: (number | string)[] }) => String(p.data[3]).split(' ')[0],
+                    fontSize: 9,
+                    color: '#e2e8f0',
+                    position: 'top' as const,
+                },
+            },
         }],
-        grid: { bottom: '14%', top: '14%', left: '12%', right: '6%' },
+        grid: { bottom: '18%', top: '14%', left: '16%', right: '6%' },
     };
 
     // ── اتجاه المبيعات ──

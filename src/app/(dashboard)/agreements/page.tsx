@@ -21,17 +21,22 @@ const agreements: Agreement[] = [
 export default function AgreementsPage() {
     // ── المواد والأرباح والخصومات ──
     const materialsAnalysisOption = {
-        xAxis: { type: 'category' as const, data: agreements.filter((a) => a.materials > 0).map((a) => a.partner.split(' ').slice(0, 2).join(' ')), axisLabel: { fontSize: 10 } },
+        xAxis: {
+            type: 'category' as const,
+            data: agreements.filter((a) => a.materials > 0).map((a) => a.partner.split(' ').slice(0, 2).join(' ')),
+            axisLabel: { fontSize: 10 },
+        },
         yAxis: [
-            { type: 'value' as const, name: 'عدد المواد' },
-            { type: 'value' as const, name: 'الهامش / الخصم %' },
+            { type: 'value' as const, name: 'عدد المواد', nameLocation: 'middle' as const, nameGap: 40 },
+            { type: 'value' as const, name: 'الهامش / الخصم %', nameLocation: 'middle' as const, nameGap: 40 },
         ],
         series: [
             { name: 'المواد', type: 'bar', data: agreements.filter((a) => a.materials > 0).map((a) => ({ value: a.materials, itemStyle: { color: '#2563eb', borderRadius: [4, 4, 0, 0] } })), barWidth: 24 },
             { name: 'هامش الربح', type: 'line', yAxisIndex: 1, data: agreements.filter((a) => a.materials > 0).map((a) => a.profitMargin), lineStyle: { color: '#047857', width: 2 }, itemStyle: { color: '#047857' } },
             { name: 'نسبة الخصم', type: 'line', yAxisIndex: 1, data: agreements.filter((a) => a.materials > 0).map((a) => a.discountRate), lineStyle: { color: '#d97706', width: 2, type: 'dashed' as const }, itemStyle: { color: '#d97706' } },
         ],
-        legend: { data: ['المواد', 'هامش الربح', 'نسبة الخصم'], top: 0, left: 0 },
+        legend: { data: ['المواد', 'هامش الربح', 'نسبة الخصم'], bottom: 0, left: 'center' },
+        grid: { left: '14%', right: '14%', top: '12%', bottom: '22%', containLabel: true },
     };
 
     // ── القيمة حسب النوع ──

@@ -17,7 +17,7 @@ export default function TimeComparePage() {
             { name: '2024', type: 'line', data: [1900000, 2000000, 2200000, 2100000, 2150000, 2500000, 2350000, 2400000, 2600000, 2500000, 2700000, 2900000], lineStyle: { color: '#2563eb', width: 2, type: 'dashed' as const }, itemStyle: { color: '#2563eb' } },
             { name: '2023', type: 'line', data: [1700000, 1800000, 1900000, 1850000, 1900000, 2200000, 2100000, 2150000, 2300000, 2200000, 2400000, 2600000], lineStyle: { color: '#64748b', width: 1, type: 'dotted' as const }, itemStyle: { color: '#64748b' } },
         ],
-        legend: { data: ['2025', '2024', '2023'], top: 0, left: 0 },
+        legend: { data: ['2025', '2024', '2023'], bottom: 0, left: 'center' },
     };
 
     // ── نسب الأرباح ──
@@ -28,7 +28,7 @@ export default function TimeComparePage() {
             { name: '2025', type: 'line', smooth: true, data: [32, 33, 35, 34, 33, 36, 35, 34, 37, 36, 38, 39], lineStyle: { color: '#047857', width: 2 }, itemStyle: { color: '#047857' } },
             { name: '2024', type: 'line', smooth: true, data: [30, 31, 32, 31, 30, 33, 32, 31, 34, 33, 35, 36], lineStyle: { color: '#2563eb', width: 2, type: 'dashed' as const }, itemStyle: { color: '#2563eb' } },
         ],
-        legend: { data: ['2025', '2024'], top: 0, left: 0 },
+        legend: { data: ['2025', '2024'], bottom: 0, left: 'center' },
     };
 
     // ── النمو الربعي ──
@@ -39,7 +39,7 @@ export default function TimeComparePage() {
             { name: '2025/2024', type: 'bar', data: [8.5, 10.2, 7.8, 9.1].map((v) => ({ value: v, itemStyle: { color: '#047857', borderRadius: [4, 4, 0, 0] } })), barWidth: 28 },
             { name: '2024/2023', type: 'bar', data: [12.1, 11.5, 10.8, 9.3].map((v) => ({ value: v, itemStyle: { color: '#2563eb', borderRadius: [4, 4, 0, 0] } })), barWidth: 28 },
         ],
-        legend: { data: ['2025/2024', '2024/2023'], top: 0, left: 0 },
+        legend: { data: ['2025/2024', '2024/2023'], bottom: 0, left: 'center' },
     };
 
     // ── الأسواق الأعلى مبيعاً ──
@@ -50,8 +50,8 @@ export default function TimeComparePage() {
             { name: '2025', type: 'bar', data: [4200000, 3100000, 2800000, 2400000, 1900000].map((v) => ({ value: v, itemStyle: { color: '#047857', borderRadius: [0, 4, 4, 0] } })), barWidth: 14 },
             { name: '2024', type: 'bar', data: [3800000, 2900000, 2500000, 2200000, 1800000].map((v) => ({ value: v, itemStyle: { color: '#334155', borderRadius: [0, 4, 4, 0] } })), barWidth: 14 },
         ],
-        legend: { data: ['2025', '2024'], top: 0, left: 0 },
-        grid: { left: '22%', right: '8%', top: '10%', bottom: '8%' },
+        legend: { data: ['2025', '2024'], bottom: 0, left: 'center' },
+        grid: { left: '22%', right: '8%', top: '10%', bottom: '18%' },
     };
 
     // ── تحليل القطع المباعة ──
@@ -62,7 +62,7 @@ export default function TimeComparePage() {
             { name: '2025', type: 'bar', data: [145000, 152000, 168000, 160000, 165000, 185000, 175000, 180000, 192000, 185000, 200000, 215000].map((v) => ({ value: v, itemStyle: { color: '#047857', borderRadius: [4, 4, 0, 0] } })), barWidth: 14 },
             { name: '2024', type: 'bar', data: [132000, 138000, 150000, 145000, 148000, 165000, 158000, 162000, 172000, 168000, 180000, 195000].map((v) => ({ value: v, itemStyle: { color: '#334155', borderRadius: [4, 4, 0, 0] } })), barWidth: 14 },
         ],
-        legend: { data: ['2025', '2024'], top: 0, left: 0 },
+        legend: { data: ['2025', '2024'], bottom: 0, left: 'center' },
     };
 
     const metrics = [

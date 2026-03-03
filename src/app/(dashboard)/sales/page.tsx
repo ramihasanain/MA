@@ -43,7 +43,7 @@ export default function SalesPage() {
             { name: `${Number(selectedYear) - 1}`, type: 'bar', data: previousYearData.map((v) => ({ value: v, itemStyle: { color: '#334155', borderRadius: [4, 4, 0, 0] } })), barWidth: 16 },
             { name: 'الفرق %', type: 'line', yAxisIndex: 0, data: currentYearData.map((v, i) => Math.round(((v - previousYearData[i]) / previousYearData[i]) * 100 * 100) / 100), lineStyle: { color: '#0891b2', width: 2, type: 'dashed' as const }, itemStyle: { color: '#0891b2' }, tooltip: { valueFormatter: (v: number) => `${v}%` } },
         ],
-        legend: { data: [`${selectedYear}`, `${Number(selectedYear) - 1}`, 'الفرق %'], top: 0, left: 0 },
+        legend: { data: [`${selectedYear}`, `${Number(selectedYear) - 1}`, 'الفرق %'], bottom: 0, left: 'center' },
     };
 
     // ── Drill-down: بيانات حسب المستوى ──
@@ -75,7 +75,7 @@ export default function SalesPage() {
             { name: 'الكمية المباعة', type: 'bar', data: products.slice(0, 8).map((p) => ({ value: p.unitsSold, itemStyle: { color: '#2563eb', borderRadius: [4, 4, 0, 0] } })), barWidth: 16 },
             { name: 'الأرباح', type: 'line', yAxisIndex: 1, data: products.slice(0, 8).map((p) => Math.round(p.revenue * p.margin / 100)), lineStyle: { color: '#047857', width: 2 }, itemStyle: { color: '#047857' } },
         ],
-        legend: { data: ['الكمية المباعة', 'الأرباح'], top: 0, left: 0 },
+        legend: { data: ['الكمية المباعة', 'الأرباح'], bottom: 0, left: 'center' },
         grid: { bottom: '20%' },
     };
 
@@ -87,7 +87,7 @@ export default function SalesPage() {
             { name: 'المبيعات', type: 'bar', data: [8200000, 5100000, 4300000, 3600000, 2100000, 1300000].map((v) => ({ value: v, itemStyle: { color: '#047857', borderRadius: [4, 4, 0, 0] } })), barWidth: 28 },
             { name: 'الأرباح', type: 'bar', data: [2050000, 1120000, 730000, 468000, 189000, 52000].map((v) => ({ value: v, itemStyle: { color: '#0891b2', borderRadius: [4, 4, 0, 0] } })), barWidth: 28 },
         ],
-        legend: { data: ['المبيعات', 'الأرباح'], top: 0, left: 0 },
+        legend: { data: ['المبيعات', 'الأرباح'], bottom: 0, left: 'center' },
     };
 
     // ── شلال الإيرادات ──

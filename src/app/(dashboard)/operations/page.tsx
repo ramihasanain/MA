@@ -29,7 +29,12 @@ export default function OperationsPage() {
 
     // ── أسباب المرتجعات حسب المنتج ──
     const returnsReasonsOption = {
-        xAxis: { type: 'value' as const, name: 'عدد المرتجعات' },
+        xAxis: {
+            type: 'value' as const,
+            name: 'عدد المرتجعات',
+            nameLocation: 'middle' as const,
+            nameGap: 32,
+        },
         yAxis: { type: 'category' as const, data: ['عيب تصنيع', 'انتهاء صلاحية', 'خطأ طلب', 'تلف أثناء النقل', 'عدم مطابقة', 'أخرى'], inverse: true },
         series: [{
             type: 'bar',
@@ -53,7 +58,7 @@ export default function OperationsPage() {
             { name: 'عدد الفواتير', type: 'bar', data: [45000, 52000, 38000, 24000, 15000, 10500].map((v) => ({ value: v, itemStyle: { color: '#2563eb', borderRadius: [4, 4, 0, 0] } })), barWidth: 28 },
             { name: 'متوسط القيمة', type: 'line', yAxisIndex: 1, data: [28, 65, 115, 178, 245, 380], lineStyle: { color: '#047857', width: 2 }, itemStyle: { color: '#047857' } },
         ],
-        legend: { data: ['عدد الفواتير', 'متوسط القيمة'], top: 0, left: 0 },
+        legend: { data: ['عدد الفواتير', 'متوسط القيمة'], bottom: 0, left: 'center' },
     };
 
     // ── المبيعات والقيمة لكل منتج ──
@@ -67,7 +72,7 @@ export default function OperationsPage() {
             { name: 'عدد الوحدات', type: 'bar', data: [72000, 45000, 38000, 55000, 62000, 28000, 32000, 18000].map((v) => ({ value: v, itemStyle: { color: '#0891b2', borderRadius: [4, 4, 0, 0] } })), barWidth: 16 },
             { name: 'القيمة المادية', type: 'bar', data: [360000, 315000, 285000, 110000, 93000, 196000, 128000, 234000].map((v) => ({ value: v, itemStyle: { color: '#047857', borderRadius: [4, 4, 0, 0] } })), barWidth: 16 },
         ],
-        legend: { data: ['عدد الوحدات', 'القيمة المادية'], top: 0, left: 0 },
+        legend: { data: ['عدد الوحدات', 'القيمة المادية'], bottom: 0, left: 'center' },
     };
 
     return (
