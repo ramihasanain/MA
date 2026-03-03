@@ -187,7 +187,7 @@ export default function TransactionsPage() {
         dataZoom: [{ type: 'inside' as const, start: 0, end: 100 }],
     };
 
-    // ── Count of Transactions by Year, Quarter — waterfall ──
+    // ── Count of Transactions by Year & Branch ──
     const years = ['2020', '2021', '2022'];
     const yearData = [
         { year: '2020', branches: [{ name: 'سوق المنارة', val: 20257 }, { name: 'سوق سلاح الجو', val: 18400 }, { name: 'سوق العساكرة', val: 12300 }] },
@@ -195,22 +195,31 @@ export default function TransactionsPage() {
         { year: '2022', branches: [{ name: 'سوق المنارة', val: 28000 }, { name: 'سوق سلاح الجو', val: 21000 }, { name: 'سوق العساكرة', val: 15500 }] },
     ];
     const allBranchNames = ['سوق المنارة', 'سوق سلاح الجو', 'سوق العساكرة'];
-    const branchColors = ['#047857', '#2563eb', '#d97706'];
+    const branchColors = ['#3b82f6', '#22c55e', '#d97706'];
 
     const waterfallOption = {
         tooltip: { trigger: 'axis' as const },
-        legend: { data: allBranchNames, bottom: 0, textStyle: { fontSize: 9 } },
-        grid: { left: '8%', right: '4%', top: '10%', bottom: '16%' },
-        xAxis: { type: 'category' as const, data: years, axisLabel: { fontSize: 11 } },
-        yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K`, fontSize: 9 } },
+        legend: { data: allBranchNames, top: 6, left: 'center', textStyle: { fontSize: 10 }, itemWidth: 14, itemHeight: 10 },
+        grid: { left: '8%', right: '4%', top: '18%', bottom: '8%' },
+        xAxis: { type: 'category' as const, data: years, axisLabel: { fontSize: 12, fontWeight: 'bold' }, axisTick: { show: false }, axisLine: { lineStyle: { color: '#e5e7eb' } } },
+        yAxis: {
+            type: 'value' as const,
+            min: 0, max: 30000, interval: 5000,
+            axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K`, fontSize: 10 },
+            splitLine: { lineStyle: { color: 'var(--border-subtle)', type: 'dashed' as const } },
+        },
         series: allBranchNames.map((br, bi) => ({
             name: br,
             type: 'bar' as const,
-            barWidth: 24,
+            barWidth: 32,
+            barGap: '15%',
             data: yearData.map(yd => {
                 const found = yd.branches.find(b => b.name === br);
-                return { value: found?.val || 0, itemStyle: { color: branchColors[bi], borderRadius: [4, 4, 0, 0] } };
+                return { value: found?.val || 0, itemStyle: { color: branchColors[bi] } };
             }),
+            label: {
+                show: false,
+            },
         })),
     };
 
@@ -304,88 +313,106 @@ export default function TransactionsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {branchData.map((branch) => {
-                                const brKey = `txb_${branch.name}`;
-                                const isBrOpen = expandedRows.has(brKey);
+                            {(() => {
+                                // Calculate max values for bar scaling
+                                const allRows = branchData.flatMap(b => [b, ...b.subs.flatMap(s => [s, ...s.products])]);
+                                const maxNet = Math.max(...allRows.map(r => r.netSales));
+                                const maxTx = Math.max(...allRows.map(r => r.transactions));
+                                const maxInv = Math.max(...allRows.map(r => r.invoices));
+                                const maxVoid = Math.max(...allRows.filter(r => r.voidCount > 0).map(r => r.voidCount), 1);
 
-                                return (
-                                    <React.Fragment key={branch.name}>
-                                        {/* صف الفرع */}
-                                        <tr onClick={() => toggleRow(brKey)} className="cursor-pointer hover:bg-white/[0.015] transition-colors"
-                                            style={{ borderBottom: '1px solid var(--border-subtle)', background: isBrOpen ? 'rgba(4,120,87,0.04)' : 'transparent' }}>
-                                            <td style={{ padding: '8px 12px', fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>
-                                                <div className="flex items-center gap-2">
-                                                    <span style={{ color: 'var(--accent-green)', transition: 'transform 0.2s', display: 'inline-block', transform: isBrOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
-                                                        <ChevronDown size={13} />
-                                                    </span>
-                                                    {branch.name}
-                                                    <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>{branch.subs.length}</span>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 10, fontWeight: 600, color: 'var(--accent-green)' }} dir="ltr">{fmt(branch.netSales)}</td>
-                                            <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{fmt(branch.transactions)}</td>
-                                            <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{fmt(branch.invoices)}</td>
-                                            <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 10, color: branch.voidCount > 0 ? 'var(--accent-red)' : 'var(--text-muted)' }} dir="ltr">{branch.voidCount}</td>
-                                            <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 10, color: 'var(--accent-blue)' }} dir="ltr">{branch.atv.toFixed(2)}</td>
-                                        </tr>
-
-                                        {/* صفوف الفئات (sub) */}
-                                        <AnimatePresence initial={false}>
-                                            {isBrOpen && branch.subs.map((sub, si) => {
-                                                const subKey = `txs_${branch.name}_${sub.name}`;
-                                                const isSubOpen = expandedRows.has(subKey);
-                                                return (
-                                                    <React.Fragment key={sub.name}>
-                                                        <motion.tr
-                                                            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                                                            transition={{ duration: 0.18, delay: si * 0.03 }}
-                                                            onClick={() => toggleRow(subKey)}
-                                                            className="cursor-pointer hover:bg-white/[0.015] transition-colors"
-                                                            style={{ borderBottom: '1px solid var(--border-subtle)', background: isSubOpen ? 'rgba(8,145,178,0.04)' : 'rgba(4,120,87,0.02)' }}>
-                                                            <td style={{ padding: '6px 12px 6px 30px', fontSize: 10, color: 'var(--text-secondary)' }}>
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <span style={{ color: 'var(--accent-cyan)', transition: 'transform 0.2s', display: 'inline-block', transform: isSubOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
-                                                                        <ChevronDown size={11} />
-                                                                    </span>
-                                                                    {sub.name}
-                                                                    <span className="text-[8px] px-1 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>{sub.products.length}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td style={{ padding: '6px 12px', textAlign: 'center', fontSize: 10, color: 'var(--accent-green)' }} dir="ltr">{fmt(sub.netSales)}</td>
-                                                            <td style={{ padding: '6px 12px', textAlign: 'center', fontSize: 10, color: 'var(--text-muted)' }} dir="ltr">{fmt(sub.transactions)}</td>
-                                                            <td style={{ padding: '6px 12px', textAlign: 'center', fontSize: 10, color: 'var(--text-muted)' }} dir="ltr">{fmt(sub.invoices)}</td>
-                                                            <td style={{ padding: '6px 12px', textAlign: 'center', fontSize: 10, color: sub.voidCount > 0 ? 'var(--accent-red)' : 'var(--text-muted)' }} dir="ltr">{sub.voidCount}</td>
-                                                            <td style={{ padding: '6px 12px', textAlign: 'center', fontSize: 10, color: 'var(--accent-blue)' }} dir="ltr">{sub.atv.toFixed(2)}</td>
-                                                        </motion.tr>
-
-                                                        {/* صفوف المنتجات (sub al sub) */}
-                                                        <AnimatePresence initial={false}>
-                                                            {isSubOpen && sub.products.map((prod, pi) => (
-                                                                <motion.tr key={prod.name}
-                                                                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                                                                    transition={{ duration: 0.15, delay: pi * 0.03 }}
-                                                                    style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(8,145,178,0.02)' }}>
-                                                                    <td style={{ padding: '5px 12px 5px 50px', fontSize: 9.5, color: 'var(--text-muted)' }}>
-                                                                        <div className="flex items-center gap-1.5">
-                                                                            <ChevronRight size={9} style={{ color: 'var(--accent-amber)', opacity: 0.6 }} />
-                                                                            {prod.name}
-                                                                        </div>
-                                                                    </td>
-                                                                    <td style={{ padding: '5px 12px', textAlign: 'center', fontSize: 9.5, color: 'var(--accent-green)' }} dir="ltr">{fmt(prod.netSales)}</td>
-                                                                    <td style={{ padding: '5px 12px', textAlign: 'center', fontSize: 9.5, color: 'var(--text-muted)' }} dir="ltr">{fmt(prod.transactions)}</td>
-                                                                    <td style={{ padding: '5px 12px', textAlign: 'center', fontSize: 9.5, color: 'var(--text-muted)' }} dir="ltr">{fmt(prod.invoices)}</td>
-                                                                    <td style={{ padding: '5px 12px', textAlign: 'center', fontSize: 9.5, color: prod.voidCount > 0 ? 'var(--accent-red)' : 'var(--text-muted)' }} dir="ltr">{prod.voidCount}</td>
-                                                                    <td style={{ padding: '5px 12px', textAlign: 'center', fontSize: 9.5, color: 'var(--accent-blue)' }} dir="ltr">{prod.atv.toFixed(2)}</td>
-                                                                </motion.tr>
-                                                            ))}
-                                                        </AnimatePresence>
-                                                    </React.Fragment>
-                                                );
-                                            })}
-                                        </AnimatePresence>
-                                    </React.Fragment>
+                                const barCell = (val: number, max: number, color: string, isMoney = false) => (
+                                    <td style={{ padding: '7px 12px', textAlign: 'center', position: 'relative' as const }}>
+                                        <div style={{ position: 'absolute', left: 4, top: '50%', transform: 'translateY(-50%)', width: `${Math.max(2, (val / max) * 85)}%`, height: 16, background: color, opacity: 0.25, borderRadius: 3 }} />
+                                        <span style={{ position: 'relative', fontSize: 10, fontWeight: 600, color: 'var(--text-secondary)' }} dir="ltr">
+                                            {isMoney ? fmt(val) : fmt(val)}
+                                        </span>
+                                    </td>
                                 );
-                            })}
+
+                                return branchData.map((branch) => {
+                                    const brKey = `txb_${branch.name}`;
+                                    const isBrOpen = expandedRows.has(brKey);
+
+                                    return (
+                                        <React.Fragment key={branch.name}>
+                                            {/* صف الفرع */}
+                                            <tr onClick={() => toggleRow(brKey)} className="cursor-pointer hover:bg-white/[0.015] transition-colors"
+                                                style={{ borderBottom: '1px solid var(--border-subtle)', background: isBrOpen ? 'rgba(4,120,87,0.04)' : 'transparent' }}>
+                                                <td style={{ padding: '8px 12px', fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span style={{ color: 'var(--accent-green)', transition: 'transform 0.2s', display: 'inline-block', transform: isBrOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+                                                            <ChevronDown size={13} />
+                                                        </span>
+                                                        {branch.name}
+                                                        <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>{branch.subs.length}</span>
+                                                    </div>
+                                                </td>
+                                                {barCell(branch.netSales, maxNet, '#3b82f6', true)}
+                                                {barCell(branch.transactions, maxTx, '#3b82f6')}
+                                                {barCell(branch.invoices, maxInv, '#3b82f6')}
+                                                {barCell(branch.voidCount, maxVoid, '#ef4444')}
+                                                <td style={{ padding: '7px 12px', textAlign: 'center', fontSize: 10, color: 'var(--accent-blue)' }} dir="ltr">{branch.atv.toFixed(2)}</td>
+                                            </tr>
+
+                                            {/* صفوف الفئات (sub) */}
+                                            <AnimatePresence initial={false}>
+                                                {isBrOpen && branch.subs.map((sub, si) => {
+                                                    const subKey = `txs_${branch.name}_${sub.name}`;
+                                                    const isSubOpen = expandedRows.has(subKey);
+                                                    return (
+                                                        <React.Fragment key={sub.name}>
+                                                            <motion.tr
+                                                                initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                                                transition={{ duration: 0.18, delay: si * 0.03 }}
+                                                                onClick={() => toggleRow(subKey)}
+                                                                className="cursor-pointer hover:bg-white/[0.015] transition-colors"
+                                                                style={{ borderBottom: '1px solid var(--border-subtle)', background: isSubOpen ? 'rgba(8,145,178,0.04)' : 'rgba(4,120,87,0.02)' }}>
+                                                                <td style={{ padding: '6px 12px 6px 30px', fontSize: 10, color: 'var(--text-secondary)' }}>
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        <span style={{ color: 'var(--accent-cyan)', transition: 'transform 0.2s', display: 'inline-block', transform: isSubOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+                                                                            <ChevronDown size={11} />
+                                                                        </span>
+                                                                        {sub.name}
+                                                                        <span className="text-[8px] px-1 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>{sub.products.length}</span>
+                                                                    </div>
+                                                                </td>
+                                                                {barCell(sub.netSales, maxNet, '#3b82f6', true)}
+                                                                {barCell(sub.transactions, maxTx, '#3b82f6')}
+                                                                {barCell(sub.invoices, maxInv, '#3b82f6')}
+                                                                {barCell(sub.voidCount, maxVoid, '#ef4444')}
+                                                                <td style={{ padding: '6px 12px', textAlign: 'center', fontSize: 10, color: 'var(--accent-blue)' }} dir="ltr">{sub.atv.toFixed(2)}</td>
+                                                            </motion.tr>
+
+                                                            {/* صفوف المنتجات (sub al sub) */}
+                                                            <AnimatePresence initial={false}>
+                                                                {isSubOpen && sub.products.map((prod, pi) => (
+                                                                    <motion.tr key={prod.name}
+                                                                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                                                        transition={{ duration: 0.15, delay: pi * 0.03 }}
+                                                                        style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(8,145,178,0.02)' }}>
+                                                                        <td style={{ padding: '5px 12px 5px 50px', fontSize: 9.5, color: 'var(--text-muted)' }}>
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <ChevronRight size={9} style={{ color: 'var(--accent-amber)', opacity: 0.6 }} />
+                                                                                {prod.name}
+                                                                            </div>
+                                                                        </td>
+                                                                        {barCell(prod.netSales, maxNet, '#3b82f6', true)}
+                                                                        {barCell(prod.transactions, maxTx, '#3b82f6')}
+                                                                        {barCell(prod.invoices, maxInv, '#3b82f6')}
+                                                                        {barCell(prod.voidCount, maxVoid, '#ef4444')}
+                                                                        <td style={{ padding: '5px 12px', textAlign: 'center', fontSize: 9.5, color: 'var(--accent-blue)' }} dir="ltr">{prod.atv.toFixed(2)}</td>
+                                                                    </motion.tr>
+                                                                ))}
+                                                            </AnimatePresence>
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </AnimatePresence>
+                                        </React.Fragment>
+                                    );
+                                });
+                            })()}
                             {/* صف الإجمالي */}
                             <tr style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--accent-green-dim)', fontWeight: 700 }}>
                                 <td style={{ padding: '8px 12px', fontSize: 11, color: 'var(--accent-green)' }}>الإجمالي</td>
