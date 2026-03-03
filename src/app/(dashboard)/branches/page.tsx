@@ -36,10 +36,10 @@ const categoryScores = [
 ];
 
 function getBarColor(score: number) {
-    if (score >= 70) return '#00e5a0'; // --accent-green
-    if (score >= 50) return '#f59e0b'; // --accent-amber
+    if (score >= 70) return 'var(--accent-green)';
+    if (score >= 50) return 'var(--accent-amber)';
     if (score >= 30) return '#f97316';
-    return '#ef4444'; // --accent-red
+    return 'var(--accent-red)';
 }
 
 export default function BranchesPage() {
@@ -48,26 +48,10 @@ export default function BranchesPage() {
     const topBranch = [...branches].sort((a, b) => b.revenue - a.revenue)[0];
     const avgScore = Math.round(branchScores.reduce((a, b) => a + b.score, 0) / branchScores.length);
 
-    // ── Custom SVG Gauge ──
-    const gaugeRadius = 90;
-    const gaugeStroke = 14;
-    const gaugeCenter = gaugeRadius + gaugeStroke + 8;
-    const svgSize = gaugeCenter * 2;
-    const startAngle = 220;
-    const endAngle = -40;
-    const totalAngle = startAngle - endAngle; // 260°
-    const scoreAngle = startAngle - (avgScore / 100) * totalAngle;
-    const toRad = (d: number) => (d * Math.PI) / 180;
-    const arcPath = (r: number, sA: number, eA: number) => {
-        const sx = gaugeCenter + r * Math.cos(toRad(sA));
-        const sy = gaugeCenter - r * Math.sin(toRad(sA));
-        const ex = gaugeCenter + r * Math.cos(toRad(eA));
-        const ey = gaugeCenter - r * Math.sin(toRad(eA));
-        const large = sA - eA > 180 ? 1 : 0;
-        return `M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey}`;
-    };
-
-    const sortedBranches = [...branchScores].sort((a, b) => b.score - a.score);
+    // ── Simple donut gauge ──
+    const gColor = avgScore >= 70 ? 'var(--accent-green)' : avgScore >= 50 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    const circumference = 2 * Math.PI * 54;
+    const dashOffset = circumference - (avgScore / 100) * circumference;
 
     // ── أداء الفروع (شريط ملون) ──
     const branchPerfOption = {
@@ -204,59 +188,24 @@ export default function BranchesPage() {
                     </div>
                 </div>
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-0">
-                    {/* Custom SVG Gauge */}
-                    <div className="p-5 border-b xl:border-b-0 xl:border-l flex flex-col items-center" style={{ borderColor: 'var(--border-subtle)' }}>
-                        <p className="text-[11px] font-semibold mb-3 self-end" style={{ color: 'var(--text-muted)' }}>متوسط درجة أداء الفروع الكلية</p>
-                        <svg width={svgSize} height={gaugeCenter + 28} viewBox={`0 0 ${svgSize} ${gaugeCenter + 28}`} style={{ overflow: 'visible' }}>
-                            <defs>
-                                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stopColor="#ef4444" />
-                                    <stop offset="40%" stopColor="#f59e0b" />
-                                    <stop offset="100%" stopColor="#00e5a0" />
-                                </linearGradient>
-                                <filter id="glow">
-                                    <feGaussianBlur stdDeviation="3" result="blur" />
-                                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                                </filter>
-                            </defs>
-                            {/* Background track */}
-                            <path d={arcPath(gaugeRadius, startAngle, endAngle)} fill="none" stroke="var(--bg-elevated)" strokeWidth={gaugeStroke} strokeLinecap="round" />
-                            {/* Gradient progress arc */}
-                            <path d={arcPath(gaugeRadius, startAngle, scoreAngle)} fill="none" stroke="url(#gaugeGrad)" strokeWidth={gaugeStroke} strokeLinecap="round" filter="url(#glow)" />
-                            {/* Tick marks */}
-                            {[0, 25, 50, 75, 100].map(v => {
-                                const a = startAngle - (v / 100) * totalAngle;
-                                const ix = gaugeCenter + (gaugeRadius - gaugeStroke - 4) * Math.cos(toRad(a));
-                                const iy = gaugeCenter - (gaugeRadius - gaugeStroke - 4) * Math.sin(toRad(a));
-                                const ox = gaugeCenter + (gaugeRadius + gaugeStroke / 2 + 6) * Math.cos(toRad(a));
-                                const oy = gaugeCenter - (gaugeRadius + gaugeStroke / 2 + 6) * Math.sin(toRad(a));
-                                return (
-                                    <g key={v}>
-                                        <line x1={gaugeCenter + (gaugeRadius - 6) * Math.cos(toRad(a))} y1={gaugeCenter - (gaugeRadius - 6) * Math.sin(toRad(a))} x2={ix} y2={iy} stroke="var(--text-muted)" strokeWidth="1" opacity="0.4" />
-                                        <text x={ox} y={oy + 3} textAnchor="middle" fontSize="8" fill="var(--text-muted)">{v}</text>
-                                    </g>
-                                );
-                            })}
-                            {/* Center score */}
-                            <text x={gaugeCenter} y={gaugeCenter - 8} textAnchor="middle" fontSize="34" fontWeight="800" fill={avgScore >= 70 ? '#00e5a0' : avgScore >= 50 ? '#f59e0b' : '#ef4444'}>
-                                {avgScore}%
-                            </text>
-                            <text x={gaugeCenter} y={gaugeCenter + 14} textAnchor="middle" fontSize="10" fill="var(--text-muted)">
-                                متوسط الأداء العام
-                            </text>
-                        </svg>
-
-                        {/* Mini branch scores list */}
-                        <div className="w-full mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5">
-                            {sortedBranches.map(b => (
-                                <div key={b.id} className="flex items-center gap-1.5">
-                                    <div className="flex-1 h-[5px] rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
-                                        <div className="h-full rounded-full transition-all" style={{ width: `${b.score}%`, background: getBarColor(b.score) }} />
-                                    </div>
-                                    <span className="text-[9px] font-bold w-7 text-left" style={{ color: getBarColor(b.score) }} dir="ltr">{b.score}%</span>
-                                    <span className="text-[9px] truncate max-w-[70px]" style={{ color: 'var(--text-muted)' }}>{b.name.split(' ').slice(1).join(' ')}</span>
-                                </div>
-                            ))}
+                    {/* Simple Donut Gauge */}
+                    <div className="p-5 border-b xl:border-b-0 xl:border-l flex flex-col items-center justify-center" style={{ borderColor: 'var(--border-subtle)' }}>
+                        <p className="text-[11px] font-semibold mb-4" style={{ color: 'var(--text-muted)' }}>متوسط درجة أداء الفروع الكلية</p>
+                        <div className="relative" style={{ width: 140, height: 140 }}>
+                            <svg width="140" height="140" viewBox="0 0 140 140">
+                                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--bg-elevated)" strokeWidth="12" />
+                                <circle cx="70" cy="70" r="54" fill="none" stroke={gColor} strokeWidth="12"
+                                    strokeLinecap="round"
+                                    strokeDasharray={circumference}
+                                    strokeDashoffset={dashOffset}
+                                    transform="rotate(-90 70 70)"
+                                    style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-2xl font-bold" style={{ color: gColor }}>{avgScore}%</span>
+                                <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>الأداء العام</span>
+                            </div>
                         </div>
                     </div>
 
@@ -338,7 +287,7 @@ export default function BranchesPage() {
                             <span key={b.id} className="font-semibold" style={{ color: getBarColor(b.score) }}>{b.score}%</span>
                         ))}
                         <div className="flex items-center gap-1">
-                            <div style={{ background: `linear-gradient(to right, #ef4444, #f59e0b, #00e5a0)` }} className="w-12 h-2 rounded-full" />
+                            <div style={{ background: `linear-gradient(to right, var(--accent-red), var(--accent-amber), var(--accent-green))` }} className="w-12 h-2 rounded-full" />
                             <span>25% → 55% → 70%</span>
                         </div>
                     </div>
@@ -352,9 +301,9 @@ export default function BranchesPage() {
                     <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>درجة أداء فئات المنتجات الكلية</h3>
                     <div className="flex items-center gap-4 mt-1 text-[10px]">
                         <span style={{ color: 'var(--text-muted)' }}>درجة أداء فئات المنتجات</span>
-                        <span className="font-semibold" style={{ color: '#ef4444' }}>20%</span>
-                        <div className="w-16 h-2 rounded-full" style={{ background: `linear-gradient(to right, #ef4444, #f59e0b, #00e5a0)` }} />
-                        <span className="font-semibold" style={{ color: '#00e5a0' }}>90%</span>
+                        <span className="font-semibold" style={{ color: 'var(--accent-red)' }}>20%</span>
+                        <div className="w-16 h-2 rounded-full" style={{ background: `linear-gradient(to right, var(--accent-red), var(--accent-amber), var(--accent-green))` }} />
+                        <span className="font-semibold" style={{ color: 'var(--accent-green)' }}>90%</span>
                         <span style={{ color: 'var(--text-muted)' }}>55%</span>
                     </div>
                 </div>
