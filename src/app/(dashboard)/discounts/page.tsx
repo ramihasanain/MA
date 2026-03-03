@@ -98,13 +98,89 @@ const discountRanges = [
 ];
 
 const branches = [
-    { name: 'عمّان', invoices: 79.00, discInv: 38, discRate: 68.00, noDiscInv: 40, avgDisc: 0, discSales: 0, discVol: 43, netSales: 0, appDisc: 0.30, utilRate: 0.00, avgDiscRate: 0.00 },
-    { name: 'العيادات واللجان', invoices: 1.00, discInv: 0, discRate: 42.00, noDiscInv: 1, avgDisc: 0, discSales: 0, discVol: 0, netSales: 0, appDisc: 0, utilRate: 0.00, avgDiscRate: 0.00 },
-    { name: 'بالوانات مبيعات (الأردن)', invoices: 4.00, discInv: 0, discRate: 92.00, noDiscInv: 4, avgDisc: 0, discSales: 0, discVol: 1, netSales: 0, appDisc: 0, utilRate: 0.00, avgDiscRate: 0.00 },
-    { name: 'الكرك', invoices: 1.00, discInv: 1, discRate: 90.00, noDiscInv: 0, avgDisc: 1.90, discSales: 1, discVol: 1, netSales: 1, appDisc: 1.90, utilRate: 4.00, avgDiscRate: 4.40 },
-    { name: 'المفرق', invoices: 1.00, discInv: 1, discRate: 80.00, noDiscInv: 0, avgDisc: 1.30, discSales: 0, discVol: 1, netSales: 0, appDisc: 1.30, utilRate: 3.00, avgDiscRate: 3.00 },
-    { name: 'اربد', invoices: 4.00, discInv: 1, discRate: 60.00, noDiscInv: 3, avgDisc: 0.50, discSales: 0, discVol: 1, netSales: 0, appDisc: 0.50, utilRate: 4.00, avgDiscRate: 0.46 },
-    { name: 'الزرقاء', invoices: 9.00, discInv: 2, discRate: 50.00, noDiscInv: 7, avgDisc: 0.80, discSales: 1, discVol: 2, netSales: 1, appDisc: 0.80, utilRate: 0.00, avgDiscRate: 0.00 },
+    {
+        name: 'عمّان', invoices: 79.00, discInv: 38, discRate: 68.00, noDiscInv: 40, avgDisc: 0, discSales: 0, discVol: 43, netSales: 0, appDisc: 0.30, utilRate: 0.00, avgDiscRate: 0.00,
+        subs: [
+            {
+                name: 'منتجات غذائية', invoices: 42, discInv: 22, discRate: 52.38, noDiscInv: 20, avgDisc: 0.15, discSales: 0, discVol: 24, netSales: 0, appDisc: 0.15, utilRate: 0.00, avgDiscRate: 0.00,
+                products: [
+                    { name: 'أرز عنبر 5كجم', invoices: 18, discInv: 10, discRate: 55.56, noDiscInv: 8, avgDisc: 0.10, discSales: 0, discVol: 12, netSales: 0, appDisc: 0.10, utilRate: 0.00, avgDiscRate: 0.00 },
+                    { name: 'زيت نباتي 1.8L', invoices: 14, discInv: 7, discRate: 50.00, noDiscInv: 7, avgDisc: 0.05, discSales: 0, discVol: 7, netSales: 0, appDisc: 0.05, utilRate: 0.00, avgDiscRate: 0.00 },
+                    { name: 'سكر أبيض 2كجم', invoices: 10, discInv: 5, discRate: 50.00, noDiscInv: 5, avgDisc: 0.00, discSales: 0, discVol: 5, netSales: 0, appDisc: 0.00, utilRate: 0.00, avgDiscRate: 0.00 },
+                ],
+            },
+            {
+                name: 'مستلزمات منزلية', invoices: 22, discInv: 10, discRate: 45.45, noDiscInv: 12, avgDisc: 0.10, discSales: 0, discVol: 12, netSales: 0, appDisc: 0.10, utilRate: 0.00, avgDiscRate: 0.00,
+                products: [
+                    { name: 'منظف أريال مسحوق', invoices: 12, discInv: 6, discRate: 50.00, noDiscInv: 6, avgDisc: 0.05, discSales: 0, discVol: 7, netSales: 0, appDisc: 0.05, utilRate: 0.00, avgDiscRate: 0.00 },
+                    { name: 'صابون صحون فيري', invoices: 10, discInv: 4, discRate: 40.00, noDiscInv: 6, avgDisc: 0.05, discSales: 0, discVol: 5, netSales: 0, appDisc: 0.05, utilRate: 0.00, avgDiscRate: 0.00 },
+                ],
+            },
+            {
+                name: 'العناية الشخصية', invoices: 15, discInv: 6, discRate: 40.00, noDiscInv: 9, avgDisc: 0.05, discSales: 0, discVol: 7, netSales: 0, appDisc: 0.05, utilRate: 0.00, avgDiscRate: 0.00,
+                products: [
+                    { name: 'شامبو هيد آند شولدرز', invoices: 8, discInv: 3, discRate: 37.50, noDiscInv: 5, avgDisc: 0.03, discSales: 0, discVol: 4, netSales: 0, appDisc: 0.03, utilRate: 0.00, avgDiscRate: 0.00 },
+                    { name: 'كريم نيفيا للجسم', invoices: 7, discInv: 3, discRate: 42.86, noDiscInv: 4, avgDisc: 0.02, discSales: 0, discVol: 3, netSales: 0, appDisc: 0.02, utilRate: 0.00, avgDiscRate: 0.00 },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'الكرك', invoices: 1.00, discInv: 1, discRate: 90.00, noDiscInv: 0, avgDisc: 1.90, discSales: 1, discVol: 1, netSales: 1, appDisc: 1.90, utilRate: 4.00, avgDiscRate: 4.40,
+        subs: [
+            {
+                name: 'منتجات غذائية', invoices: 1, discInv: 1, discRate: 100.00, noDiscInv: 0, avgDisc: 1.90, discSales: 1, discVol: 1, netSales: 1, appDisc: 1.90, utilRate: 4.00, avgDiscRate: 4.40,
+                products: [
+                    { name: 'أرز عنبر 5كجم', invoices: 1, discInv: 1, discRate: 100.00, noDiscInv: 0, avgDisc: 1.90, discSales: 1, discVol: 1, netSales: 1, appDisc: 1.90, utilRate: 4.00, avgDiscRate: 4.40 },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'المفرق', invoices: 1.00, discInv: 1, discRate: 80.00, noDiscInv: 0, avgDisc: 1.30, discSales: 0, discVol: 1, netSales: 0, appDisc: 1.30, utilRate: 3.00, avgDiscRate: 3.00,
+        subs: [
+            {
+                name: 'فرفاشية', invoices: 1, discInv: 1, discRate: 80.00, noDiscInv: 0, avgDisc: 1.30, discSales: 0, discVol: 1, netSales: 0, appDisc: 1.30, utilRate: 3.00, avgDiscRate: 3.00,
+                products: [
+                    { name: 'حلوى شوكولاته مكس', invoices: 1, discInv: 1, discRate: 80.00, noDiscInv: 0, avgDisc: 1.30, discSales: 0, discVol: 1, netSales: 0, appDisc: 1.30, utilRate: 3.00, avgDiscRate: 3.00 },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'اربد', invoices: 4.00, discInv: 1, discRate: 60.00, noDiscInv: 3, avgDisc: 0.50, discSales: 0, discVol: 1, netSales: 0, appDisc: 0.50, utilRate: 4.00, avgDiscRate: 0.46,
+        subs: [
+            {
+                name: 'مسطحات غذائية', invoices: 2, discInv: 1, discRate: 50.00, noDiscInv: 1, avgDisc: 0.30, discSales: 0, discVol: 1, netSales: 0, appDisc: 0.30, utilRate: 2.00, avgDiscRate: 0.30,
+                products: [
+                    { name: 'عصير مانجو 1L', invoices: 2, discInv: 1, discRate: 50.00, noDiscInv: 1, avgDisc: 0.30, discSales: 0, discVol: 1, netSales: 0, appDisc: 0.30, utilRate: 2.00, avgDiscRate: 0.30 },
+                ],
+            },
+            {
+                name: 'منتجات غذائية', invoices: 2, discInv: 0, discRate: 0.00, noDiscInv: 2, avgDisc: 0.20, discSales: 0, discVol: 0, netSales: 0, appDisc: 0.20, utilRate: 2.00, avgDiscRate: 0.16,
+                products: [
+                    { name: 'شاي ليبتون 100كيس', invoices: 2, discInv: 0, discRate: 0.00, noDiscInv: 2, avgDisc: 0.20, discSales: 0, discVol: 0, netSales: 0, appDisc: 0.20, utilRate: 2.00, avgDiscRate: 0.16 },
+                ],
+            },
+        ],
+    },
+    {
+        name: 'الزرقاء', invoices: 9.00, discInv: 2, discRate: 50.00, noDiscInv: 7, avgDisc: 0.80, discSales: 1, discVol: 2, netSales: 1, appDisc: 0.80, utilRate: 0.00, avgDiscRate: 0.00,
+        subs: [
+            {
+                name: 'العناية الشخصية', invoices: 5, discInv: 1, discRate: 20.00, noDiscInv: 4, avgDisc: 0.40, discSales: 0, discVol: 1, netSales: 0, appDisc: 0.40, utilRate: 0.00, avgDiscRate: 0.00,
+                products: [
+                    { name: 'معجون أسنان كولجيت', invoices: 5, discInv: 1, discRate: 20.00, noDiscInv: 4, avgDisc: 0.40, discSales: 0, discVol: 1, netSales: 0, appDisc: 0.40, utilRate: 0.00, avgDiscRate: 0.00 },
+                ],
+            },
+            {
+                name: 'مستلزمات الأطفال', invoices: 4, discInv: 1, discRate: 25.00, noDiscInv: 3, avgDisc: 0.40, discSales: 1, discVol: 1, netSales: 1, appDisc: 0.40, utilRate: 0.00, avgDiscRate: 0.00,
+                products: [
+                    { name: 'حفاضات بامبرز', invoices: 4, discInv: 1, discRate: 25.00, noDiscInv: 3, avgDisc: 0.40, discSales: 1, discVol: 1, netSales: 1, appDisc: 0.40, utilRate: 0.00, avgDiscRate: 0.00 },
+                ],
+            },
+        ],
+    },
     { name: 'الإجمالي', invoices: 79.00, discInv: 38, discRate: 68.00, noDiscInv: 40, avgDisc: 0.94, discSales: 2, discVol: 43, netSales: 2, appDisc: 4.80, utilRate: 4.00, avgDiscRate: 4.45 },
 ];
 
@@ -442,35 +518,115 @@ export default function DiscountsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {branches.map((b, i) => {
+                            {branches.map((b) => {
                                 const isTotal = b.name === 'الإجمالي';
-                                return (
-                                    <tr key={b.name} style={{ borderBottom: '1px solid var(--border-subtle)', background: isTotal ? 'var(--accent-green-dim)' : 'transparent', fontWeight: isTotal ? 700 : 400 }}
-                                        className={isTotal ? '' : 'hover:bg-white/[0.015] transition-colors'}>
-                                        <td style={{ padding: '7px 10px', fontSize: 11, color: isTotal ? 'var(--accent-green)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>{b.name}</td>
-                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{b.invoices.toFixed(2)}</td>
-                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--accent-cyan)' }} dir="ltr">{b.discInv}</td>
+                                const hasSubs = 'subs' in b && (b as any).subs;
+                                const brKey = `br_${b.name}`;
+                                const isBrOpen = expandedCats.has(brKey);
+
+                                const renderCells = (row: typeof b, isSub = false, isProd = false) => (
+                                    <>
+                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{row.invoices.toFixed(isProd ? 0 : 2)}</td>
+                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--accent-cyan)' }} dir="ltr">{row.discInv}</td>
                                         <td style={{ padding: '7px 10px', textAlign: 'center' }}>
                                             <div className="flex items-center gap-1.5 justify-center">
                                                 <div style={{ width: 36, height: 5, borderRadius: 3, background: 'var(--bg-elevated)', overflow: 'hidden' }}>
-                                                    <div style={{ width: `${(b.discRate / 100) * 100}%`, height: '100%', background: 'var(--accent-blue)', borderRadius: 3 }} />
+                                                    <div style={{ width: `${(row.discRate / 100) * 100}%`, height: '100%', background: 'var(--accent-blue)', borderRadius: 3 }} />
                                                 </div>
-                                                <span style={{ fontSize: 9, color: 'var(--accent-blue)' }} dir="ltr">{b.discRate.toFixed(2)}%</span>
+                                                <span style={{ fontSize: 9, color: 'var(--accent-blue)' }} dir="ltr">{row.discRate.toFixed(2)}%</span>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{b.noDiscInv}</td>
-                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{b.avgDisc.toFixed(2)}</td>
-                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{b.discSales.toFixed(2)}</td>
-                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{b.discVol}</td>
-                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--accent-green)' }} dir="ltr">{b.netSales.toFixed(2)}</td>
-                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--accent-amber)' }} dir="ltr">{b.appDisc.toFixed(2)}</td>
+                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{row.noDiscInv}</td>
+                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{row.avgDisc.toFixed(2)}</td>
+                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{row.discSales.toFixed(2)}</td>
+                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--text-secondary)' }} dir="ltr">{row.discVol}</td>
+                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--accent-green)' }} dir="ltr">{row.netSales.toFixed(2)}</td>
+                                        <td style={{ padding: '7px 10px', textAlign: 'center', fontSize: 10, color: 'var(--accent-amber)' }} dir="ltr">{row.appDisc.toFixed(2)}</td>
                                         <td style={{ padding: '7px 10px', textAlign: 'center' }}>
-                                            <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: b.utilRate > 0 ? 'rgba(0,229,160,0.1)' : 'var(--bg-elevated)', color: b.utilRate > 0 ? 'var(--accent-green)' : 'var(--text-muted)' }} dir="ltr">{b.utilRate.toFixed(2)}%</span>
+                                            <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: row.utilRate > 0 ? 'rgba(0,229,160,0.1)' : 'var(--bg-elevated)', color: row.utilRate > 0 ? 'var(--accent-green)' : 'var(--text-muted)' }} dir="ltr">{row.utilRate.toFixed(2)}%</span>
                                         </td>
                                         <td style={{ padding: '7px 10px', textAlign: 'center' }}>
-                                            <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: b.avgDiscRate > 0 ? 'rgba(245,158,11,0.1)' : 'var(--bg-elevated)', color: b.avgDiscRate > 0 ? 'var(--accent-amber)' : 'var(--text-muted)' }} dir="ltr">{b.avgDiscRate.toFixed(2)}%</span>
+                                            <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: row.avgDiscRate > 0 ? 'rgba(245,158,11,0.1)' : 'var(--bg-elevated)', color: row.avgDiscRate > 0 ? 'var(--accent-amber)' : 'var(--text-muted)' }} dir="ltr">{row.avgDiscRate.toFixed(2)}%</span>
                                         </td>
-                                    </tr>
+                                    </>
+                                );
+
+                                return (
+                                    <React.Fragment key={b.name}>
+                                        {/* صف الفرع */}
+                                        <tr
+                                            onClick={() => hasSubs ? toggleCat(brKey) : undefined}
+                                            className={isTotal ? '' : 'hover:bg-white/[0.015] transition-colors'}
+                                            style={{ borderBottom: '1px solid var(--border-subtle)', background: isTotal ? 'var(--accent-green-dim)' : isBrOpen ? 'rgba(4,120,87,0.04)' : 'transparent', fontWeight: isTotal ? 700 : 400, cursor: hasSubs ? 'pointer' : 'default' }}
+                                        >
+                                            <td style={{ padding: '7px 10px', fontSize: 11, color: isTotal ? 'var(--accent-green)' : 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+                                                <div className="flex items-center gap-2">
+                                                    {hasSubs && (
+                                                        <span style={{ color: 'var(--accent-green)', transition: 'transform 0.2s', display: 'inline-block', transform: isBrOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+                                                            <ChevronDown size={13} />
+                                                        </span>
+                                                    )}
+                                                    {b.name}
+                                                    {hasSubs && <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>{(b as any).subs.length}</span>}
+                                                </div>
+                                            </td>
+                                            {renderCells(b)}
+                                        </tr>
+
+                                        {/* صفوف الفئات (sub) */}
+                                        <AnimatePresence initial={false}>
+                                            {isBrOpen && hasSubs && (b as any).subs.map((sub: any, si: number) => {
+                                                const subKey = `brs_${b.name}_${sub.name}`;
+                                                const isSubOpen = expandedCats.has(subKey);
+                                                return (
+                                                    <React.Fragment key={sub.name}>
+                                                        <motion.tr
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: 'auto' }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                            transition={{ duration: 0.18, delay: si * 0.03 }}
+                                                            onClick={() => toggleCat(subKey)}
+                                                            className="cursor-pointer hover:bg-white/[0.015] transition-colors"
+                                                            style={{ borderBottom: '1px solid var(--border-subtle)', background: isSubOpen ? 'rgba(8,145,178,0.04)' : 'rgba(4,120,87,0.02)' }}
+                                                        >
+                                                            <td style={{ padding: '6px 10px 6px 28px', fontSize: 10, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span style={{ color: 'var(--accent-cyan)', transition: 'transform 0.2s', display: 'inline-block', transform: isSubOpen ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+                                                                        <ChevronDown size={11} />
+                                                                    </span>
+                                                                    {sub.name}
+                                                                    <span className="text-[8px] px-1 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>{sub.products.length}</span>
+                                                                </div>
+                                                            </td>
+                                                            {renderCells(sub, true)}
+                                                        </motion.tr>
+
+                                                        {/* صفوف المنتجات (sub al sub) */}
+                                                        <AnimatePresence initial={false}>
+                                                            {isSubOpen && sub.products.map((prod: any, pi: number) => (
+                                                                <motion.tr
+                                                                    key={prod.name}
+                                                                    initial={{ opacity: 0, height: 0 }}
+                                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                                    exit={{ opacity: 0, height: 0 }}
+                                                                    transition={{ duration: 0.15, delay: pi * 0.03 }}
+                                                                    style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(8,145,178,0.02)' }}
+                                                                >
+                                                                    <td style={{ padding: '5px 10px 5px 48px', fontSize: 9.5, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            <ChevronRight size={9} style={{ color: 'var(--accent-amber)', opacity: 0.6 }} />
+                                                                            {prod.name}
+                                                                        </div>
+                                                                    </td>
+                                                                    {renderCells(prod, false, true)}
+                                                                </motion.tr>
+                                                            ))}
+                                                        </AnimatePresence>
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                        </AnimatePresence>
+                                    </React.Fragment>
                                 );
                             })}
                         </tbody>

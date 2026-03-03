@@ -16,6 +16,7 @@ import {
     Package,
     Percent,
     FileText,
+    Receipt,
     CreditCard,
     Brain,
     ShoppingBasket,
@@ -48,6 +49,7 @@ const navItems: NavItem[] = [
     { id: 'discounts', label: 'الخصومات', icon: Percent, href: '/discounts' },
     { id: 'agreements', label: 'الاتفاقيات', icon: FileText, href: '/agreements' },
     { id: 'sales-method', label: 'طريقة البيع', icon: CreditCard, href: '/sales-method' },
+    { id: 'transactions', label: 'المعاملات', icon: Receipt, href: '/transactions' },
     { id: 'ai-forecast', label: 'التنبؤ الذكي', icon: Brain, href: '/ai-forecast', isAI: true, dividerBefore: true },
     { id: 'ai-basket', label: 'السلة الذكية', icon: ShoppingBasket, href: '/ai-basket', isAI: true },
     { id: 'time-compare', label: 'المقارنة الزمنية', icon: Clock, href: '/time-compare' },
@@ -74,9 +76,8 @@ export default function Sidebar() {
 
     return (
         <motion.aside
-            className={`flex flex-col z-40 sidebar-transition overflow-hidden ${
-                isOverlay ? 'fixed top-0 right-0 h-screen' : 'sticky top-0 h-screen shrink-0'
-            }`}
+            className={`flex flex-col z-40 sidebar-transition overflow-hidden ${isOverlay ? 'fixed top-0 right-0 h-screen' : 'sticky top-0 h-screen shrink-0'
+                }`}
             style={{
                 width: isCollapsed ? 72 : 260,
                 background: 'var(--sidebar-bg)',

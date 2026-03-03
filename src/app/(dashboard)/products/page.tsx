@@ -9,7 +9,7 @@ import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import { getProductData, type ProductData } from '@/lib/mockData';
 
 // ── ألوان الفئات ──
-const CAT_COLORS = ['#00e5a0', '#00d4ff', '#3b82f6', '#a855f7', '#f59e0b', '#ef4444', '#0891b2', '#047857'];
+const CAT_COLORS = ['#047857', '#0891b2', '#2563eb', '#7c3aed', '#d97706', '#dc2626', '#0d9488', '#059669'];
 
 const categories = [
     { name: 'منتجات غذائية', netSales: 248170, volume: 150240, margin: 38.2 },
@@ -23,29 +23,29 @@ const categories = [
 ];
 
 const top10 = [
-    { name: 'أرز مطبوخ ممتاز سطح الطرمة 4.5 كجم', profit: 8420, trend: [12, 18, 15, 22, 19, 28, 24, 34, 30, 38, 36, 42] },
-    { name: 'الفراولة تايم تشكيلة ألبو سيرياكس كبير', profit: 7680, trend: [10, 15, 13, 19, 16, 24, 20, 28, 25, 32, 30, 36] },
-    { name: 'معجون بودي ناعم بطاقة 45 غم', profit: 6540, trend: [9, 12, 11, 16, 14, 18, 16, 22, 19, 24, 22, 26] },
-    { name: 'طحينة طعم الأصل 1000 ملل', profit: 5890, trend: [8, 11, 10, 14, 12, 16, 14, 19, 17, 21, 20, 23] },
-    { name: 'شوكولاته توبي مولد كلشيء بلاستيك 30', profit: 5240, trend: [7, 10, 8, 13, 11, 15, 13, 17, 15, 19, 18, 21] },
-    { name: 'شوكولاته ندى تحت الجرب خضراء كار 30', profit: 4780, trend: [6, 9, 8, 11, 10, 13, 11, 15, 14, 17, 16, 20] },
-    { name: 'قرص ويفر 250ملل كيمر بلاستيك', profit: 4320, trend: [5, 8, 7, 10, 9, 12, 10, 14, 12, 15, 14, 18] },
-    { name: 'جبن هروة جاج 18 غم غامق 100 غم', profit: 3960, trend: [5, 7, 6, 9, 8, 11, 9, 12, 11, 14, 13, 16] },
-    { name: 'جبل طيبي 1 كيل طيبي 250 غم', profit: 3580, trend: [4, 6, 5, 8, 7, 9, 8, 11, 10, 12, 11, 14] },
-    { name: 'مكارونة كلاسيك ألبين 15 كجم', profit: 3240, trend: [4, 6, 5, 7, 6, 9, 7, 10, 9, 11, 10, 13] },
+    { name: 'أرز مطبوخ ممتاز سطح الطرمة 4.5 كجم', profit: 8420, trend: [520, 580, 610, 640, 700, 750, 680, 720, 810, 850, 880, 920] },
+    { name: 'الفراولة تايم تشكيلة ألبو سيرياكس كبير', profit: 7680, trend: [480, 520, 540, 600, 640, 690, 620, 660, 740, 780, 810, 840] },
+    { name: 'معجون بودي ناعم بطاقة 45 غم', profit: 6540, trend: [400, 430, 470, 510, 530, 580, 560, 600, 640, 670, 690, 720] },
+    { name: 'طحينة طعم الأصل 1000 ملل', profit: 5890, trend: [350, 380, 420, 460, 480, 530, 500, 540, 580, 610, 630, 660] },
+    { name: 'شوكولاته توبي مولد كلشيء بلاستيك 30', profit: 5240, trend: [310, 340, 360, 400, 430, 470, 440, 480, 520, 550, 570, 600] },
+    { name: 'شوكولاته ندى تحت الجرب خضراء كار 30', profit: 4780, trend: [280, 300, 330, 370, 390, 420, 400, 440, 470, 500, 510, 540] },
+    { name: 'قرص ويفر 250ملل كيمر بلاستيك', profit: 4320, trend: [240, 260, 290, 320, 350, 380, 360, 390, 420, 440, 460, 490] },
+    { name: 'جبن هروة جاج 18 غم غامق 100 غم', profit: 3960, trend: [200, 220, 250, 280, 310, 340, 320, 350, 380, 400, 420, 450] },
+    { name: 'جبل طيبي 1 كيل طيبي 250 غم', profit: 3580, trend: [180, 200, 220, 250, 270, 300, 280, 310, 340, 360, 380, 400] },
+    { name: 'مكارونة كلاسيك ألبين 15 كجم', profit: 3240, trend: [150, 170, 190, 220, 240, 270, 250, 280, 310, 330, 340, 360] },
 ];
 
 const bottom10 = [
-    { name: 'سبانخ معلبة هيلو 28 غم', profit: 18 },
-    { name: 'أوكال كوباية لبن كيس 15', profit: 22 },
-    { name: 'معمول بودرة نقاطة 43 غم', profit: 24 },
-    { name: 'طحينة طعم بخل الأصل 1000ملل', profit: 31 },
-    { name: 'شوكولاته توبي ربيع بلاستيك 30', profit: 38 },
-    { name: 'ندى خضراء تحت الشرقي كار باكت', profit: 42 },
-    { name: 'قرص ويفر 250ملل كيمر', profit: 47 },
-    { name: 'مامون كبير 550ملل بلاستيك', profit: 51 },
-    { name: 'فول مطبوخ كامل القمر 500 ملل', profit: 56 },
-    { name: 'محدون اكسل مساسكا 300 مل ستاكس', profit: 61 },
+    { name: 'سبانخ معلبة هيلو 28 غم', profit: 18, trend: [5, 4, 3, 2, 3, 2, 1, 2, 1, 1, 1, 1] },
+    { name: 'أوكال كوباية لبن كيس 15', profit: 22, trend: [6, 5, 5, 4, 3, 3, 2, 2, 2, 1, 1, 2] },
+    { name: 'معمول بودرة نقاطة 43 غم', profit: 24, trend: [8, 7, 6, 5, 5, 4, 3, 3, 2, 2, 2, 2] },
+    { name: 'طحينة طعم بخل الأصل 1000ملل', profit: 31, trend: [10, 9, 8, 7, 6, 5, 4, 4, 3, 3, 2, 3] },
+    { name: 'شوكولاته توبي ربيع بلاستيك 30', profit: 38, trend: [14, 12, 11, 9, 8, 7, 6, 5, 5, 4, 3, 4] },
+    { name: 'ندى خضراء تحت الشرقي كار باكت', profit: 42, trend: [18, 16, 14, 12, 10, 9, 8, 7, 6, 5, 5, 4] },
+    { name: 'قرص ويفر 250ملل كيمر', profit: 47, trend: [22, 20, 18, 15, 13, 11, 10, 9, 8, 7, 6, 5] },
+    { name: 'مامون كبير 550ملل بلاستيك', profit: 51, trend: [28, 25, 22, 19, 16, 14, 12, 11, 10, 8, 7, 6] },
+    { name: 'فول مطبوخ كامل القمر 500 ملل', profit: 56, trend: [35, 32, 28, 24, 20, 18, 15, 13, 12, 10, 9, 8] },
+    { name: 'محدون اكسل مساسكا 300 مل ستاكس', profit: 61, trend: [42, 38, 34, 30, 26, 22, 19, 16, 14, 12, 10, 9] },
 ];
 
 const contrib = [
@@ -59,6 +59,11 @@ const contrib = [
     { name: 'صاج التصليح مصمح', vol: 1.15, profit: 3.90 },
     { name: 'ريت بناء 12 ق', vol: 1.08, profit: 3.62 },
     { name: 'الفراولة شعلي أسر', vol: 0.98, profit: 3.40 },
+    { name: 'الفراني شام أمو', vol: 0.88, profit: 2.95 },
+    { name: 'حليب مراعي 2.25', vol: 0.78, profit: 2.60 },
+    { name: 'الكشك حمص غال', vol: 0.65, profit: 2.10 },
+    { name: 'معجن ماكد مقلق', vol: 0.52, profit: 1.80 },
+    { name: 'زيت المنورة شريك', vol: 0.42, profit: 1.45 },
 ];
 
 const totalNetSales = categories.reduce((a, c) => a + c.netSales, 0);
@@ -75,10 +80,10 @@ export default function ProductsPage() {
 
     // ── مخطط صافي المبيعات حسب الفئة ──
     const salesByCatOption = {
-        tooltip: { trigger: 'axis' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0', fontSize: 11 } },
+        tooltip: { trigger: 'axis' as const },
         grid: { bottom: '24%', top: '12%', left: '3%', right: '2%', containLabel: true },
-        xAxis: { type: 'category' as const, data: categories.map(c => c.name), axisLabel: { rotate: 28, fontSize: 9, color: '#64748b' }, axisLine: { lineStyle: { color: '#334155' } }, splitLine: { show: false } },
-        yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K`, fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
+        xAxis: { type: 'category' as const, data: categories.map(c => c.name), axisLabel: { rotate: 28, fontSize: 9 }, splitLine: { show: false } },
+        yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K`, fontSize: 9 } },
         series: [{
             type: 'bar', barMaxWidth: 44,
             data: categories.map((c, i) => ({
@@ -94,37 +99,37 @@ export default function ProductsPage() {
 
     // ── Scatter: حجم المبيعات مقابل هامش الربح ──
     const scatterOption = {
-        tooltip: { trigger: 'item' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0', fontSize: 11 }, formatter: (p: { data: [number, number, string] }) => `<b style="color:#00e5a0">${p.data[2]}</b><br/>الحجم: ${fmtK(p.data[0])}<br/>الهامش: ${p.data[1]}%` },
+        tooltip: { trigger: 'item' as const, formatter: (p: { data: [number, number, string] }) => `<b>${p.data[2]}</b><br/>الحجم: ${fmtK(p.data[0])}<br/>الهامش: ${p.data[1]}%` },
         xAxis: {
             name: 'حجم المبيعات',
             type: 'value' as const,
             nameLocation: 'middle' as const,
             nameGap: 32,
-            nameTextStyle: { color: '#64748b', fontSize: 9 },
-            axisLabel: { formatter: (v: number) => fmtK(v), fontSize: 9, color: '#64748b' },
-            splitLine: { lineStyle: { color: '#1e293b' } },
+            nameTextStyle: { fontSize: 9 },
+            axisLabel: { formatter: (v: number) => fmtK(v), fontSize: 9 },
+            splitLine: { show: false },
         },
         yAxis: {
             name: 'هامش الربح %',
             type: 'value' as const,
             nameLocation: 'middle' as const,
             nameGap: 40,
-            nameTextStyle: { color: '#64748b', fontSize: 9 },
-            axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' },
-            splitLine: { lineStyle: { color: '#1e293b' } },
+            nameTextStyle: { fontSize: 9 },
+            axisLabel: { formatter: '{value}%', fontSize: 9 },
+            splitLine: { show: false },
         },
         series: [{
             type: 'scatter',
             symbolSize: (d: number[]) => Math.max(14, Math.sqrt(d[0] / 600)),
             data: categories.map(c => [c.volume, c.margin, c.name]),
-            itemStyle: { color: (p: { dataIndex: number }) => CAT_COLORS[p.dataIndex % CAT_COLORS.length], opacity: 0.85, borderColor: 'rgba(255,255,255,0.15)', borderWidth: 1 },
+            itemStyle: { color: (p: { dataIndex: number }) => CAT_COLORS[p.dataIndex % CAT_COLORS.length], opacity: 0.85, borderWidth: 0 },
             label: { show: false },
             emphasis: {
                 label: {
                     show: true,
                     formatter: (p: { data: (number | string)[] }) => String(p.data[2]).split(/[ ،]/)[0],
                     fontSize: 9,
-                    color: '#e2e8f0',
+
                     position: 'top' as const,
                 },
             },
@@ -133,126 +138,80 @@ export default function ProductsPage() {
     };
 
     // ── مخطط أفضل 10 (أشرطة أفقية تدرج) ──
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const greenTones = ['#047857', '#059669', '#0d9488', '#0891b2', '#2563eb', '#7c3aed', '#0f766e', '#15803d', '#16a34a', '#14b8a6'];
+    const redTones = ['#dc2626', '#ef4444', '#f97316', '#d97706', '#b91c1c', '#9a3412', '#c2410c', '#ea580c', '#e11d48', '#be123c'];
+
     const top10Option = {
-        tooltip: {
-            trigger: 'axis' as const,
-            backgroundColor: '#1a2035', borderColor: '#1e293b',
-            textStyle: { color: '#e2e8f0', fontSize: 11 },
-        },
-        grid: { left: '40%', right: '14%', top: '2%', bottom: '2%' },
-        xAxis: {
-            type: 'value' as const,
-            axisLabel: { fontSize: 9, color: '#64748b' },
-            splitLine: { lineStyle: { color: '#1e293b' } },
-        },
-        yAxis: {
-            type: 'category' as const,
-            data: [...top10].reverse().map(p => p.name.length > 30 ? p.name.substring(0, 30) + '…' : p.name),
-            axisLabel: { fontSize: 9.5, color: '#94a3b8', width: 190, overflow: 'truncate' as const },
-            axisLine: { show: false },
-            axisTick: { show: false },
-        },
-        series: [{
-            type: 'bar' as const,
-            barMaxWidth: 22,
-            data: [...top10].reverse().map((p, i) => ({
-                value: p.profit,
-                itemStyle: {
-                    color: {
-                        type: 'linear' as const, x: 0, y: 0, x2: 1, y2: 0,
-                        colorStops: [
-                            { offset: 0, color: `${CAT_COLORS[(top10.length - 1 - i) % CAT_COLORS.length]}33` },
-                            { offset: 1, color: CAT_COLORS[(top10.length - 1 - i) % CAT_COLORS.length] },
-                        ],
-                    },
-                    borderRadius: [0, 6, 6, 0],
-                },
-                label: {
-                    show: true, position: 'right' as const,
-                    fontSize: 10, fontWeight: 'bold',
-                    color: CAT_COLORS[(top10.length - 1 - i) % CAT_COLORS.length],
-                    formatter: (lp: { value: number }) => lp.value.toLocaleString(),
-                },
-            })),
-        }],
+        tooltip: { trigger: 'axis' as const },
+        legend: { type: 'scroll' as const, bottom: 0, textStyle: { fontSize: 8 }, pageIconSize: 10 },
+        grid: { left: '8%', right: '4%', top: '8%', bottom: '18%' },
+        xAxis: { type: 'category' as const, data: months, axisLabel: { fontSize: 9 } },
+        yAxis: { type: 'value' as const, axisLabel: { fontSize: 9 } },
+        series: top10.map((p, i) => ({
+            name: p.name.length > 18 ? p.name.substring(0, 18) + '…' : p.name,
+            type: 'line' as const,
+            data: p.trend,
+            smooth: true,
+            showSymbol: false,
+            lineStyle: { width: 2, color: greenTones[i] },
+            itemStyle: { color: greenTones[i] },
+        })),
+    };
+
+    const bottom10Option = {
+        tooltip: { trigger: 'axis' as const },
+        legend: { type: 'scroll' as const, bottom: 0, textStyle: { fontSize: 8 }, pageIconSize: 10 },
+        grid: { left: '8%', right: '4%', top: '8%', bottom: '18%' },
+        xAxis: { type: 'category' as const, data: months, axisLabel: { fontSize: 9 } },
+        yAxis: { type: 'value' as const, axisLabel: { fontSize: 9 } },
+        series: bottom10.map((p, i) => ({
+            name: p.name.length > 18 ? p.name.substring(0, 18) + '…' : p.name,
+            type: 'line' as const,
+            data: p.trend,
+            smooth: true,
+            showSymbol: false,
+            lineStyle: { width: 2, color: redTones[i] },
+            itemStyle: { color: redTones[i] },
+        })),
     };
 
 
     // ── مساهمة الأرباح والحجم ──
+    const contribSorted = [...contrib].sort((a, b) => a.profit - b.profit);
     const contribOption = {
-        tooltip: { trigger: 'axis' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0', fontSize: 10 } },
-        legend: { data: ['% حجم المبيعات', '% مساهمة الربح'], bottom: 0, textStyle: { color: '#64748b', fontSize: 9 } },
-        grid: { left: '28%', right: '10%', top: '4%', bottom: '14%' },
-        xAxis: { type: 'value' as const, axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
-        yAxis: { type: 'category' as const, data: contrib.map(p => p.name.substring(0, 14)), axisLabel: { fontSize: 9, color: '#94a3b8' }, axisLine: { show: false }, axisTick: { show: false } },
+        tooltip: { trigger: 'axis' as const },
+        legend: { data: ['% حجم المبيعات', '% مساهمة الربح'], bottom: 0, textStyle: { fontSize: 9 } },
+        grid: { left: '24%', right: '12%', top: '2%', bottom: '12%' },
+        xAxis: { type: 'value' as const, axisLabel: { formatter: '{value}%', fontSize: 9 }, max: 10 },
+        yAxis: { type: 'category' as const, data: contribSorted.map(p => p.name), axisLabel: { fontSize: 10 }, axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false } },
         series: [
-            { name: '% حجم المبيعات', type: 'bar' as const, barGap: '8%', barMaxWidth: 12, data: contrib.map(p => ({ value: p.vol, itemStyle: { color: '#00d4ff', borderRadius: [0, 4, 4, 0] } })), label: { show: true, position: 'right' as const, fontSize: 8, color: '#00d4ff', formatter: (p: { value: number }) => `${p.value.toFixed(2)}%` } },
-            { name: '% مساهمة الربح', type: 'bar' as const, barMaxWidth: 12, data: contrib.map(p => ({ value: p.profit, itemStyle: { color: '#00e5a0', borderRadius: [0, 4, 4, 0] } })), label: { show: true, position: 'right' as const, fontSize: 8, color: '#00e5a0', formatter: (p: { value: number }) => `${p.value.toFixed(2)}%` } },
+            {
+                name: '% حجم المبيعات', type: 'bar' as const, stack: 'total', barWidth: 12, barCategoryGap: '40%',
+                data: contribSorted.map(p => ({ value: p.vol, itemStyle: { color: '#0891b2' } })),
+                label: { show: true, position: 'inside' as const, fontSize: 8, fontWeight: 'bold', color: '#fff', formatter: (p: { value: number }) => `${p.value.toFixed(2)}%` },
+            },
+            {
+                name: '% مساهمة الربح', type: 'bar' as const, stack: 'total', barWidth: 12,
+                data: contribSorted.map(p => ({ value: p.profit - p.vol, itemStyle: { color: '#047857', borderRadius: [0, 4, 4, 0] } })),
+                label: {
+                    show: true, position: 'right' as const, fontSize: 9, fontWeight: 'bold', color: '#047857',
+                    formatter: (params: { dataIndex: number }) => `${contribSorted[params.dataIndex].profit.toFixed(2)}%`
+                },
+            },
         ],
     };
 
-    // ── شبكة الارتباط ──
-    const networkOption = {
-        tooltip: { trigger: 'item' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0' } },
-        series: [{
-            type: 'graph', layout: 'force' as const, roam: true,
-            label: { show: true, color: '#e2e8f0', fontSize: 10, fontWeight: 'bold' },
-            lineStyle: { color: '#334155', curveness: 0.2 },
-            emphasis: { focus: 'adjacency' as const, lineStyle: { width: 3 } },
-            force: { repulsion: 200, edgeLength: [60, 180], gravity: 0.1 },
-            data: [
-                { name: 'أرز', symbolSize: 50, itemStyle: { color: '#00e5a0', shadowBlur: 15, shadowColor: '#00e5a080' } },
-                { name: 'زيت', symbolSize: 42, itemStyle: { color: '#00d4ff', shadowBlur: 12, shadowColor: '#00d4ff80' } },
-                { name: 'سكر', symbolSize: 36, itemStyle: { color: '#3b82f6' } },
-                { name: 'دجاج', symbolSize: 46, itemStyle: { color: '#f59e0b', shadowBlur: 12, shadowColor: '#f59e0b80' } },
-                { name: 'حليب', symbolSize: 40, itemStyle: { color: '#a855f7' } },
-                { name: 'تونة', symbolSize: 32, itemStyle: { color: '#0891b2' } },
-                { name: 'منظفات', symbolSize: 30, itemStyle: { color: '#ef4444' } },
-            ],
-            links: [
-                { source: 'أرز', target: 'زيت', value: 82, lineStyle: { width: 3, color: '#00e5a050' } },
-                { source: 'أرز', target: 'سكر', value: 70, lineStyle: { width: 2, color: '#00d4ff50' } },
-                { source: 'دجاج', target: 'أرز', value: 75, lineStyle: { width: 2.5, color: '#f59e0b50' } },
-                { source: 'حليب', target: 'سكر', value: 55, lineStyle: { width: 1.5, color: '#a855f750' } },
-                { source: 'تونة', target: 'زيت', value: 45, lineStyle: { width: 1.5, color: '#0891b250' } },
-                { source: 'دجاج', target: 'زيت', value: 60, lineStyle: { width: 2, color: '#f59e0b50' } },
-            ],
-        }],
-    };
-
-    // ── Treemap ──
-    const treemapOption = {
-        tooltip: { trigger: 'item' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0' } },
-        series: [{
-            type: 'treemap',
-            data: [
-                { name: 'بقالة', value: 3500000, itemStyle: { color: '#064e3b' }, children: [{ name: 'أرز', value: 1200000 }, { name: 'زيوت', value: 800000 }, { name: 'سكر', value: 500000 }, { name: 'أخرى', value: 1000000 }] },
-                { name: 'لحوم', value: 2200000, itemStyle: { color: '#1e3a5f' }, children: [{ name: 'دواجن', value: 1400000 }, { name: 'بقري', value: 500000 }, { name: 'غنم', value: 300000 }] },
-                { name: 'ألبان', value: 1500000, itemStyle: { color: '#312e81' } },
-                { name: 'مشروبات', value: 1200000, itemStyle: { color: '#1c4532' } },
-                { name: 'منزلية', value: 900000, itemStyle: { color: '#1a1f2e' } },
-            ],
-            label: { show: true, color: '#e2e8f0', fontSize: 11, fontWeight: 'bold' },
-            upperLabel: { show: true, height: 24, color: '#e2e8f0', fontSize: 12, fontWeight: 600 as const },
-            itemStyle: { borderColor: '#0a0e17', borderWidth: 2, gapWidth: 2 },
-            levels: [{ itemStyle: { borderWidth: 3, gapWidth: 3 }, upperLabel: { show: false } }, { colorSaturation: [0.5, 0.85], itemStyle: { borderWidth: 1, gapWidth: 2 } }],
-        }],
-    };
 
     // ── جدول المرتجعات (المنتجات) ──
     const returnsOption = {
-        tooltip: { trigger: 'axis' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0' } },
-        xAxis: { type: 'category' as const, data: products.slice(0, 8).map(p => p.nameAr.split(' ').slice(0, 2).join(' ')), axisLabel: { rotate: 30, fontSize: 9, color: '#64748b' }, axisLine: { lineStyle: { color: '#334155' } }, splitLine: { show: false } },
-        yAxis: [
-            { type: 'value' as const, axisLabel: { fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
-            { type: 'value' as const, axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' } },
-        ],
+        tooltip: { trigger: 'axis' as const },
+        xAxis: { type: 'category' as const, data: products.slice(0, 8).map(p => p.nameAr.split(' ').slice(0, 2).join(' ')), axisLabel: { rotate: 30, fontSize: 9 }, splitLine: { show: false } },
+        yAxis: { type: 'value' as const, axisLabel: { fontSize: 9 } },
         series: [
-            { name: 'المرتجعات', type: 'bar', data: [320, 180, 420, 150, 95, 210, 110, 280].map(v => ({ value: v, itemStyle: { color: '#ef4444', borderRadius: [4, 4, 0, 0] } })), barWidth: 14 },
-            { name: '% الإرجاع', type: 'line', yAxisIndex: 1, data: [2.1, 1.5, 4.2, 1.2, 0.8, 3.5, 1.8, 3.8], lineStyle: { color: '#f59e0b', width: 2 }, itemStyle: { color: '#f59e0b' }, smooth: true },
+            { name: 'المرتجعات', type: 'bar', data: [320, 180, 420, 150, 95, 210, 110, 280].map(v => ({ value: v, itemStyle: { color: '#dc2626', borderRadius: [4, 4, 0, 0] } })), barWidth: 20 },
         ],
-        legend: { data: ['المرتجعات', '% الإرجاع'], bottom: 0, left: 'center', textStyle: { color: '#64748b', fontSize: 9 } },
-        grid: { bottom: '20%', top: '16%', containLabel: true },
+        grid: { bottom: '16%', top: '10%', containLabel: true },
     };
 
     const prodColumns: TableColumn<ProductData>[] = [
@@ -265,13 +224,13 @@ export default function ProductsPage() {
     ];
 
     const kpis = [
-        { icon: DollarSign, label: 'صافي المبيعات', sub: 'Net Sales', value: fmtK(totalNetSales), color: '#00e5a0', dim: 'rgba(0,229,160,0.1)' },
-        { icon: TrendingUp, label: 'قيمة الربح', sub: 'Profit Value', value: fmtK(totalProfitValue), color: '#00d4ff', dim: 'rgba(0,212,255,0.1)' },
-        { icon: BarChart3, label: 'قيمة التكلفة', sub: 'Cost Value', value: fmtK(totalCostValue), color: '#3b82f6', dim: 'rgba(59,130,246,0.1)' },
-        { icon: ShoppingCart, label: 'متوسط قيمة المعاملة', sub: 'Avg. Transaction Value (ATV)', value: '36.76', color: '#f59e0b', dim: 'rgba(245,158,11,0.1)' },
-        { icon: Package, label: 'متوسط حجم السلة', sub: 'Average Basket Size', value: '27', color: '#a855f7', dim: 'rgba(168,85,247,0.1)' },
-        { icon: Layers, label: 'حجم مبيعات المنتجات', sub: 'Product Sales Volume', value: fmtK(totalVolume), color: '#0891b2', dim: 'rgba(8,145,178,0.1)' },
-        { icon: Percent, label: 'هامش الربح %', sub: '% Profit Margin', value: '36.51%', color: '#00e5a0', dim: 'rgba(0,229,160,0.1)' },
+        { icon: DollarSign, label: 'صافي المبيعات', sub: 'Net Sales', value: fmtK(totalNetSales), color: 'var(--accent-green)', dim: 'rgba(4,120,87,0.1)' },
+        { icon: TrendingUp, label: 'قيمة الربح', sub: 'Profit Value', value: fmtK(totalProfitValue), color: 'var(--accent-cyan)', dim: 'rgba(8,145,178,0.1)' },
+        { icon: BarChart3, label: 'قيمة التكلفة', sub: 'Cost Value', value: fmtK(totalCostValue), color: 'var(--accent-blue)', dim: 'rgba(37,99,235,0.1)' },
+        { icon: ShoppingCart, label: 'متوسط قيمة المعاملة', sub: 'Avg. Transaction Value (ATV)', value: '36.76', color: 'var(--accent-amber)', dim: 'rgba(217,119,6,0.1)' },
+        { icon: Package, label: 'متوسط حجم السلة', sub: 'Average Basket Size', value: '27', color: 'var(--accent-purple)', dim: 'rgba(124,58,237,0.1)' },
+        { icon: Layers, label: 'حجم مبيعات المنتجات', sub: 'Product Sales Volume', value: fmtK(totalVolume), color: 'var(--accent-cyan)', dim: 'rgba(8,145,178,0.1)' },
+        { icon: Percent, label: 'هامش الربح %', sub: '% Profit Margin', value: '36.51%', color: 'var(--accent-green)', dim: 'rgba(4,120,87,0.1)' },
     ];
 
     return (
@@ -314,54 +273,18 @@ export default function ProductsPage() {
                 <ChartCard title="حجم المبيعات مقابل هامش الربح" subtitle="Product Volume & % Profit Margin by Category" option={scatterOption} height="320px" delay={2} />
             </div>
 
-            {/* ── أفضل 10 + أدنى 10 ── */}
+            {/* ── أفضل 10 + أدنى 10 — حسب الشهر ── */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                {/* أفضل 10 */}
-                <ChartCard
-                    title="أفضل 10 منتجات — قيمة الربح"
-                    subtitle="Top 10 Products by Profit Value"
-                    option={top10Option}
-                    height="380px"
-                    delay={1}
-                />
-
-                {/* أدنى 10 */}
-                <div className="glass-panel overflow-hidden">
-                    <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--border-subtle)' }}>
-                        <div className="p-1.5 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)' }}>
-                            <TrendingDown size={13} style={{ color: 'var(--accent-red)' }} />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>أدنى 10 منتجات — قيمة الربح</p>
-                            <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Lowest 10 Products by Profit Value</p>
-                        </div>
-                    </div>
-                    <div className="px-4 py-3 space-y-3">
-                        {bottom10.map((p, i) => (
-                            <div key={p.name} className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold shrink-0 w-4 text-center" style={{ color: 'var(--accent-red)', opacity: 0.6 + i * 0.04 }}>{i + 1}</span>
-                                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
-                                    <div style={{ width: `${(p.profit / maxBottom) * 100}%`, height: '100%', background: `rgba(239,68,68,${0.35 + i * 0.065})`, borderRadius: 9999 }} />
-                                </div>
-                                <span className="text-[9px] flex-1 max-w-[160px] truncate" style={{ color: 'var(--text-secondary)' }}>{p.name}</span>
-                                <span className="text-[10px] font-bold shrink-0" style={{ color: 'var(--accent-red)' }} dir="ltr">{p.profit}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <ChartCard title="أفضل 10 منتجات — اتجاه الربح الشهري" subtitle="Top 10 Products — Monthly Profit Trend" option={top10Option} height="380px" delay={1} />
+                <ChartCard title="أدنى 10 منتجات — اتجاه الربح الشهري" subtitle="Bottom 10 Products — Monthly Profit Trend" option={bottom10Option} height="380px" delay={2} />
             </div>
 
             {/* ── مساهمة الأرباح + المرتجعات ── */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                <ChartCard title="% مساهمة حجم المبيعات والأرباح" subtitle="% Sales Volume Contribution & % Profit Contribution by Product" option={contribOption} height="320px" delay={1} />
+                <ChartCard title="% مساهمة حجم المبيعات والأرباح" subtitle="Sales Volume Contribution & Profit Contribution by Product %" option={contribOption} height="480px" delay={1} />
                 <ChartCard title="المرتجعات حسب المنتج" subtitle="عدد المرتجعات مع نسبة الإرجاع" option={returnsOption} height="320px" delay={2} />
             </div>
 
-            {/* ── شبكة الارتباط + Treemap ── */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                <ChartCard title="شبكة ارتباط المنتجات" subtitle="Basket Analysis — التأثير المتبادل بين المنتجات (روتيت وكبر)" option={networkOption} height="360px" delay={1} />
-                <ChartCard title="خريطة إيرادات الفئات" subtitle="Treemap — الإيرادات الهرمية حسب الفئة" option={treemapOption} height="360px" delay={2} />
-            </div>
 
             {/* ── كتالوج المنتجات ── */}
             <EnterpriseTable title="كتالوج المنتجات" columns={prodColumns} data={products} pageSize={10} />

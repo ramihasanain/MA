@@ -28,14 +28,14 @@ export default function CustomersPage() {
         yAxis: { type: 'category' as const, data: days, splitArea: { show: true }, axisLabel: { fontSize: 10 } },
         visualMap: {
             min: 5, max: 95, calculable: true, orient: 'horizontal' as const, left: 'center', bottom: '0%',
-            inRange: { color: ['#0a2e1a', '#047857', '#d97706', '#dc2626'] },
-            textStyle: { color: '#94a3b8' },
+            inRange: { color: ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444', '#dc2626'] },
+            textStyle: { color: 'var(--text-muted)' },
         },
         series: [{
             type: 'heatmap',
             data: heatmapData,
-            label: { show: true, color: '#e2e8f0', fontSize: 9 },
-            emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
+            label: { show: true, fontSize: 9 },
+            emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.3)' } },
         }],
     };
 
@@ -75,6 +75,37 @@ export default function CustomersPage() {
         series: [{ type: 'bar', data: [8000, 22000, 32000, 18000, 9000, 3500].map((v, i) => ({ value: v, itemStyle: { color: `hsl(${160 + i * 20}, 55%, ${40 - i * 3}%)`, borderRadius: [4, 4, 0, 0] } })), barWidth: 32 }],
     };
 
+    // ── Transaction Frequency vs ATV ──
+    const txScatterData: number[][] = [];
+    const seedHash = (s: number) => { let h = s * 2654435761; h = ((h >>> 16) ^ h) * 0x45d9f3b; return ((h >>> 16) ^ h) >>> 0; };
+    for (let i = 0; i < 200; i++) {
+        const h = seedHash(i + 7);
+        const totalTx = (h % 650) + 1;
+        const atv = totalTx > 300 ? 2 + (seedHash(i + 99) % 12) : totalTx > 100 ? 3 + (seedHash(i + 55) % 30) : 5 + (seedHash(i + 33) % 130);
+        const avgVal = (seedHash(i + 200) % 1880) / 1000;
+        const sz = Math.max(4, Math.min(25, (seedHash(i + 300) % 20) + 4));
+        txScatterData.push([totalTx, atv, avgVal, sz]);
+    }
+    const txFreqOption = {
+        grid: { left: '10%', right: '14%', top: '12%', bottom: '15%' },
+        xAxis: { type: 'value' as const, name: 'إجمالي المعاملات لكل عميل', nameLocation: 'center' as const, nameGap: 30, max: 700 },
+        yAxis: { type: 'value' as const, name: 'ATV لكل عميل', nameLocation: 'center' as const, nameGap: 35, max: 140 },
+        visualMap: {
+            show: true, dimension: 2, min: 0, max: 1.88, calculable: true,
+            orient: 'horizontal' as const, left: 'center', top: 0,
+            inRange: { color: ['#eab308', '#a3e635', '#22c55e', '#059669'] },
+            text: ['1.88K', '0.00K'], textStyle: { fontSize: 9, color: 'var(--text-muted)' },
+            formatter: (v: number) => `${v.toFixed(2)}K`,
+        },
+        series: [{
+            type: 'scatter',
+            data: txScatterData,
+            symbolSize: (d: number[]) => d[3],
+            encode: { x: 0, y: 1 },
+            itemStyle: { opacity: 0.75 },
+        }],
+    };
+
     return (
         <div className="space-y-6">
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
@@ -99,6 +130,8 @@ export default function CustomersPage() {
             </div>
 
             <ChartCard title="خريطة حرارية — أوقات الذروة" subtitle="كثافة العملاء حسب اليوم والساعة (Heatmap)" option={heatmapOption} height="340px" delay={1} />
+
+            <ChartCard title="تكرار المعاملات مقابل متوسط قيمة المعاملة" subtitle="Transaction Frequency vs. Average Transaction Value" option={txFreqOption} height="400px" delay={2} />
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <ChartCard title="طريقة الدفع" subtitle="توزيع طرق الدفع للمستهلكين" option={paymentMethodOption} height="340px" delay={3} />
