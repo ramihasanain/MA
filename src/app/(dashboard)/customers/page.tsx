@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { UserCircle, ShoppingBag, Repeat, TrendingUp, Heart, CreditCard, Clock } from 'lucide-react';
 import ChartCard from '@/components/ui/ChartCard';
 import CustomerInsightsTable from '@/components/ui/CustomerInsightsTable';
+import { PRIMARY_GREEN, GREEN_SCALE, PRIMARY_CYAN } from '@/lib/colors';
 
 export default function CustomersPage() {
     // ── Heatmap أوقات الذروة ──
@@ -27,8 +28,13 @@ export default function CustomersPage() {
         xAxis: { type: 'category' as const, data: hours, splitArea: { show: true }, axisLabel: { fontSize: 10 } },
         yAxis: { type: 'category' as const, data: days, splitArea: { show: true }, axisLabel: { fontSize: 10 } },
         visualMap: {
-            min: 5, max: 95, calculable: true, orient: 'horizontal' as const, left: 'center', bottom: '0%',
-            inRange: { color:['#dcfce7', '#bbf7d0', '#86efac', '#4ade80', '#22c55e', '#14532d'] },
+            min: 5,
+            max: 95,
+            calculable: true,
+            orient: 'horizontal' as const,
+            left: 'center',
+            bottom: '0%',
+            inRange: { color: GREEN_SCALE },
             textStyle: { color: 'var(--text-muted)' },
         },
         series: [{
@@ -46,7 +52,7 @@ export default function CustomersPage() {
             radius: ['45%', '70%'],
             center: ['50%', '45%'],
             data: [
-                { name: 'نقدي', value: 45, itemStyle: { color: '#22c55e' } },   // green
+                { name: 'نقدي', value: 45, itemStyle: { color: PRIMARY_GREEN } },   // green
                 { name: 'فيزا', value: 25, itemStyle: { color: '#0ea5e9' } },   // cyan/blue
                 { name: 'محفظة إلكترونية', value: 18, itemStyle: { color: '#6366f1' } }, // indigo
                 { name: 'دفع لاحق', value: 8, itemStyle: { color: '#f59e0b' } }, // amber
@@ -69,7 +75,7 @@ export default function CustomersPage() {
                 type: 'bar',
                 data: [12000, 14000, 18000, 15000, 16000, 22000, 20000, 19000, 24000, 21000, 28000, 35000].map((v) => ({
                     value: v,
-                    itemStyle: { color: '#22c55e', borderRadius: [4, 4, 0, 0] }, // normalized green
+                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 18,
             },
@@ -78,8 +84,8 @@ export default function CustomersPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: [13, 15, 19, 16, 17, 24, 22, 21, 26, 23, 30, 38],
-                lineStyle: { color: '#0ea5e9', width: 2 }, // normalized cyan/blue
-                itemStyle: { color: '#0ea5e9' },
+                lineStyle: { color: PRIMARY_CYAN, width: 2 }, // normalized cyan/blue
+                itemStyle: { color: PRIMARY_CYAN },
             },
         ],
         legend: { data: ['مستخدمي الخصومات', 'نسبة الاستفادة'], bottom: 0, left: 'center' },
@@ -94,7 +100,7 @@ export default function CustomersPage() {
             data: [8000, 22000, 32000, 18000, 9000, 3500].map((v, i) => ({
                 value: v,
                 itemStyle: {
-                    color: ['#bbf7d0', '#86efac', '#4ade80', '#22c55e', '#16a34a', '#166534'][i], // light→dark greens
+                    color: GREEN_SCALE[i],
                     borderRadius: [4, 4, 0, 0],
                 },
             })),
@@ -118,10 +124,17 @@ export default function CustomersPage() {
         xAxis: { type: 'value' as const, name: 'إجمالي المعاملات لكل عميل', nameLocation: 'center' as const, nameGap: 30, max: 700 },
         yAxis: { type: 'value' as const, name: 'ATV لكل عميل', nameLocation: 'center' as const, nameGap: 35, max: 140 },
         visualMap: {
-            show: true, dimension: 2, min: 0, max: 1.88, calculable: true,
-            orient: 'horizontal' as const, left: 'center', top: 0,
-            inRange: { color: ['#dcfce7', '#86efac', '#22c55e', '#14532d'] },
-            text: ['1.88K', '0.00K'], textStyle: { fontSize: 9, color: 'var(--text-muted)' },
+            show: true,
+            dimension: 2,
+            min: 0,
+            max: 1.88,
+            calculable: true,
+            orient: 'horizontal' as const,
+            left: 'center',
+            top: 0,
+            inRange: { color: GREEN_SCALE },
+            text: ['1.88K', '0.00K'],
+            textStyle: { fontSize: 9, color: 'var(--text-muted)' },
             formatter: (v: number) => `${v.toFixed(2)}K`,
         },
         series: [{

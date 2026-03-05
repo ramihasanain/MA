@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, BarChart3, Building2, FileText, Layers } from 'lucide-react';
 import ChartCard from '@/components/ui/ChartCard';
 import { getMonthlySalesData, getProductData, type ProductData } from '@/lib/mockData';
+import { PRIMARY_GREEN, PRIMARY_RED, PRIMARY_AMBER, PRIMARY_SLATE, PRIMARY_CYAN, PRIMARY_BLUE } from '@/lib/colors';
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import TreeDrillDown from '@/components/ui/TreeDrillDown';
@@ -43,33 +44,34 @@ export default function SalesPage() {
             {
                 name: `${selectedYear}`,
                 type: 'bar',
-                data: currentYearData.map((v) => ({
-                    value: v,
-                    itemStyle: { color: '#00e5a0', borderRadius: [4, 4, 0, 0] },
-                })),
+                data: currentYearData,
                 barWidth: 16,
                 barGap: '20%',
+                itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
             },
             {
                 name: `${Number(selectedYear) - 1}`,
                 type: 'bar',
-                data: previousYearData.map((v) => ({
-                    value: v,
-                    itemStyle: { color: '#334155', borderRadius: [4, 4, 0, 0] },
-                })),
+                data: previousYearData,
                 barWidth: 16,
+                itemStyle: { color: PRIMARY_SLATE, borderRadius: [4, 4, 0, 0] },
             },
             {
                 name: 'الفرق %',
                 type: 'line',
                 yAxisIndex: 0,
                 data: currentYearData.map((v, i) => Math.round(((v - previousYearData[i]) / previousYearData[i]) * 100 * 100) / 100),
-                lineStyle: { color: '#00d4ff', width: 2, type: 'dashed' as const },
-                itemStyle: { color: '#00d4ff' },
+                lineStyle: { color: PRIMARY_CYAN, width: 2, type: 'dashed' as const },
+                itemStyle: { color: PRIMARY_CYAN },
                 tooltip: { valueFormatter: (v: number) => `${v}%` },
             },
         ],
-        legend: { data: [`${selectedYear}`, `${Number(selectedYear) - 1}`, 'الفرق %'], bottom: 0, left: 'center' },
+        legend: {
+            data: [`${selectedYear}`, `${Number(selectedYear) - 1}`, 'الفرق %'],
+            bottom: 0,
+            left: 'center',
+            textStyle: { color: 'var(--text-muted)' },
+        },
     };
 
     // ── Drill-down: بيانات حسب المستوى ──
@@ -96,19 +98,17 @@ export default function SalesPage() {
             {
                 name: 'المبيعات',
                 type: 'bar',
-                data: drillData.values.map((v) => ({
-                    value: v,
-                    itemStyle: { color: '#00e5a0', borderRadius: [4, 4, 0, 0] },
-                })),
+                data: drillData.values,
                 barWidth: drillLevel === 'month' ? 18 : 40,
+                itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
             },
             {
                 name: 'الأرباح',
                 type: 'line',
                 yAxisIndex: 1,
                 data: drillData.profits,
-                lineStyle: { color: '#00d4ff', width: 2.5 },
-                itemStyle: { color: '#00d4ff', borderWidth: 2 },
+                lineStyle: { color: PRIMARY_CYAN, width: 2.5 },
+                itemStyle: { color: PRIMARY_CYAN, borderWidth: 2 },
                 symbol: 'circle',
                 symbolSize: 8,
                 smooth: true,
@@ -130,10 +130,8 @@ export default function SalesPage() {
             {
                 name: 'الكمية المباعة',
                 type: 'bar',
-                data: products.slice(0, 8).map((p) => ({
-                    value: p.unitsSold,
-                    itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] },
-                })),
+                data: products.slice(0, 8).map((p) => p.unitsSold),
+                itemStyle: { color: PRIMARY_BLUE, borderRadius: [4, 4, 0, 0] },
                 barWidth: 16,
             },
             {
@@ -141,8 +139,8 @@ export default function SalesPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: products.slice(0, 8).map((p) => Math.round(p.revenue * p.margin / 100)),
-                lineStyle: { color: '#00e5a0', width: 2 },
-                itemStyle: { color: '#00e5a0' },
+                lineStyle: { color: PRIMARY_GREEN, width: 2 },
+                itemStyle: { color: PRIMARY_GREEN },
             },
         ],
         legend: { data: ['الكمية المباعة', 'الأرباح'], bottom: 0, left: 'center' },
@@ -157,19 +155,15 @@ export default function SalesPage() {
             {
                 name: 'المبيعات',
                 type: 'bar',
-                data: [8200000, 5100000, 4300000, 3600000, 2100000, 1300000].map((v) => ({
-                    value: v,
-                    itemStyle: { color: '#00e5a0', borderRadius: [4, 4, 0, 0] },
-                })),
+                data: [8200000, 5100000, 4300000, 3600000, 2100000, 1300000],
+                itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
                 barWidth: 28,
             },
             {
                 name: 'الأرباح',
                 type: 'bar',
-                data: [2050000, 1120000, 730000, 468000, 189000, 52000].map((v) => ({
-                    value: v,
-                    itemStyle: { color: '#00d4ff', borderRadius: [4, 4, 0, 0] },
-                })),
+                data: [2050000, 1120000, 730000, 468000, 189000, 52000],
+                itemStyle: { color: PRIMARY_CYAN, borderRadius: [4, 4, 0, 0] },
                 barWidth: 28,
             },
         ],
@@ -183,13 +177,13 @@ export default function SalesPage() {
         series: [{
             type: 'bar',
             data: [
-                { value: totalRevenue, itemStyle: { color: '#00e5a0', borderRadius: [4, 4, 0, 0] } },
-                { value: totalCost, itemStyle: { color: '#ef4444', borderRadius: [4, 4, 0, 0] } },
-                { value: totalDiscount, itemStyle: { color: '#f59e0b', borderRadius: [4, 4, 0, 0] } },
-                { value: totalReturns * 50, itemStyle: { color: '#ef4444', borderRadius: [4, 4, 0, 0] } },
+                { value: totalRevenue, itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] } },
+                { value: totalCost, itemStyle: { color: PRIMARY_RED, borderRadius: [4, 4, 0, 0] } },
+                { value: totalDiscount, itemStyle: { color: PRIMARY_AMBER, borderRadius: [4, 4, 0, 0] } },
+                { value: totalReturns * 50, itemStyle: { color: PRIMARY_RED, borderRadius: [4, 4, 0, 0] } },
                 {
                     value: totalRevenue - totalCost - totalDiscount - totalReturns * 50,
-                    itemStyle: { color: '#00e5a0', borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
                 },
             ],
             barWidth: 36,
@@ -209,7 +203,7 @@ export default function SalesPage() {
         <div className="space-y-6">
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="flex items-center gap-3 mb-1">
-                    <TrendingUp size={24} style={{ color: 'var(--accent-green)' }} />
+                    <TrendingUp size={24} style={{ color: PRIMARY_GREEN }} />
                     <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>أداء المبيعات</h1>
                 </div>
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>تحليل شامل للمبيعات — التقرير الأول</p>

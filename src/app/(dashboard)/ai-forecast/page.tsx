@@ -6,6 +6,7 @@ import { Brain, Target, TrendingUp, BarChart3, Undo2, DollarSign } from 'lucide-
 import ChartCard from '@/components/ui/ChartCard';
 import AIBadge from '@/components/ui/AIBadge';
 import { getForecastData } from '@/lib/mockData';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_RED } from '@/lib/colors';
 
 export default function AIForecastPage() {
     const forecastData = useMemo(() => getForecastData(), []);
@@ -20,15 +21,15 @@ export default function AIForecastPage() {
                 name: 'الفعلي',
                 type: 'line',
                 data: forecastData.map((d) => d.actual),
-                lineStyle: { color: '#22c55e', width: 2 },
-                itemStyle: { color: '#22c55e' },
+                lineStyle: { color: PRIMARY_GREEN, width: 2 },
+                itemStyle: { color: PRIMARY_GREEN },
             },
             {
                 name: 'المتوقع',
                 type: 'line',
                 data: forecastData.map((d) => d.predicted),
-                lineStyle: { color: '#0ea5e9', width: 2 },
-                itemStyle: { color: '#0ea5e9' },
+                lineStyle: { color: PRIMARY_CYAN, width: 2 },
+                itemStyle: { color: PRIMARY_CYAN },
             },
             {
                 name: 'الحد الأعلى',
@@ -63,7 +64,7 @@ export default function AIForecastPage() {
                 type: 'bar',
                 data: futureData.map((d) => ({
                     value: Math.round(d.predicted * 0.35),
-                    itemStyle: { color: '#22c55e', borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 28,
             },
@@ -71,8 +72,8 @@ export default function AIForecastPage() {
                 name: 'المبيعات المتوقعة',
                 type: 'line',
                 data: futureData.map((d) => d.predicted),
-                lineStyle: { color: '#0ea5e9', width: 2 },
-                itemStyle: { color: '#0ea5e9' },
+                lineStyle: { color: PRIMARY_CYAN, width: 2 },
+                itemStyle: { color: PRIMARY_CYAN },
             },
         ],
         legend: { data: ['الأرباح المتوقعة', 'المبيعات المتوقعة'], bottom: 0, left: 'center' },
@@ -83,12 +84,12 @@ export default function AIForecastPage() {
         xAxis: { type: 'category' as const, data: futureData.map((d) => d.date) },
         yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K` } },
         series: [{
-            name: 'المرتجعات المتوقعة',
-            type: 'bar',
-            data: futureData.map((d) => ({
-                value: Math.round(d.predicted * 0.048),
-                itemStyle: { color: '#ef4444', borderRadius: [4, 4, 0, 0], opacity: 0.7 },
-            })),
+                name: 'المرتجعات المتوقعة',
+                type: 'bar',
+                data: futureData.map((d) => ({
+                    value: Math.round(d.predicted * 0.048),
+                    itemStyle: { color: PRIMARY_RED, borderRadius: [4, 4, 0, 0], opacity: 0.7 },
+                })),
             barWidth: 28,
         }],
     };

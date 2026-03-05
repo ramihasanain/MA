@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, ShoppingBag, DollarSign, ArrowLeftRight, Users, Shield } from 'lucide-react';
 import ChartCard from '@/components/ui/ChartCard';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER } from '@/lib/colors';
 
 // ── بيانات نوع الدفع ──
 const paymentRows = [
@@ -34,7 +35,7 @@ export default function SalesMethodPage() {
                 data: paymentRows.map((r, i) => ({
                     value: r.sales,
                     itemStyle: {
-                        color: ['#22c55e', '#0ea5e9', '#3b82f6'][i],
+                        color: [PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE][i],
                         borderRadius: [4, 4, 0, 0],
                     },
                     label: {
@@ -75,7 +76,7 @@ export default function SalesMethodPage() {
                 data: salesTypeRows.map((r, i) => ({
                     value: r.sales,
                     itemStyle: {
-                        color: ['#22c55e', '#0ea5e9'][i],
+                        color: [PRIMARY_GREEN, PRIMARY_CYAN][i],
                         borderRadius: [4, 4, 0, 0],
                     },
                     label: {
@@ -113,8 +114,8 @@ export default function SalesMethodPage() {
                 stack: 'total',
                 data: [850000, 820000, 900000, 880000, 870000, 950000, 920000, 910000, 980000, 940000, 1000000, 1100000],
                 areaStyle: { opacity: 0.3 },
-                lineStyle: { color: '#22c55e', width: 2 },
-                itemStyle: { color: '#22c55e' },
+                lineStyle: { color: PRIMARY_GREEN, width: 2 },
+                itemStyle: { color: PRIMARY_GREEN },
             },
             {
                 name: 'فيزا/ماستركارد',
@@ -122,8 +123,8 @@ export default function SalesMethodPage() {
                 stack: 'total',
                 data: [560000, 580000, 620000, 600000, 630000, 700000, 680000, 690000, 730000, 720000, 780000, 850000],
                 areaStyle: { opacity: 0.3 },
-                lineStyle: { color: '#0ea5e9', width: 2 },
-                itemStyle: { color: '#0ea5e9' },
+                lineStyle: { color: PRIMARY_CYAN, width: 2 },
+                itemStyle: { color: PRIMARY_CYAN },
             },
             {
                 name: 'كوبون / قسيمة',
@@ -131,8 +132,8 @@ export default function SalesMethodPage() {
                 stack: 'total',
                 data: [80000, 90000, 100000, 110000, 95000, 120000, 115000, 108000, 125000, 118000, 130000, 145000],
                 areaStyle: { opacity: 0.3 },
-                lineStyle: { color: '#f59e0b', width: 2 },
-                itemStyle: { color: '#f59e0b' },
+                lineStyle: { color: PRIMARY_AMBER, width: 2 },
+                itemStyle: { color: PRIMARY_AMBER },
             },
             {
                 name: 'دفع لاحق',
@@ -185,7 +186,7 @@ export default function SalesMethodPage() {
                 name: 'بطاقة عسكرية',
                 type: 'bar',
                 data: [2200000, 2150000, 2400000, 2350000, 2300000, 2600000, 2500000, 2450000, 2700000, 2600000, 2800000, 3100000].map(
-                    (v) => ({ value: v, itemStyle: { color: '#22c55e', borderRadius: [4, 4, 0, 0] } })
+                    (v) => ({ value: v, itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] } })
                 ),
                 barWidth: 14,
                 barGap: '20%',
@@ -194,7 +195,7 @@ export default function SalesMethodPage() {
                 name: 'مدني',
                 type: 'bar',
                 data: [850000, 830000, 950000, 940000, 920000, 1050000, 1000000, 990000, 1100000, 1050000, 1150000, 1280000].map(
-                    (v) => ({ value: v, itemStyle: { color: '#0ea5e9', borderRadius: [4, 4, 0, 0] } })
+                    (v) => ({ value: v, itemStyle: { color: PRIMARY_CYAN, borderRadius: [4, 4, 0, 0] } })
                 ),
                 barWidth: 14,
             },

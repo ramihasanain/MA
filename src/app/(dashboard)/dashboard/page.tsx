@@ -6,6 +6,7 @@ import { Calendar, Activity, Zap, Target } from 'lucide-react';
 import KPICard from '@/components/ui/KPICard';
 import ChartCard from '@/components/ui/ChartCard';
 import { getKPIData, getMonthlySalesData, getCategoryDistribution, getBranchData, getRegionalData } from '@/lib/mockData';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER } from '@/lib/colors';
 
 export default function DashboardPage() {
     const kpiData = useMemo(() => getKPIData(), []);
@@ -26,14 +27,14 @@ export default function DashboardPage() {
                 type: 'line',
                 data: salesData.map((d) => d.revenue),
                 smooth: true,
-                lineStyle: { color: '#00e5a0', width: 2 },
-                itemStyle: { color: '#00e5a0' },
+                lineStyle: { color: PRIMARY_GREEN, width: 2 },
+                itemStyle: { color: PRIMARY_GREEN },
                 areaStyle: {
                     color: {
                         type: 'linear' as const, x: 0, y: 0, x2: 0, y2: 1,
                         colorStops: [
-                            { offset: 0, color: 'rgba(0, 229, 160, 0.18)' },
-                            { offset: 1, color: 'rgba(0, 229, 160, 0)' },
+                            { offset: 0, color: PRIMARY_GREEN },
+                            { offset: 1, color: 'rgba(34,197,94,0)' },
                         ],
                     },
                 },
@@ -43,8 +44,8 @@ export default function DashboardPage() {
                 type: 'line',
                 data: salesData.map((d) => d.netRevenue),
                 smooth: true,
-                lineStyle: { color: '#0891b2', width: 2, type: 'dashed' as const },
-                itemStyle: { color: '#0891b2' },
+                lineStyle: { color: PRIMARY_CYAN, width: 2, type: 'dashed' as const },
+                itemStyle: { color: PRIMARY_CYAN },
             },
         ],
         legend: { data: ['الإيرادات', 'صافي الإيرادات'], bottom: 0, left: 'center' },
@@ -59,7 +60,7 @@ export default function DashboardPage() {
             data: topBranches.map((b, i) => ({
                 value: b.revenue,
                 itemStyle: {
-                    color: ['#00e5a0', '#00d4ff', '#3b82f6', '#a855f7', '#f59e0b'][i],
+                    color: [PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER][i],
                     borderRadius: [0, 4, 4, 0],
                 },
             })),
@@ -96,7 +97,7 @@ export default function DashboardPage() {
                 name: 'الإيرادات',
                 type: 'bar',
                 data: regions.map((r) => r.revenue),
-                itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] },
+                itemStyle: { color: PRIMARY_BLUE, borderRadius: [4, 4, 0, 0] },
                 barWidth: 30,
             },
             {
@@ -104,8 +105,8 @@ export default function DashboardPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: regions.map((r) => r.growth),
-                lineStyle: { color: '#00e5a0', width: 2 },
-                itemStyle: { color: '#00e5a0' },
+                lineStyle: { color: PRIMARY_GREEN, width: 2 },
+                itemStyle: { color: PRIMARY_GREEN },
             },
         ],
         legend: { data: ['الإيرادات', 'النمو'], bottom: 0, left: 'center' },

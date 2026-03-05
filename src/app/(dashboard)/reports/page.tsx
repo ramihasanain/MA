@@ -10,6 +10,7 @@ import ChartCard from '@/components/ui/ChartCard';
 import ReportPreviewModal from '@/components/ui/ReportPreviewModal';
 import { getReportJobs } from '@/lib/mockData';
 import { useRouter } from 'next/navigation';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_INDIGO, PRIMARY_AMBER, PRIMARY_SLATE } from '@/lib/colors';
 
 // ── بيانات المعاينة ──────────────────────────────────────────────────────────
 interface PreviewRow { market: string; revenue: number; cost: number; profit: number; orders: number; growth: number; }
@@ -61,7 +62,7 @@ export default function ReportsPage() {
                 type: 'bar',
                 data: previewData.map(d => ({
                     value: d.revenue,
-                    itemStyle: { color: '#22c55e', borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 16,
             },
@@ -70,7 +71,7 @@ export default function ReportsPage() {
                 type: 'bar',
                 data: previewData.map(d => ({
                     value: d.cost,
-                    itemStyle: { color: '#94a3b8', borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: PRIMARY_SLATE, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 16,
             },
@@ -78,8 +79,8 @@ export default function ReportsPage() {
                 name: 'الأرباح',
                 type: 'line',
                 data: previewData.map(d => d.profit),
-                lineStyle: { color: '#0ea5e9', width: 2 },
-                itemStyle: { color: '#0ea5e9' },
+                lineStyle: { color: PRIMARY_CYAN, width: 2 },
+                itemStyle: { color: PRIMARY_CYAN },
             },
         ],
         legend: { data: ['الإيرادات', 'التكلفة', 'الأرباح'], top: 0, left: 0 },
@@ -91,7 +92,9 @@ export default function ReportsPage() {
             data: previewData.slice(0, 5).map((d, i) => ({
                 name: d.market.split(' ')[0],
                 value: d.revenue,
-                itemStyle: { color: ['#22c55e', '#3b82f6', '#6366f1', '#f59e0b', '#0ea5e9'][i] },
+                itemStyle: {
+                    color: [PRIMARY_GREEN, PRIMARY_BLUE, PRIMARY_INDIGO, PRIMARY_AMBER, PRIMARY_CYAN][i],
+                },
             })),
             label: { color: '#94a3b8', fontSize: 11 }, labelLine: { lineStyle: { color: '#334155' } },
         }],

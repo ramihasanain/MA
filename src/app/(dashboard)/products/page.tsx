@@ -7,9 +7,19 @@ import ChartCard from '@/components/ui/ChartCard';
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import { getProductData, type ProductData } from '@/lib/mockData';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_INDIGO, PRIMARY_AMBER, PRIMARY_RED, GREEN_SCALE } from '@/lib/colors';
 
 // ── ألوان الفئات ──
-const CAT_COLORS = ['#047857', '#0891b2', '#2563eb', '#7c3aed', '#d97706', '#dc2626', '#0d9488', '#059669'];
+const CAT_COLORS = [
+    PRIMARY_GREEN,
+    PRIMARY_CYAN,
+    PRIMARY_BLUE,
+    PRIMARY_INDIGO,
+    PRIMARY_AMBER,
+    PRIMARY_RED,
+    '#0d9488',
+    '#059669',
+];
 
 const categories = [
     { name: 'منتجات غذائية', netSales: 248170, volume: 150240, margin: 38.2 },
@@ -139,7 +149,7 @@ export default function ProductsPage() {
 
     // ── مخطط أفضل 10 (أشرطة أفقية تدرج) ──
     const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-    const greenTones = ['#047857', '#059669', '#0d9488', '#0891b2', '#2563eb', '#7c3aed', '#0f766e', '#15803d', '#16a34a', '#14b8a6'];
+    const greenTones = GREEN_SCALE;
     const redTones = ['#dc2626', '#ef4444', '#f97316', '#d97706', '#b91c1c', '#9a3412', '#c2410c', '#ea580c', '#e11d48', '#be123c'];
 
     const top10Option = {
@@ -154,8 +164,8 @@ export default function ProductsPage() {
             data: p.trend,
             smooth: true,
             showSymbol: false,
-            lineStyle: { width: 2, color: greenTones[i] },
-            itemStyle: { color: greenTones[i] },
+            lineStyle: { width: 2, color: greenTones[i % greenTones.length] },
+            itemStyle: { color: greenTones[i % greenTones.length] },
         })),
     };
 

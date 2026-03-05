@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Receipt, DollarSign, TrendingUp, ShoppingCart, Package, AlertTriangle, Hash, Ban, ChevronDown, ChevronRight } from 'lucide-react';
 import ChartCard from '@/components/ui/ChartCard';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED } from '@/lib/colors';
 
 // ── بيانات الفروع مع sub و sub al sub ──
 const branchData = [
@@ -202,7 +203,7 @@ export default function TransactionsPage() {
         { year: '2022', branches: [{ name: 'سوق المنارة', val: 28000 }, { name: 'سوق سلاح الجو', val: 21000 }, { name: 'سوق العساكرة', val: 15500 }] },
     ];
     const allBranchNames = ['سوق المنارة', 'سوق سلاح الجو', 'سوق العساكرة'];
-    const branchColors = ['#22c55e', '#3b82f6', '#f59e0b'];
+    const branchColors = [PRIMARY_GREEN, PRIMARY_BLUE, PRIMARY_AMBER];
 
     const waterfallOption = {
         tooltip: { trigger: 'axis' as const },
@@ -250,13 +251,13 @@ export default function TransactionsPage() {
             {
                 name: 'صافي المبيعات',
                 type: 'bar' as const,
-                data: qNetSales.map(v => ({ value: v, itemStyle: { color: '#22c55e', borderRadius: [4, 4, 0, 0] } })),
+                data: qNetSales.map(v => ({ value: v, itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] } })),
                 barWidth: 18,
             },
             {
                 name: 'قيمة الربح',
                 type: 'bar' as const,
-                data: qProfit.map(v => ({ value: v, itemStyle: { color: '#0ea5e9', borderRadius: [4, 4, 0, 0] } })),
+                data: qProfit.map(v => ({ value: v, itemStyle: { color: PRIMARY_CYAN, borderRadius: [4, 4, 0, 0] } })),
                 barWidth: 18,
             },
             {
@@ -264,8 +265,8 @@ export default function TransactionsPage() {
                 type: 'line' as const,
                 yAxisIndex: 1,
                 data: qAtv,
-                lineStyle: { color: '#ef4444', width: 2 },
-                itemStyle: { color: '#ef4444' },
+                lineStyle: { color: PRIMARY_RED, width: 2 },
+                itemStyle: { color: PRIMARY_RED },
                 smooth: true,
             },
         ],

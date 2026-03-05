@@ -9,6 +9,7 @@ import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import { getBranchData, getRegionalData, type BranchData } from '@/lib/mockData';
 import BranchMap from '@/components/ui/BranchMap';
 import BranchSalesTable from '@/components/ui/BranchSalesTable';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED, PRIMARY_PURPLE } from '@/lib/colors';
 
 // ── بيانات الأداء المرجّح لكل فرع ──
 const branchScores = [
@@ -131,7 +132,7 @@ export default function BranchesPage() {
 
     // ── أداء فئات المنتجات (مجمّع لكل الفروع) ──
     const branchKeys = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8'] as const;
-    const branchColors = ['#00e5a0', '#00d4ff', '#3b82f6', '#a855f7', '#f59e0b', '#ef4444', '#0891b2', '#d97706'];
+    const branchColors = [PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER, PRIMARY_RED, '#0891b2', '#d97706'];
     const categoryPerfOption = {
         tooltip: {
             trigger: 'axis' as const,

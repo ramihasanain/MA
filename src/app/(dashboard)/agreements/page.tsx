@@ -6,6 +6,14 @@ import { FileText, CheckCircle, Clock, DollarSign, Package, Percent, BarChart3 }
 import ChartCard from '@/components/ui/ChartCard';
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
+import {
+    PRIMARY_GREEN,
+    PRIMARY_CYAN,
+    PRIMARY_BLUE,
+    PRIMARY_INDIGO,
+    PRIMARY_AMBER,
+    PRIMARY_SLATE,
+} from '@/lib/colors';
 
 interface Agreement { name: string; partner: string; typeAr: string; value: number; status: string; statusAr: string; materials: number; profitMargin: number; discountRate: number; start: string; end: string;[key: string]: unknown; }
 
@@ -36,7 +44,10 @@ export default function AgreementsPage() {
                 type: 'bar',
                 data: agreements
                     .filter((a) => a.materials > 0)
-                    .map((a) => ({ value: a.materials, itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] } })),
+                    .map((a) => ({
+                        value: a.materials,
+                        itemStyle: { color: PRIMARY_BLUE, borderRadius: [4, 4, 0, 0] },
+                    })),
                 barWidth: 24,
             },
             {
@@ -44,16 +55,16 @@ export default function AgreementsPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: agreements.filter((a) => a.materials > 0).map((a) => a.profitMargin),
-                lineStyle: { color: '#22c55e', width: 2 },
-                itemStyle: { color: '#22c55e' },
+                lineStyle: { color: PRIMARY_GREEN, width: 2 },
+                itemStyle: { color: PRIMARY_GREEN },
             },
             {
                 name: 'نسبة الخصم',
                 type: 'line',
                 yAxisIndex: 1,
                 data: agreements.filter((a) => a.materials > 0).map((a) => a.discountRate),
-                lineStyle: { color: '#f59e0b', width: 2, type: 'dashed' as const },
-                itemStyle: { color: '#f59e0b' },
+                lineStyle: { color: PRIMARY_AMBER, width: 2, type: 'dashed' as const },
+                itemStyle: { color: PRIMARY_AMBER },
             },
         ],
         legend: { data: ['المواد', 'هامش الربح', 'نسبة الخصم'], bottom: 0, left: 'center' },
@@ -67,10 +78,10 @@ export default function AgreementsPage() {
         series: [{
             type: 'bar',
             data: [
-                { value: 2160000, itemStyle: { color: '#22c55e', borderRadius: [4, 4, 0, 0] } },
-                { value: 850000, itemStyle: { color: '#0ea5e9', borderRadius: [4, 4, 0, 0] } },
-                { value: 180000, itemStyle: { color: '#6366f1', borderRadius: [4, 4, 0, 0] } },
-                { value: 450000, itemStyle: { color: '#f59e0b', borderRadius: [4, 4, 0, 0] } },
+                { value: 2160000, itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] } },
+                { value: 850000, itemStyle: { color: PRIMARY_CYAN, borderRadius: [4, 4, 0, 0] } },
+                { value: 180000, itemStyle: { color: PRIMARY_INDIGO, borderRadius: [4, 4, 0, 0] } },
+                { value: 450000, itemStyle: { color: PRIMARY_AMBER, borderRadius: [4, 4, 0, 0] } },
             ],
             barWidth: 40,
         }],
@@ -83,13 +94,14 @@ export default function AgreementsPage() {
             radius: ['36%', '54%'],
             center: ['50%', '42%'],
             data: [
-                { name: 'بقالة (أرز)', value: 35, itemStyle: { color: '#22c55e' } },
-                { name: 'ألبان', value: 25, itemStyle: { color: '#3b82f6' } },
-                { name: 'منظفات', value: 20, itemStyle: { color: '#6366f1' } },
-                { name: 'لحوم', value: 12, itemStyle: { color: '#f59e0b' } },
-                { name: 'أخرى', value: 8, itemStyle: { color: '#94a3b8' } },
+                { name: 'بقالة (أرز)', value: 35, itemStyle: { color: PRIMARY_GREEN } },
+                { name: 'ألبان', value: 25, itemStyle: { color: PRIMARY_BLUE } },
+                { name: 'منظفات', value: 20, itemStyle: { color: PRIMARY_INDIGO } },
+                { name: 'لحوم', value: 12, itemStyle: { color: PRIMARY_AMBER } },
+                { name: 'أخرى', value: 8, itemStyle: { color: PRIMARY_SLATE } },
             ],
-            label: { color: '#94a3b8', fontSize: 11 }, labelLine: { lineStyle: { color: '#334155' } },
+            label: { color: '#94a3b8', fontSize: 11 },
+            labelLine: { lineStyle: { color: '#334155' } },
         }],
     };
 

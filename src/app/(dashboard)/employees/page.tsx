@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, DollarSign, ShoppingCart, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import ChartCard from '@/components/ui/ChartCard';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED, PRIMARY_PURPLE, PRIMARY_SLATE } from '@/lib/colors';
 
 // ── بيانات الكاشيرات ──
 const cashiers = [
@@ -28,12 +29,11 @@ const fmtN = (n: number) => new Intl.NumberFormat('en-US').format(n);
 const fmt2 = (n: number) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 const fmtK = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(2)}K` : fmt2(n);
 
-// الألوان الحقيقية للموقع
 function scoreColor(s: number) {
-    if (s >= 63) return '#00e5a0'; // accent-green
-    if (s >= 55) return '#f59e0b'; // accent-amber
+    if (s >= 63) return PRIMARY_GREEN; // high score
+    if (s >= 55) return PRIMARY_AMBER;
     if (s >= 45) return '#f97316';
-    return '#ef4444'; // accent-red
+    return PRIMARY_RED;
 }
 
 const maxSales = Math.max(...cashiers.map(c => c.sales));
@@ -54,8 +54,23 @@ export default function EmployeesPage() {
             min: 0, max: 100, radius: '90%',
             pointer: { show: false },
             progress: {
-                show: true, roundCap: true, width: 16,
-                itemStyle: { color: { type: 'linear' as const, x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: '#ef4444' }, { offset: 0.5, color: '#f59e0b' }, { offset: 1, color: '#00e5a0' }] } },
+                show: true,
+                roundCap: true,
+                width: 16,
+                itemStyle: {
+                    color: {
+                        type: 'linear' as const,
+                        x: 0,
+                        y: 0,
+                        x2: 1,
+                        y2: 0,
+                        colorStops: [
+                            { offset: 0, color: PRIMARY_RED },
+                            { offset: 0.5, color: PRIMARY_AMBER },
+                            { offset: 1, color: PRIMARY_GREEN },
+                        ],
+                    },
+                },
             },
             axisLine: { lineStyle: { width: 16, color: [[1, '#1e293b']] } },
             splitLine: { show: false }, axisTick: { show: false },
@@ -71,7 +86,11 @@ export default function EmployeesPage() {
     // ── ترتيب الكاشيرات (أفقي) ──
     const ranked = [...cashiers].sort((a, b) => b.score - a.score);
     const perfOption = {
-        tooltip: { trigger: 'item' as const, formatter: (p: { name: string; value: number }) => `${p.name}: <b style="color:#00e5a0">${p.value}%</b>` },
+        tooltip: {
+            trigger: 'item' as const,
+            formatter: (p: { name: string; value: number }) =>
+                `${p.name}: <b style="color:${PRIMARY_GREEN}">${p.value}%</b>`,
+        },
         grid: { left: '26%', right: '14%', top: '3%', bottom: '3%' },
         xAxis: { type: 'value' as const, max: 80, axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
         yAxis: { type: 'category' as const, data: ranked.map(c => c.short), axisLabel: { fontSize: 10, color: '#94a3b8' }, axisLine: { show: false }, axisTick: { show: false } },
@@ -97,25 +116,25 @@ export default function EmployeesPage() {
             borderColor: '#1e293b',
             textStyle: { color: '#e2e8f0', fontSize: 11 },
             formatter: (p: { data: [number, number, number, string] }) =>
-                `<b style="color:#00e5a0">${p.data[3]}</b><br/>معدل الإلغاء: ${p.data[0]}%<br/>ATV: ${p.data[1].toFixed(2)}<br/>المعاملات: ${fmtN(p.data[2])}`,
+                `<b style="color:${PRIMARY_GREEN}">${p.data[3]}</b><br/>معدل الإلغاء: ${p.data[0]}%<br/>ATV: ${p.data[1].toFixed(2)}<br/>المعاملات: ${fmtN(p.data[2])}`,
         },
         xAxis: {
             name: 'معدل الإلغاء %',
             type: 'value' as const,
             nameLocation: 'middle' as const,
             nameGap: 32,
-            nameTextStyle: { color: '#64748b', fontSize: 9 },
-            axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' },
-            splitLine: { lineStyle: { color: '#1e293b' } },
+            nameTextStyle: { color: PRIMARY_GREEN, fontSize: 9 },
+            axisLabel: { formatter: '{value}%', fontSize: 9, color: PRIMARY_GREEN },
+            splitLine: { lineStyle: { color: PRIMARY_SLATE } },
         },
         yAxis: {
             name: 'متوسط ATV',
             type: 'value' as const,
             nameLocation: 'middle' as const,
             nameGap: 40,
-            nameTextStyle: { color: '#64748b', fontSize: 9 },
-            axisLabel: { fontSize: 9, color: '#64748b' },
-            splitLine: { lineStyle: { color: '#1e293b' } },
+            nameTextStyle: { color: PRIMARY_GREEN, fontSize: 9 },
+            axisLabel: { fontSize: 9, color: PRIMARY_GREEN },
+            splitLine: { lineStyle: { color: PRIMARY_SLATE } },
         },
         series: [{
             type: 'scatter',
@@ -123,7 +142,7 @@ export default function EmployeesPage() {
             data: cashiers.map(c => [c.voidRate, c.atv, c.transactions, c.short]),
             itemStyle: {
                 color: (p: { data: number[] }) => scoreColor(cashiers.find(c => c.transactions === p.data[2])?.score ?? 50),
-                opacity: 0.85, borderColor: '#1e293b', borderWidth: 1,
+                opacity: 0.85, borderColor: PRIMARY_SLATE, borderWidth: 1,
             },
             label: { show: false },
             emphasis: {
@@ -131,7 +150,7 @@ export default function EmployeesPage() {
                     show: true,
                     formatter: (p: { data: (number | string)[] }) => String(p.data[3]).split(' ')[0],
                     fontSize: 9,
-                    color: '#e2e8f0',
+                    color: PRIMARY_GREEN,
                     position: 'top' as const,
                 },
             },
@@ -141,12 +160,22 @@ export default function EmployeesPage() {
 
     // ── اتجاه المبيعات ──
     const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-    const trendColors = ['#00e5a0', '#00d4ff', '#3b82f6', '#a855f7', '#f59e0b', '#ef4444', '#0891b2', '#047857', '#d97706'];
+    const trendColors = [
+        PRIMARY_GREEN,
+        PRIMARY_CYAN,
+        PRIMARY_BLUE,
+        PRIMARY_PURPLE,
+        PRIMARY_AMBER,
+        PRIMARY_RED,
+        '#0891b2',
+        PRIMARY_GREEN,
+        '#d97706',
+    ];
     const trendOption = {
         tooltip: { trigger: 'axis' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0', fontSize: 11 } },
-        legend: { data: cashiers.map(c => c.short), bottom: 0, textStyle: { color: '#64748b', fontSize: 8 }, type: 'scroll' as const, pageIconColor: '#00e5a0', pageTextStyle: { color: '#94a3b8' } },
+        legend: { data: cashiers.map(c => c.short), bottom: 0, textStyle: { color: PRIMARY_GREEN, fontSize: 8 }, type: 'scroll' as const, pageIconColor: PRIMARY_GREEN, pageTextStyle: { color: PRIMARY_GREEN } },
         grid: { bottom: '22%', top: '5%', left: '2%', right: '2%', containLabel: true },
-        xAxis: { type: 'category' as const, data: months, axisLabel: { fontSize: 9, color: '#64748b', rotate: 30 }, axisLine: { lineStyle: { color: '#334155' } }, splitLine: { show: false } },
+        xAxis: { type: 'category' as const, data: months, axisLabel: { fontSize: 9, color: PRIMARY_GREEN, rotate: 30 }, axisLine: { lineStyle: { color: PRIMARY_SLATE } }, splitLine: { show: false } },
         yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => fmtK(v), fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
         series: cashiers.map((c, i) => ({
             name: c.short,
@@ -162,9 +191,9 @@ export default function EmployeesPage() {
         <button onClick={() => toggleSort(k)}
             className="flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all"
             style={{
-                background: sortKey === k ? 'rgba(0,229,160,0.12)' : 'var(--bg-elevated)',
-                color: sortKey === k ? 'var(--accent-green)' : 'var(--text-muted)',
-                border: '1px solid', borderColor: sortKey === k ? 'rgba(0,229,160,0.25)' : 'var(--border-subtle)',
+                background: sortKey === k ? PRIMARY_GREEN : 'var(--bg-elevated)',
+                color: sortKey === k ? PRIMARY_GREEN : 'var(--text-muted)',
+                border: '1px solid', borderColor: sortKey === k ? PRIMARY_GREEN : 'var(--border-subtle)',
             }}>
             {label}
             {sortKey === k ? (sortDir === 'desc' ? <ChevronDown size={11} /> : <ChevronUp size={11} />) : <ChevronDown size={11} style={{ opacity: 0.3 }} />}
@@ -176,14 +205,14 @@ export default function EmployeesPage() {
             {/* ── Header ── */}
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="flex items-center gap-3 mb-1">
-                    <Users size={22} style={{ color: 'var(--accent-green)' }} />
+                    <Users size={22} style={{ color: 'var(--text-primary)' }} />
                     <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Cashier Insights Dashboard</h1>
                     <div className="flex items-center gap-1.5 mr-2">
-                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--accent-green)' }} />
-                        <span className="text-[11px] font-medium" style={{ color: 'var(--accent-green)' }}>بيانات مباشرة</span>
+                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: PRIMARY_GREEN }} />
+                        <span className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>بيانات مباشرة</span>
                     </div>
                 </div>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>تحليل أداء الكاشيرات — مبيعات، معاملات، نسبة الإلغاء، ودرجة الأداء الكلي</p>
+                <p className="text-xs" style={{ color: 'var(--text-primary)' }}>تحليل أداء الكاشيرات — مبيعات، معاملات، نسبة الإلغاء، ودرجة الأداء الكلي</p>
             </motion.div>
 
             {/* ── KPIs ── */}
@@ -225,7 +254,7 @@ export default function EmployeesPage() {
                         <ChartCard title="" option={gaugeOption} height="170px" />
                     </div>
                     <div className="flex items-center justify-center gap-2 text-[9px] py-1.5" style={{ color: 'var(--text-muted)' }}>
-                        {[{ l: 'ضعيف', c: '#ef4444' }, { l: 'متوسط', c: '#f97316' }, { l: 'جيد', c: '#f59e0b' }, { l: 'ممتاز', c: '#00e5a0' }].map(x => (
+                        {[{ l: 'ضعيف', c: PRIMARY_RED }, { l: 'متوسط', c: '#f97316' }, { l: 'جيد', c: PRIMARY_AMBER }, { l: 'ممتاز', c: PRIMARY_GREEN }].map(x => (
                             <div key={x.l} className="flex items-center gap-0.5">
                                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: x.c }} />
                                 <span>{x.l}</span>

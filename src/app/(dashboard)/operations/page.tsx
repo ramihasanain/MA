@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Settings2, Truck, Package, Clock, CheckCircle, BarChart3, Undo2, ShoppingCart } from 'lucide-react';
 import ChartCard from '@/components/ui/ChartCard';
+import { PRIMARY_GREEN, PRIMARY_BLUE } from '@/lib/colors';
 
 export default function OperationsPage() {
     const operationalKPIs = [
@@ -24,14 +25,18 @@ export default function OperationsPage() {
             type: 'line',
             smooth: true,
             data: [580000, 620000, 710000, 680000, 720000, 840000, 790000, 810000, 870000, 830000, 920000, 980000],
-            lineStyle: { color: '#00e5a0', width: 3 },
-            itemStyle: { color: '#00e5a0' },
+            lineStyle: { color: PRIMARY_GREEN, width: 3 },
+            itemStyle: { color: PRIMARY_GREEN },
             areaStyle: {
                 color: {
-                    type: 'linear' as const, x: 0, y: 0, x2: 0, y2: 1,
+                    type: 'linear' as const,
+                    x: 0,
+                    y: 0,
+                    x2: 0,
+                    y2: 1,
                     colorStops: [
-                        { offset: 0, color: 'rgba(0,229,160,0.18)' },
-                        { offset: 1, color: 'rgba(0,229,160,0)' },
+                        { offset: 0, color: 'rgba(34,197,94,0.18)' },
+                        { offset: 1, color: 'rgba(34,197,94,0)' },
                     ],
                 },
             },
@@ -71,7 +76,7 @@ export default function OperationsPage() {
                 type: 'bar',
                 data: [45000, 52000, 38000, 24000, 15000, 10500].map((v) => ({
                     value: v,
-                    itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: PRIMARY_BLUE, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 28,
             },
@@ -80,8 +85,8 @@ export default function OperationsPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: [28, 65, 115, 178, 245, 380],
-                lineStyle: { color: '#00e5a0', width: 2 },
-                itemStyle: { color: '#00e5a0' },
+                lineStyle: { color: PRIMARY_GREEN, width: 2 },
+                itemStyle: { color: PRIMARY_GREEN },
             },
         ],
         legend: { data: ['عدد الفواتير', 'متوسط القيمة'], bottom: 0, left: 'center' },
@@ -109,7 +114,7 @@ export default function OperationsPage() {
                 type: 'bar',
                 data: [360000, 315000, 285000, 110000, 93000, 196000, 128000, 234000].map((v) => ({
                     value: v,
-                    itemStyle: { color: '#00e5a0', borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 16,
             },

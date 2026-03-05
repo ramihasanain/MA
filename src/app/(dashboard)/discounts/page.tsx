@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Percent, DollarSign, TrendingUp, TrendingDown, Tag, BarChart3, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import ChartCard from '@/components/ui/ChartCard';
+import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED } from '@/lib/colors';
 
 // ── بيانات الفئات ──
 const categories = [
@@ -207,11 +208,52 @@ export default function DiscountsPage() {
         xAxis: { type: 'value' as const, axisLabel: { formatter: '{value}%', fontSize: 8, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } }, max: 100 },
         yAxis: { type: 'category' as const, data: categories.map(c => c.name), axisLabel: { fontSize: 9, color: '#94a3b8' }, axisLine: { show: false }, axisTick: { show: false } },
         series: [
-            { name: '0%', type: 'bar' as const, stack: 'total', barMaxWidth: 18, data: categories.map((_, i) => [31.92, 11.27, 45.89, 40.10, 31.11, 22.15, 66.71, 40.15, 29.90, 21.99, 21.00, 21.00][i]), itemStyle: { color: '#00e5a0' }, label: { show: true, fontSize: 7, color: '#fff', formatter: (p: { value: number }) => p.value > 5 ? `${p.value}%` : '' } },
-            { name: '1-2%', type: 'bar' as const, stack: 'total', barMaxWidth: 18, data: categories.map((_, i) => [0, 21.67, 0, 0, 0, 41.36, 0, 0, 0, 0, 0, 0][i]), itemStyle: { color: '#00d4ff' } },
-            { name: '2-5%', type: 'bar' as const, stack: 'total', barMaxWidth: 18, data: categories.map((_, i) => [0, 0, 0, 24.97, 0, 0, 0, 0, 0, 0, 0, 0][i]), itemStyle: { color: '#3b82f6' } },
-            { name: '5-10%', type: 'bar' as const, stack: 'total', barMaxWidth: 18, data: categories.map((_, i) => [0, 4.67, 0, 14.93, 0, 0, 0, 0, 0, 0, 0, 0][i]), itemStyle: { color: '#f59e0b' } },
-            { name: '11-25%', type: 'bar' as const, stack: 'total', barMaxWidth: 18, data: categories.map((_, i) => [0, 0, 0, 0, 0, 0, 0, 0, 21.40, 0, 0, 21.40][i]), itemStyle: { color: '#ef4444' } },
+            {
+                name: '0%',
+                type: 'bar' as const,
+                stack: 'total',
+                barMaxWidth: 18,
+                data: categories.map((_, i) => [31.92, 11.27, 45.89, 40.10, 31.11, 22.15, 66.71, 40.15, 29.90, 21.99, 21.00, 21.00][i]),
+                itemStyle: { color: PRIMARY_GREEN },
+                label: {
+                    show: true,
+                    fontSize: 7,
+                    color: '#fff',
+                    formatter: (p: { value: number }) => (p.value > 5 ? `${p.value}%` : ''),
+                },
+            },
+            {
+                name: '1-2%',
+                type: 'bar' as const,
+                stack: 'total',
+                barMaxWidth: 18,
+                data: categories.map((_, i) => [0, 21.67, 0, 0, 0, 41.36, 0, 0, 0, 0, 0, 0][i]),
+                itemStyle: { color: PRIMARY_CYAN },
+            },
+            {
+                name: '2-5%',
+                type: 'bar' as const,
+                stack: 'total',
+                barMaxWidth: 18,
+                data: categories.map((_, i) => [0, 0, 0, 24.97, 0, 0, 0, 0, 0, 0, 0, 0][i]),
+                itemStyle: { color: PRIMARY_BLUE },
+            },
+            {
+                name: '5-10%',
+                type: 'bar' as const,
+                stack: 'total',
+                barMaxWidth: 18,
+                data: categories.map((_, i) => [0, 4.67, 0, 14.93, 0, 0, 0, 0, 0, 0, 0, 0][i]),
+                itemStyle: { color: PRIMARY_AMBER },
+            },
+            {
+                name: '11-25%',
+                type: 'bar' as const,
+                stack: 'total',
+                barMaxWidth: 18,
+                data: categories.map((_, i) => [0, 0, 0, 0, 0, 0, 0, 0, 21.40, 0, 0, 21.40][i]),
+                itemStyle: { color: PRIMARY_RED },
+            },
         ],
     };
 
@@ -243,7 +285,7 @@ export default function DiscountsPage() {
             type: 'scatter',
             symbolSize: (d: number[]) => Math.max(10, Math.sqrt(d[1] / 100)),
             data: categories.map(c => [c.withSales * 5, c.withMargin * 1000, c.name]),
-            itemStyle: { color: '#00e5a0', opacity: 0.8, borderColor: 'rgba(0,229,160,0.25)', borderWidth: 1 },
+            itemStyle: { color: PRIMARY_GREEN, opacity: 0.8, borderColor: 'rgba(34,197,94,0.25)', borderWidth: 1 },
             label: { show: false },
             emphasis: {
                 label: {
@@ -269,10 +311,42 @@ export default function DiscountsPage() {
             { type: 'value' as const, name: 'معدل الخصم %', axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' } },
         ],
         series: [
-            { name: 'صافي المبيعات', type: 'bar', data: discountRanges.map(r => ({ value: r.netSales, itemStyle: { color: '#00e5a0', borderRadius: [4, 4, 0, 0] } })), barMaxWidth: 32 },
-            { name: 'قيمة الربح', type: 'bar', data: discountRanges.map(r => ({ value: r.profitValue, itemStyle: { color: '#00d4ff', borderRadius: [4, 4, 0, 0] } })), barMaxWidth: 32 },
-            { name: 'إجمالي الخصومات', type: 'bar', data: discountRanges.map(r => ({ value: r.totalDiscount, itemStyle: { color: '#f59e0b', borderRadius: [4, 4, 0, 0] } })), barMaxWidth: 32 },
-            { name: 'معدل الخصم %', type: 'line', yAxisIndex: 1, data: discountRanges.map(r => r.avgRate), lineStyle: { color: '#ef4444', width: 2 }, itemStyle: { color: '#ef4444' }, smooth: true },
+            {
+                name: 'صافي المبيعات',
+                type: 'bar',
+                data: discountRanges.map(r => ({
+                    value: r.netSales,
+                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
+                })),
+                barMaxWidth: 32,
+            },
+            {
+                name: 'قيمة الربح',
+                type: 'bar',
+                data: discountRanges.map(r => ({
+                    value: r.profitValue,
+                    itemStyle: { color: PRIMARY_CYAN, borderRadius: [4, 4, 0, 0] },
+                })),
+                barMaxWidth: 32,
+            },
+            {
+                name: 'إجمالي الخصومات',
+                type: 'bar',
+                data: discountRanges.map(r => ({
+                    value: r.totalDiscount,
+                    itemStyle: { color: PRIMARY_AMBER, borderRadius: [4, 4, 0, 0] },
+                })),
+                barMaxWidth: 32,
+            },
+            {
+                name: 'معدل الخصم %',
+                type: 'line',
+                yAxisIndex: 1,
+                data: discountRanges.map(r => r.avgRate),
+                lineStyle: { color: PRIMARY_RED, width: 2 },
+                itemStyle: { color: PRIMARY_RED },
+                smooth: true,
+            },
         ],
     };
 
@@ -297,8 +371,8 @@ export default function DiscountsPage() {
             trigger: 'axis' as const,
             backgroundColor: '#1a2035', borderColor: '#1e293b',
             textStyle: { color: '#e2e8f0', fontSize: 11 },
-            formatter: (params: { name: string; value: number }[]) =>
-                `${params[0].name}<br/>إجمالي الخصومات: <b style="color:#f59e0b">${fmtK(params[0].value)}</b>`,
+                            formatter: (params: { name: string; value: number }[]) =>
+                `${params[0].name}<br/>إجمالي الخصومات: <b style="color:${PRIMARY_AMBER}">${fmtK(params[0].value)}</b>`,
         },
         grid: { bottom: '10%', top: '8%', left: '3%', right: '3%', containLabel: true },
         xAxis: {
@@ -313,33 +387,37 @@ export default function DiscountsPage() {
             axisLabel: { formatter: (v: number) => fmtK(v), fontSize: 9, color: '#64748b' },
             splitLine: { lineStyle: { color: '#1e293b' } },
         },
-        series: [{
-            type: 'line' as const,
-            smooth: true,
-            showSymbol: true,
-            symbolSize: 7,
-            data: pData.values,
-            lineStyle: { color: '#f59e0b', width: 2.5 },
-            itemStyle: { color: '#f59e0b', borderColor: '#1a2035', borderWidth: 2 },
-            areaStyle: {
-                color: {
-                    type: 'linear' as const, x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(245,158,11,0.25)' },
-                        { offset: 1, color: 'rgba(245,158,11,0.02)' },
-                    ],
+            series: [{
+                type: 'line' as const,
+                smooth: true,
+                showSymbol: true,
+                symbolSize: 7,
+                data: pData.values,
+                lineStyle: { color: PRIMARY_AMBER, width: 2.5 },
+                itemStyle: { color: PRIMARY_AMBER, borderColor: '#1a2035', borderWidth: 2 },
+                areaStyle: {
+                    color: {
+                        type: 'linear' as const,
+                        x: 0,
+                        y: 0,
+                        x2: 0,
+                        y2: 1,
+                        colorStops: [
+                            { offset: 0, color: 'rgba(245,158,11,0.25)' },
+                            { offset: 1, color: 'rgba(245,158,11,0.02)' },
+                        ],
+                    },
                 },
-            },
-        }],
+            }],
     };
 
     const kpis = [
-        { icon: DollarSign, label: 'صافي المبيعات', value: '425.92K', color: '#00e5a0', dim: 'rgba(0,229,160,0.1)' },
-        { icon: TrendingUp, label: 'قيمة الربح', value: '155.52K', color: '#00d4ff', dim: 'rgba(0,212,255,0.1)' },
-        { icon: BarChart3, label: 'قيمة التكلفة', value: '78.28K', color: '#3b82f6', dim: 'rgba(59,130,246,0.1)' },
-        { icon: Tag, label: 'إجمالي الخصومات المطبقة', value: '169.47K', color: '#f59e0b', dim: 'rgba(245,158,11,0.1)' },
+        { icon: DollarSign, label: 'صافي المبيعات', value: '425.92K', color: PRIMARY_GREEN, dim: 'rgba(34,197,94,0.1)' },
+        { icon: TrendingUp, label: 'قيمة الربح', value: '155.52K', color: PRIMARY_CYAN, dim: 'rgba(14,165,233,0.1)' },
+        { icon: BarChart3, label: 'قيمة التكلفة', value: '78.28K', color: PRIMARY_BLUE, dim: 'rgba(59,130,246,0.1)' },
+        { icon: Tag, label: 'إجمالي الخصومات المطبقة', value: '169.47K', color: PRIMARY_AMBER, dim: 'rgba(245,158,11,0.1)' },
         { icon: TrendingDown, label: 'ربح المنتجات المخصومة', value: '43.61K', color: '#a855f7', dim: 'rgba(168,85,247,0.1)' },
-        { icon: Percent, label: '% مبيعات مخصومة', value: '21.31%', color: '#ef4444', dim: 'rgba(239,68,68,0.1)' },
+        { icon: Percent, label: '% مبيعات مخصومة', value: '21.31%', color: PRIMARY_RED, dim: 'rgba(239,68,68,0.1)' },
         { icon: AlertCircle, label: 'متوسط نسبة الخصم', value: '1.97%', color: '#0891b2', dim: 'rgba(8,145,178,0.1)' },
     ];
 
