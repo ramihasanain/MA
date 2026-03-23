@@ -1,9 +1,16 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import '@/lib/echarts/register-scatter';
+import dynamic from 'next/dynamic';
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Package, TrendingUp, TrendingDown, DollarSign, ShoppingCart, BarChart3, Percent, Layers } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import { getProductData, type ProductData } from '@/lib/mockData';

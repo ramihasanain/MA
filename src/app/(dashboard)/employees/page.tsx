@@ -1,9 +1,17 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import '@/lib/echarts/register-scatter';
+import '@/lib/echarts/register-gauge';
+import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, DollarSign, ShoppingCart, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED, PRIMARY_PURPLE, PRIMARY_SLATE } from '@/lib/colors';
 
 // ── بيانات الكاشيرات ──
@@ -187,18 +195,25 @@ export default function EmployeesPage() {
         })),
     };
 
-    const SortBtn = ({ k, label }: { k: typeof sortKey; label: string }) => (
-        <button onClick={() => toggleSort(k)}
-            className="flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all"
-            style={{
-                background: sortKey === k ? PRIMARY_GREEN : 'var(--bg-elevated)',
-                color: sortKey === k ? PRIMARY_GREEN : 'var(--text-muted)',
-                border: '1px solid', borderColor: sortKey === k ? PRIMARY_GREEN : 'var(--border-subtle)',
-            }}>
-            {label}
-            {sortKey === k ? (sortDir === 'desc' ? <ChevronDown size={11} /> : <ChevronUp size={11} />) : <ChevronDown size={11} style={{ opacity: 0.3 }} />}
-        </button>
-    );
+    const SortBtn = ({ k, label }: { k: typeof sortKey; label: string }) => {
+        const active = sortKey === k;
+        return (
+            <button
+                type="button"
+                onClick={() => toggleSort(k)}
+                className="flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all"
+                style={{
+                    background: active ? PRIMARY_GREEN : 'var(--bg-elevated)',
+                    color: active ? '#ffffff' : 'var(--text-muted)',
+                    border: '1px solid',
+                    borderColor: active ? PRIMARY_GREEN : 'var(--border-subtle)',
+                }}
+            >
+                {label}
+                {active ? (sortDir === 'desc' ? <ChevronDown size={11} /> : <ChevronUp size={11} />) : <ChevronDown size={11} style={{ opacity: 0.3 }} />}
+            </button>
+        );
+    };
 
     return (
         <div className="space-y-6">

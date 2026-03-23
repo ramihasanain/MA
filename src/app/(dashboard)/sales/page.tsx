@@ -1,9 +1,16 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, BarChart3, Building2, FileText, Layers } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+import { ChartTitleFlagBadge } from '@/components/ui/ChartTitleFlagBadge';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import { getMonthlySalesData, getProductData, type ProductData } from '@/lib/mockData';
 import { PRIMARY_GREEN, PRIMARY_RED, PRIMARY_AMBER, PRIMARY_SLATE, PRIMARY_CYAN, PRIMARY_BLUE } from '@/lib/colors';
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
@@ -224,18 +231,17 @@ export default function SalesPage() {
             </div>
 
             {/* مقارنة سنوية */}
-            <ChartCard title="مقارنة المبيعات — العام الحالي مقابل السابق" subtitle="مقارنة شهرية مع نسبة التغيير" option={yoyComparisonOption} height="340px" delay={1} />
+            <ChartCard title="مقارنة المبيعات — العام الحالي مقابل السابق" titleFlag='blue' subtitle="مقارنة شهرية مع نسبة التغيير" option={yoyComparisonOption} height="340px" delay={1} />
 
             {/* Drill-Down */}
-            <div className="glass-panel p-5">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Drill-Down — تحليل متعدد المستويات</h3>
-                        <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>انقر على المستوى للتعمق في البيانات</p>
-                    </div>
-                    <div className="flex items-center gap-1">
+            <ChartCard
+                title="صافي الأرباح والمبيعات حسب التاريخ"
+                subtitle="انقر على المستوى للتعمق في البيانات"
+                titleFlag="green"
+                headerExtra={
+                    <div className="flex items-center gap-1 flex-wrap justify-end">
                         {([['year', 'سنة'], ['quarter', 'ربع'], ['month', 'شهر']] as const).map(([level, label]) => (
-                            <button key={level} onClick={() => setDrillLevel(level)}
+                            <button key={level} type="button" onClick={() => setDrillLevel(level)}
                                 className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
                                 style={{
                                     background: drillLevel === level ? 'var(--accent-green-dim)' : 'var(--bg-elevated)',
@@ -246,18 +252,19 @@ export default function SalesPage() {
                             </button>
                         ))}
                     </div>
-                </div>
-                <ChartCard title="" option={drillDownOption} height="280px" />
-            </div>
+                }
+                option={drillDownOption}
+                height="280px"
+            />
 
             {/* مبيعات مقابل أرباح + شلال */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                <ChartCard title="كمية المبيعات مقابل الأرباح" subtitle="مقارنة حسب المنتج" option={salesVsProfitOption} height="340px" delay={2} />
-                <ChartCard title="شلال الإيرادات" subtitle="من إجمالي المبيعات إلى صافي الربح" option={waterfallOption} height="340px" delay={3} />
+                <ChartCard title="صافي الأرباح والمبيعات" subtitle='مقارنة حسب التصنيف' titleFlag='green' option={salesVsProfitOption} height="340px" delay={2} />
+                <ChartCard title="شلال الإيرادات" titleFlag='blue' subtitle="من إجمالي المبيعات إلى صافي الربح" option={waterfallOption} height="340px" delay={3} />
             </div>
 
             {/* تحليل المبيعات حسب الخصم */}
-            <ChartCard title="تحليل المبيعات حسب نسبة الخصم" subtitle="تأثير الخصومات على المبيعات والأرباح" option={salesByDiscountOption} height="300px" delay={4} />
+            <ChartCard title="تحليل المبيعات حسب نسبة الخصم" titleFlag="red" titleFlagNumber={1} subtitle="تأثير الخصومات على المبيعات والأرباح" option={salesByDiscountOption} height="300px" delay={4} />
 
             {/* ── Decomposition Tree Drill-Down ── */}
             <TreeDrillDown />
@@ -265,7 +272,10 @@ export default function SalesPage() {
             {/* ── الجدول التفصيلي: سنة / ربع / شهر مع YoY وMoM ── */}
             <div className="glass-panel overflow-hidden">
                 <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>التحليل الزمني التفصيلي للمبيعات</h3>
+                    <div className="flex items-center gap-2">
+                        <ChartTitleFlagBadge flag="green" size="sm" />
+                        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>التحليل الزمني التفصيلي للمبيعات</h3>
+                    </div>
                     <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>صافي المبيعات • YoY% • MoM% • عدد الفواتير • هامش الربح</p>
                 </div>
                 <div className="overflow-x-auto">

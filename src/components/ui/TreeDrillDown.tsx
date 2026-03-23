@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown } from 'lucide-react';
+import { ChartTitleFlagBadge } from '@/components/ui/ChartTitleFlagBadge';
 
 // ── بنية البيانات ──
 interface TreeNode {
@@ -204,9 +205,12 @@ export default function TreeDrillDown() {
         <div className="glass-panel overflow-hidden">
             {/* رأس */}
             <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    Decomposition Tree — التحليل الهرمي للمبيعات
-                </h3>
+                <div className="flex items-center gap-2">
+                    <ChartTitleFlagBadge flag="green" size="sm" />
+                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        التحليل الهرمي للمبيعات
+                    </h3>
+                </div>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
                     اضغط على أي عنصر للتعمق في التفاصيل • الفرع ← الفئة ← الفئة الفرعية ← المنتج
                 </p>

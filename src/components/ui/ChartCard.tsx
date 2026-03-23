@@ -1,56 +1,104 @@
 'use client';
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, useRef, memo } from 'react';
 import ReactEChartsCore from 'echarts-for-react/lib/core';
 import * as echarts from 'echarts/core';
-import { BarChart, LineChart, PieChart, ScatterChart, GraphChart, TreemapChart, HeatmapChart, RadarChart, GaugeChart } from 'echarts/charts';
-import {
-    GridComponent,
-    TooltipComponent,
-    LegendComponent,
-    DataZoomComponent,
-    ToolboxComponent,
-    MarkLineComponent,
-    VisualMapComponent,
-    RadarComponent,
-} from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Maximize2, X } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 import { createPortal } from 'react-dom';
+import { ChartTitleFlagBadge, type ChartCardTitleFlag } from './ChartTitleFlagBadge';
 
-echarts.use([
-    BarChart, LineChart, PieChart, ScatterChart, GraphChart, TreemapChart, HeatmapChart, RadarChart, GaugeChart,
-    GridComponent, TooltipComponent, LegendComponent,
-    DataZoomComponent, ToolboxComponent, MarkLineComponent, VisualMapComponent, RadarComponent,
-    CanvasRenderer,
-]);
+export type { ChartCardTitleFlag };
 
 interface ChartCardProps {
     title: string;
     subtitle?: string;
+    /** Optional colored flag next to the chart title (inline and fullscreen). */
+    titleFlag?: ChartCardTitleFlag;
+    /** Optional number shown inside the flag (any `titleFlag` color). */
+    titleFlagNumber?: number;
+    /** Renders in the header row before the expand control (e.g. level toggles). */
+    headerExtra?: React.ReactNode;
     option: Record<string, unknown>;
     height?: string;
     className?: string;
     onExpand?: () => void;
     delay?: number;
     aiPowered?: boolean;
+    /** When true, chart initializes only after the card enters the viewport (IntersectionObserver). */
+    lazyViewport?: boolean;
+    /** Root margin for viewport detection (e.g. prefetch before visible). */
+    lazyRootMargin?: string;
 }
 
-export default function ChartCard({
+function scheduleAfterIdle(cb: () => void): { cancel: () => void } {
+    let id: number | ReturnType<typeof setTimeout>;
+    if (typeof requestIdleCallback !== 'undefined') {
+        id = requestIdleCallback(() => cb(), { timeout: 800 });
+        return { cancel: () => cancelIdleCallback(id as number) };
+    }
+    id = setTimeout(cb, 1);
+    return { cancel: () => clearTimeout(id as ReturnType<typeof setTimeout>) };
+}
+
+function ChartCard({
     title,
     subtitle,
+    titleFlag,
+    titleFlagNumber,
+    headerExtra,
     option,
     height = '320px',
     className = '',
     onExpand,
     delay = 0,
     aiPowered = false,
+    lazyViewport = false,
+    lazyRootMargin = '100px',
 }: ChartCardProps) {
     const mode = useThemeStore((s) => s.mode);
     const isDark = mode === 'dark';
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [chartReady, setChartReady] = useState(false);
+    const [inViewport, setInViewport] = useState(!lazyViewport);
+    const viewportRef = useRef<HTMLDivElement>(null);
+    const mountedRef = useRef(true);
+
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!lazyViewport) return;
+        const el = viewportRef.current;
+        if (!el || typeof IntersectionObserver === 'undefined') {
+            setInViewport(true);
+            return;
+        }
+        const obs = new IntersectionObserver(
+            (entries) => {
+                if (entries.some((e) => e.isIntersecting)) {
+                    setInViewport(true);
+                    obs.disconnect();
+                }
+            },
+            { root: null, rootMargin: lazyRootMargin, threshold: 0 }
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, [lazyViewport, lazyRootMargin]);
+
+    useEffect(() => {
+        if (!inViewport) return;
+        const { cancel } = scheduleAfterIdle(() => {
+            if (mountedRef.current) setChartReady(true);
+        });
+        return () => cancel();
+    }, [inViewport]);
 
     const openFullscreen = useCallback(() => {
         if (onExpand) {
@@ -101,7 +149,6 @@ export default function ChartCard({
 
     const mergedOption = useMemo(() => {
         const chartTooltip = (option.tooltip || {}) as Record<string, unknown>;
-        // In light mode: theme wins on bg/border/text; in dark: chart wins (already has correct colors)
         const mergedTooltip = isDark
             ? { ...baseTheme.tooltip, ...chartTooltip }
             : {
@@ -112,22 +159,25 @@ export default function ChartCard({
                 extraCssText: 'box-shadow: 0 4px 12px rgba(0,0,0,0.12); border-radius: 8px;',
             };
 
-        const merged: Record<string, any> = {
+        const merged: Record<string, unknown> = {
             ...baseTheme,
             ...option,
             tooltip: mergedTooltip,
             grid: { ...baseTheme.grid, ...(option.grid || {}) },
-            legend: { ...(baseTheme as any).legend, ...(((option as any).legend || {}) as Record<string, unknown>) },
+            legend: { ...(baseTheme as { legend: Record<string, unknown> }).legend, ...(((option as { legend?: Record<string, unknown> }).legend || {}) as Record<string, unknown>) },
         };
 
-        // ── Force remove all grid splitLines globally ──
-        const killSplit = (ax: any) => (ax ? { ...ax, splitLine: { show: false } } : ax);
-        if (Array.isArray(merged.xAxis)) merged.xAxis = merged.xAxis.map(killSplit);
-        else if (merged.xAxis) merged.xAxis = killSplit(merged.xAxis);
-        if (Array.isArray(merged.yAxis)) merged.yAxis = merged.yAxis.map(killSplit);
-        else if (merged.yAxis) merged.yAxis = killSplit(merged.yAxis);
+        if (merged.animation === undefined) {
+            merged.animation = false;
+        }
 
-        // Fix radar axis names and graph/pie/treemap labels for light mode
+        const killSplit = (ax: Record<string, unknown> | undefined) =>
+            (ax ? { ...ax, splitLine: { show: false } } : ax);
+        if (Array.isArray(merged.xAxis)) merged.xAxis = merged.xAxis.map(killSplit);
+        else if (merged.xAxis) merged.xAxis = killSplit(merged.xAxis as Record<string, unknown>);
+        if (Array.isArray(merged.yAxis)) merged.yAxis = merged.yAxis.map(killSplit);
+        else if (merged.yAxis) merged.yAxis = killSplit(merged.yAxis as Record<string, unknown>);
+
         if (!isDark && merged.series) {
             const series = merged.series as Record<string, unknown>[];
             const fixedSeries = series.map((s: Record<string, unknown>) => {
@@ -140,7 +190,6 @@ export default function ChartCard({
                     const label = (s.label || {}) as Record<string, unknown>;
                     return { ...s, label: { ...label, color: label.color === '#e2e8f0' ? '#0f172a' : (label.color || '#0f172a') } };
                 }
-                // Fix bar/line labels that use hardcoded dark colors
                 if (type === 'bar' || type === 'line') {
                     const label = (s.label || {}) as Record<string, unknown>;
                     if (label.color === '#fff' || label.color === '#e2e8f0') {
@@ -152,7 +201,6 @@ export default function ChartCard({
             merged.series = fixedSeries;
         }
 
-        // Fix xAxis/yAxis arrays (multi-axis charts)
         if (!isDark) {
             const lightAxisStyle = {
                 axisLine: { lineStyle: { color: '#e2e8f0' } },
@@ -161,28 +209,43 @@ export default function ChartCard({
                 splitLine: { show: false },
             };
             if (Array.isArray(merged.xAxis)) {
-                merged.xAxis = merged.xAxis.map((ax: Record<string, unknown>) => ({ ...lightAxisStyle, ...ax, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisLabel: { color: '#64748b', fontSize: 11 } }));
+                merged.xAxis = merged.xAxis.map((ax: Record<string, unknown>) => ({
+                    ...lightAxisStyle,
+                    ...ax,
+                    axisLine: { lineStyle: { color: '#e2e8f0' } },
+                    axisLabel: { color: '#64748b', fontSize: 11 },
+                }));
             }
             if (Array.isArray(merged.yAxis)) {
-                merged.yAxis = merged.yAxis.map((ax: Record<string, unknown>) => ({ ...lightAxisStyle, ...ax, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisLabel: { color: '#64748b', fontSize: 11 }, splitLine: { show: false } }));
+                merged.yAxis = merged.yAxis.map((ax: Record<string, unknown>) => ({
+                    ...lightAxisStyle,
+                    ...ax,
+                    axisLine: { lineStyle: { color: '#e2e8f0' } },
+                    axisLabel: { color: '#64748b', fontSize: 11 },
+                    splitLine: { show: false },
+                }));
             }
         }
 
-        // Fix gauge axisLine track in light mode
         if (!isDark && merged.series) {
-            merged.series = (merged.series as any[]).map((s: any) => {
-                if (s.type === 'gauge') {
+            merged.series = (merged.series as Record<string, unknown>[]).map((s) => {
+                const ser = s as { type?: string; axisLine?: Record<string, unknown>; detail?: Record<string, unknown> };
+                if (ser.type === 'gauge') {
+                    const axisLine = ser.axisLine || {};
+                    const lineStyle = (axisLine.lineStyle || {}) as Record<string, unknown>;
                     return {
                         ...s,
-                        axisLine: { ...s.axisLine, lineStyle: { ...(s.axisLine?.lineStyle || {}), color: [[1, '#e2e8f0']] } },
-                        detail: { ...s.detail, color: s.detail?.color },
+                        axisLine: {
+                            ...axisLine,
+                            lineStyle: { ...lineStyle, color: [[1, '#e2e8f0']] },
+                        },
+                        detail: { ...ser.detail, color: ser.detail?.color },
                     };
                 }
                 return s;
             });
         }
 
-        // Fix radar axisName color in light mode
         if (!isDark && merged.radar) {
             const radar = merged.radar as Record<string, unknown>;
             const axisName = (radar.axisName || {}) as Record<string, unknown>;
@@ -195,7 +258,6 @@ export default function ChartCard({
             };
         }
 
-        // Fix visualMap text in light mode
         if (!isDark && merged.visualMap) {
             const vm = merged.visualMap as Record<string, unknown>;
             merged.visualMap = { ...vm, textStyle: { color: '#475569' } };
@@ -204,54 +266,76 @@ export default function ChartCard({
         return merged;
     }, [option, baseTheme, isDark]);
 
-    const chartEl = (extraHeight?: string) => (
-        <ReactEChartsCore
-            echarts={echarts}
-            option={mergedOption}
-            style={{ height: extraHeight || '100%', width: '100%' }}
-            opts={{ renderer: 'canvas' }}
-            notMerge={true}
-        />
+    const chartEl = (extraHeight?: string) => {
+        if (!chartReady) {
+            return <div style={{ height: extraHeight || '100%', width: '100%' }} aria-hidden />;
+        }
+        return (
+            <ReactEChartsCore
+                echarts={echarts}
+                option={mergedOption}
+                style={{ height: extraHeight || '100%', width: '100%' }}
+                opts={{ renderer: 'canvas' }}
+                notMerge={true}
+            />
+        );
+    };
+
+    const showTitleBlock = Boolean(title || subtitle);
+
+    const chartShell = (
+        <>
+            <div
+                className={`flex items-center px-5 pt-4 pb-2 gap-3 ${showTitleBlock ? 'justify-between' : 'justify-end'}`}
+            >
+                {showTitleBlock && (
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                            {titleFlag && (
+                                <ChartTitleFlagBadge flag={titleFlag} flagNumber={titleFlagNumber} size="sm" />
+                            )}
+                            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</h3>
+                        </div>
+                        {subtitle && <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>}
+                    </div>
+                )}
+                <div className="flex items-center gap-2 shrink-0">
+                    {headerExtra}
+                    {aiPowered && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                            style={{ background: 'var(--accent-cyan-dim)', color: 'var(--accent-cyan)', border: '1px solid rgba(0,212,255,0.2)' }}>
+                            AI
+                        </span>
+                    )}
+                    <button
+                        type="button"
+                        onClick={openFullscreen}
+                        className="p-1.5 rounded-md transition-all hover:scale-110"
+                        style={{ color: 'var(--text-muted)' }}
+                        title="تكبير الشارت"
+                    >
+                        <Maximize2 size={14} />
+                    </button>
+                </div>
+            </div>
+            <div style={{ height }}>
+                {chartEl()}
+            </div>
+        </>
     );
 
     return (
         <>
             <motion.div
+                ref={lazyViewport ? viewportRef : undefined}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: delay * 0.1 }}
                 className={`glass-panel overflow-hidden ${aiPowered ? 'ai-module glow-cyan' : ''} ${className}`}
             >
-                {(title || subtitle) && (
-                    <div className="flex items-center justify-between px-5 pt-4 pb-2">
-                        <div>
-                            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</h3>
-                            {subtitle && <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {aiPowered && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-                                    style={{ background: 'var(--accent-cyan-dim)', color: 'var(--accent-cyan)', border: '1px solid rgba(0,212,255,0.2)' }}>
-                                    AI
-                                </span>
-                            )}
-                            <button
-                                onClick={openFullscreen}
-                                className="p-1.5 rounded-md transition-all hover:scale-110"
-                                style={{ color: 'var(--text-muted)' }}
-                                title="تكبير الشارت"
-                            >
-                                <Maximize2 size={14} />
-                            </button>
-                        </div>
-                    </div>
-                )}
-                <div style={{ height }}>
-                    {chartEl()}
-                </div>
+                {chartShell}
             </motion.div>
 
-            {/* ── Fullscreen Modal ── */}
             {typeof window !== 'undefined' && isFullscreen && createPortal(
                 <AnimatePresence>
                     <motion.div
@@ -277,21 +361,33 @@ export default function ChartCard({
                             className="glass-panel overflow-hidden"
                             style={{ width: '92vw', maxWidth: 1200, minHeight: '85vh', maxHeight: '95vh', display: 'flex', flexDirection: 'column' }}
                         >
-                            {/* Header */}
-                            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border-subtle)', flexShrink: 0 }}>
-                                <div>
-                                    <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{title}</h2>
-                                    {subtitle && <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>}
+                            <div
+                                className={`flex items-center px-6 py-4 border-b gap-3 ${showTitleBlock ? 'justify-between' : 'justify-end'}`}
+                                style={{ borderColor: 'var(--border-subtle)', flexShrink: 0 }}
+                            >
+                                {showTitleBlock && (
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2.5">
+                                            {titleFlag && (
+                                                <ChartTitleFlagBadge flag={titleFlag} flagNumber={titleFlagNumber} size="lg" />
+                                            )}
+                                            <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{title}</h2>
+                                        </div>
+                                        {subtitle && <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>}
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    {headerExtra}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsFullscreen(false)}
+                                        className="p-2 rounded-lg transition-all hover:scale-110"
+                                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+                                    >
+                                        <X size={16} />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => setIsFullscreen(false)}
-                                    className="p-2 rounded-lg transition-all hover:scale-110"
-                                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
-                                >
-                                    <X size={16} />
-                                </button>
                             </div>
-                            {/* Chart fills the rest — full height so ECharts can use it */}
                             <div style={{ flex: 1, minHeight: 0, padding: '8px 0', position: 'relative' }}>
                                 <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
                                     {chartEl('100%')}
@@ -305,3 +401,5 @@ export default function ChartCard({
         </>
     );
 }
+
+export default memo(ChartCard);

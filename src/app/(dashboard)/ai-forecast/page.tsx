@@ -1,9 +1,16 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import '@/lib/echarts/register-gauge';
+import dynamic from 'next/dynamic';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Brain, TrendingUp, TrendingDown, Target, BarChart3 } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import AIBadge from '@/components/ui/AIBadge';
 
 // ── بيانات التنبؤ اليومية ──

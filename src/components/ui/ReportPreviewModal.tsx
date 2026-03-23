@@ -1,10 +1,16 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, FileBarChart, TrendingUp, TrendingDown, DollarSign, Users, Package, Percent, BarChart3, Brain, ShoppingCart, Clock } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 280 }}>Loading chart...</div>,
+});
 
 interface ReportPreviewModalProps {
     type: string | null;

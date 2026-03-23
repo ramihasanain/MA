@@ -1,9 +1,15 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Calendar, TrendingUp, DollarSign, BarChart3, Percent } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 
 // ── بيانات الفترة 1 (Feb 2020 → Jan 2021) ──
 const p1Dates = Array.from({ length: 12 }, (_, i) => {

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronLeft } from 'lucide-react';
+import { ChartTitleFlagBadge } from './ChartTitleFlagBadge';
 
 // ── Deterministic seeded random ──
 let _s = 77;
@@ -274,9 +275,12 @@ export default function DrillDownTable() {
     return (
         <div className="glass-panel overflow-hidden">
             <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    تحليل المبيعات التفصيلي — سوق / فئة / منتج
-                </h3>
+                <div className="flex items-center gap-2">
+                    <ChartTitleFlagBadge flag="green" size="sm" />
+                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        تحليل المبيعات التفصيلي — سوق / فئة / منتج
+                    </h3>
+                </div>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
                     اضغط على أي صف للتوسع • إجمالي ← صافي ← خصومات ← حجم المنتجات
                 </p>

@@ -1,14 +1,22 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, MapPin, Award, Scale, TrendingUp, BarChart3, ChevronDown, ChevronLeft } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+import { ChartTitleFlagBadge } from '@/components/ui/ChartTitleFlagBadge';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import { getBranchData, getRegionalData, type BranchData } from '@/lib/mockData';
 import BranchMap from '@/components/ui/BranchMap';
 import BranchSalesTable from '@/components/ui/BranchSalesTable';
+import MetricsBubblePlot, { type MetricsBubblePoint } from '@/components/ui/MetricsBubblePlot';
 import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED, PRIMARY_PURPLE } from '@/lib/colors';
 
 // ── بيانات الأداء المرجّح لكل فرع ──
@@ -105,9 +113,11 @@ export default function BranchesPage() {
     const avgScore = Math.round(branchScores.reduce((a, b) => a + b.score, 0) / branchScores.length);
     const [expandedCats, setExpandedCats] = useState<Record<string, boolean>>({});
 
-    // ── Simple donut gauge ──
+    // ── Simple donut gauge (200×200, r=77 — scaled up from 140×140 / r=54) ──
     const gColor = avgScore >= 70 ? 'var(--accent-green)' : avgScore >= 50 ? 'var(--accent-amber)' : 'var(--accent-red)';
-    const circumference = 2 * Math.PI * 54;
+    const donutR = 77;
+    const donutC = 100;
+    const circumference = 2 * Math.PI * donutR;
     const dashOffset = circumference - (avgScore / 100) * circumference;
 
     // ── أداء الفروع (شريط ملون) ──
@@ -278,28 +288,31 @@ export default function BranchesPage() {
             <div className="glass-panel p-0 overflow-hidden">
                 <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
                     <div className="flex items-center gap-2">
-                        <BarChart3 size={16} style={{ color: 'var(--accent-blue)' }} />
-                        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>تقييم أداء الفروع وفئات المنتجات</h3>
+                        <ChartTitleFlagBadge flag="green" size="sm" />
+                        <div className="flex items-center gap-2">
+                            <BarChart3 size={16} style={{ color: 'var(--accent-blue)' }} />
+                            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>تقييم أداء الفروع</h3>
+                        </div>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-0">
                     {/* Simple Donut Gauge */}
                     <div className="p-5 border-b xl:border-b-0 xl:border-l flex flex-col items-center justify-center" style={{ borderColor: 'var(--border-subtle)' }}>
                         <p className="text-[11px] font-semibold mb-4" style={{ color: 'var(--text-muted)' }}>متوسط درجة أداء الفروع الكلية</p>
-                        <div className="relative" style={{ width: 140, height: 140 }}>
-                            <svg width="140" height="140" viewBox="0 0 140 140">
-                                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--bg-elevated)" strokeWidth="12" />
-                                <circle cx="70" cy="70" r="54" fill="none" stroke={gColor} strokeWidth="12"
+                        <div className="relative" style={{ width: 200, height: 200 }}>
+                            <svg width="200" height="200" viewBox="0 0 200 200">
+                                <circle cx={donutC} cy={donutC} r={donutR} fill="none" stroke="var(--bg-elevated)" strokeWidth="16" />
+                                <circle cx={donutC} cy={donutC} r={donutR} fill="none" stroke={gColor} strokeWidth="16"
                                     strokeLinecap="round"
                                     strokeDasharray={circumference}
                                     strokeDashoffset={dashOffset}
-                                    transform="rotate(-90 70 70)"
+                                    transform={`rotate(-90 ${donutC} ${donutC})`}
                                     style={{ transition: 'stroke-dashoffset 0.8s ease' }}
                                 />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="text-2xl font-bold" style={{ color: gColor }}>{avgScore}%</span>
-                                <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>الأداء العام</span>
+                                <span className="text-3xl font-bold" style={{ color: gColor }}>{avgScore}%</span>
+                                <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>الأداء العام</span>
                             </div>
                         </div>
                     </div>
@@ -375,7 +388,10 @@ export default function BranchesPage() {
             {/* ── Overall Branch Performance Score (bar chart) ── */}
             <div className="glass-panel overflow-hidden">
                 <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>درجة أداء الفروع الكلية</h3>
+                    <div className="flex items-center gap-2">
+                        <ChartTitleFlagBadge flag="green" size="sm" />
+                        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>أداء الفروع الكلية</h3>
+                    </div>
                     <div className="flex items-center gap-3 mt-1 text-[10px]" style={{ color: 'var(--text-muted)' }}>
                         <span>درجة أداء الفروع</span>
                         {branchScores.map(b => (
@@ -393,7 +409,10 @@ export default function BranchesPage() {
             {/* ── درجة أداء فئات المنتجات ── */}
             <div className="glass-panel overflow-hidden">
                 <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>درجة أداء فئات المنتجات الكلية</h3>
+                    <div className="flex items-center gap-2">
+                        <ChartTitleFlagBadge flag="green" size="sm" />
+                        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>أداء فئات المنتجات حسب الفروع</h3>
+                    </div>
                     <div className="flex items-center gap-4 mt-1 text-[10px]">
                         <span style={{ color: 'var(--text-muted)' }}>درجة أداء فئات المنتجات</span>
                         <span className="font-semibold" style={{ color: 'var(--accent-red)' }}>20%</span>
@@ -490,10 +509,10 @@ export default function BranchesPage() {
                         ]
                     },
                     {
-                        branch: 'سوق الخبر', py: 58400, ac: 43200, years: [
-                            { year: '2020', py: 38500, ac: null as number | null },
-                            { year: '2022', py: 42500, ac: 43200 },
-                            { year: '2021', py: 38500, ac: 42500 },
+                        branch: 'سوق الخبر', py: 42000, ac: 56000, years: [
+                            { year: '2020', py: 30000, ac: null as number | null },
+                            { year: '2022', py: 44000, ac: 56000 },
+                            { year: '2021', py: 30000, ac: 44000 },
                         ]
                     },
                     {
@@ -545,7 +564,10 @@ export default function BranchesPage() {
                 return (
                     <div className="glass-panel p-0 overflow-hidden">
                         <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>مقارنة المبيعات: السنة الحالية مقابل السابقة</h3>
+                            <div className="flex items-center gap-2">
+                                <ChartTitleFlagBadge flag="green" size="sm" />
+                                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>مقارنة المبيعات: السنة الحالية مقابل السابقة</h3>
+                            </div>
                             <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Current Year Sales and Previous Year Sales by Year, Branch Name</p>
                         </div>
                         <div className="overflow-x-auto">
@@ -795,10 +817,6 @@ export default function BranchesPage() {
                         ]
                     },
                 ];
-                const gMaxVol = Math.max(...prodAnalysis.flatMap(b => b.cats.flatMap(c => c.products.map(p => p.vol))));
-                const gMaxAtv = Math.max(...prodAnalysis.flatMap(b => b.cats.flatMap(c => c.products.map(p => p.atv))));
-                const gMaxBsk = Math.max(...prodAnalysis.flatMap(b => b.cats.flatMap(c => c.products.map(p => p.basket))));
-                const fk = (v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}K` : `${v}`;
                 type Row = { key: string; label: string; depth: number; vol: number; price: number; basket: number; atv: number; has: boolean; open: boolean; click?: () => void };
                 const t1: Row[] = [];
                 const t2: Row[] = [];
@@ -819,64 +837,47 @@ export default function BranchesPage() {
                         if (co) for (const p of c.products) t2.push({ key: `${ck}_${p.name}`, label: p.name, depth: 2, vol: p.vol, price: p.price, basket: p.basket, atv: p.atv, has: false, open: false });
                     }
                 }
-                const rowCell = (r: Row) => (
-                    <td style={{ color: r.depth === 0 ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: r.depth === 0 ? 600 : r.depth === 1 ? 500 : 400, fontSize: [12, 11, 10][r.depth], paddingRight: r.depth * 16 + 8 }}>
-                        <div className="flex items-center gap-1">
-                            {r.has ? (<span style={{ display: 'inline-flex', alignItems: 'center', width: 12, height: 12, borderRadius: 2, background: r.open ? 'rgba(37,99,235,0.12)' : 'transparent' }}>{r.open ? <ChevronDown size={9} style={{ color: 'var(--accent-blue)' }} /> : <ChevronLeft size={9} style={{ color: 'var(--text-muted)' }} />}</span>)
-                                : (<span style={{ color: 'var(--text-muted)', fontSize: 8, marginLeft: 2 }}>•</span>)}
-                            {r.label}
-                        </div>
-                    </td>
-                );
+                const toBubble = (r: Row, xValue: number, yValue: number): MetricsBubblePoint => ({
+                    key: r.key,
+                    label: r.label,
+                    depth: r.depth as 0 | 1 | 2,
+                    xValue,
+                    yValue,
+                    hasChildren: r.has,
+                    open: r.open,
+                    onClick: r.click,
+                    vol: r.vol,
+                    price: r.price,
+                    basket: r.basket,
+                    atv: r.atv,
+                });
+                const bubblePoints1 = t1.map((r) => toBubble(r, r.vol, r.price));
+                const bubblePoints2 = t2.map((r) => toBubble(r, r.basket, r.atv));
                 return (
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                         <div className="glass-panel p-0 overflow-hidden">
                             <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>حجم مبيعات المنتجات ومتوسط السعر</h3>
-                                <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>فرع → فئة → منتج</p>
+                                <div className="flex items-center gap-2">
+                                    <ChartTitleFlagBadge flag="green" size="sm" />
+                                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>تغير المبيعات حسب السعر</h3>
+                                </div>
+                                <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                                    انقر على دائرة الفرع أو الفئة للتوسيع • المحور الأفقي: الحجم، العمودي: م. السعر
+                                </p>
                             </div>
-                            <div className="overflow-x-auto" style={{ maxHeight: 440, overflowY: 'auto' }}>
-                                <table className="enterprise-table"><thead><tr>
-                                    <th style={{ minWidth: 130 }}>الاسم</th><th style={{ textAlign: 'center' }}>الحجم</th><th style={{ textAlign: 'center' }}>م. السعر</th><th style={{ textAlign: 'center', minWidth: 70 }}>المؤشر</th>
-                                </tr></thead><tbody>
-                                        {t1.map(r => (
-                                            <tr key={r.key} style={{ cursor: r.has ? 'pointer' : 'default', background: r.depth === 2 ? 'var(--bg-elevated)' : undefined }} onClick={r.click}>
-                                                {rowCell(r)}
-                                                <td style={{ textAlign: 'center', fontSize: [12, 11, 10][r.depth] }} dir="ltr"><span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{fk(r.vol)}</span></td>
-                                                <td style={{ textAlign: 'center', fontSize: [12, 11, 10][r.depth] }} dir="ltr"><span style={{ color: 'var(--accent-blue)', fontWeight: 600 }}>{r.price.toFixed(1)}</span></td>
-                                                <td style={{ padding: '3px 6px' }}><div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}><div className="h-full rounded-full" style={{ width: `${(r.vol / gMaxVol) * 100}%`, background: 'var(--accent-blue)', opacity: [1, 0.7, 0.5][r.depth] }} /></div></td>
-                                            </tr>
-                                        ))}
-                                    </tbody></table>
-                            </div>
+                            <MetricsBubblePlot points={bubblePoints1} xLabel="عدد مرات البيع" yLabel="م. السعر" variant="blue" plotHeight={420} />
                         </div>
                         <div className="glass-panel p-0 overflow-hidden">
                             <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>متوسط حجم السلة وقيمة المعاملة</h3>
-                                <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>فرع → فئة → منتج</p>
+                                <div className="flex items-center gap-2">
+                                    <ChartTitleFlagBadge flag="green" size="sm" />
+                                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>مقارنة متوسط حجم السلة وقيمة الفاتورة</h3>
+                                </div>
+                                <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                                    انقر على دائرة الفرع أو الفئة للتوسيع • المحور الأفقي: السلة، العمودي: ATV
+                                </p>
                             </div>
-                            <div className="overflow-x-auto" style={{ maxHeight: 440, overflowY: 'auto' }}>
-                                <table className="enterprise-table"><thead><tr>
-                                    <th style={{ minWidth: 130 }}>الاسم</th><th style={{ textAlign: 'center' }}>السلة</th><th style={{ textAlign: 'center' }}>ATV</th><th style={{ textAlign: 'center', minWidth: 70 }}>المؤشر</th>
-                                </tr></thead><tbody>
-                                        {t2.map(r => {
-                                            const sz = Math.max(6, (r.basket / gMaxBsk) * 18);
-                                            return (
-                                                <tr key={r.key} style={{ cursor: r.has ? 'pointer' : 'default', background: r.depth === 2 ? 'var(--bg-elevated)' : undefined }} onClick={r.click}>
-                                                    {rowCell(r)}
-                                                    <td style={{ textAlign: 'center', fontSize: [12, 11, 10][r.depth] }} dir="ltr"><span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{r.basket.toFixed(1)}</span></td>
-                                                    <td style={{ textAlign: 'center', fontSize: [12, 11, 10][r.depth] }} dir="ltr"><span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>{r.atv.toFixed(1)}</span></td>
-                                                    <td style={{ textAlign: 'center', padding: '3px 6px' }}>
-                                                        <div className="flex items-center justify-center gap-1.5">
-                                                            <span style={{ width: sz, height: sz, borderRadius: '50%', background: 'var(--accent-blue)', opacity: r.depth === 0 ? 0.8 : 0.5, display: 'inline-block', flexShrink: 0 }} />
-                                                            <div className="h-1.5 rounded-full overflow-hidden flex-1" style={{ background: 'var(--bg-elevated)', maxWidth: 45 }}><div className="h-full rounded-full" style={{ width: `${(r.atv / gMaxAtv) * 100}%`, background: 'var(--accent-green)' }} /></div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody></table>
-                            </div>
+                            <MetricsBubblePlot points={bubblePoints2} xLabel="متوسط السلة" yLabel="ATV" variant="green" plotHeight={420} />
                         </div>
                     </div>
                 );
@@ -885,7 +886,7 @@ export default function BranchesPage() {
             {/* ── خريطة الفروع + صافي المبيعات ── */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <BranchMap />
-                <ChartCard title="صافي المبيعات عبر الزمن لكل فرع" subtitle="Net Sales Over Time by Branch" option={netSalesByBranchOption} height="460px" delay={2} />
+                <ChartCard title="صافي المبيعات عبر الزمن لكل فرع" titleFlag='green' subtitle="Net Sales Over Time by Branch" option={netSalesByBranchOption} height="460px" delay={2} />
             </div>
 
             <BranchSalesTable />

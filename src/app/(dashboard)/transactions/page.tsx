@@ -1,9 +1,15 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Receipt, DollarSign, TrendingUp, ShoppingCart, Package, AlertTriangle, Hash, Ban, ChevronDown, ChevronRight } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED } from '@/lib/colors';
 
 // ── بيانات الفروع مع sub و sub al sub ──

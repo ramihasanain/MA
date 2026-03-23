@@ -1,9 +1,16 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import '@/lib/echarts/register-scatter';
+import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Percent, DollarSign, TrendingUp, TrendingDown, Tag, BarChart3, AlertCircle, ChevronDown, ChevronRight } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED } from '@/lib/colors';
 
 // ── بيانات الفئات ──

@@ -1,10 +1,16 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Activity, Zap, Target } from 'lucide-react';
 import KPICard from '@/components/ui/KPICard';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import { getKPIData, getMonthlySalesData, getCategoryDistribution, getBranchData, getRegionalData } from '@/lib/mockData';
 import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER } from '@/lib/colors';
 

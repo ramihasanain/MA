@@ -1,12 +1,18 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FileBarChart, Download, RefreshCw, Clock, CheckCircle,
     AlertCircle, Loader2, X, Eye, TrendingUp, TrendingDown, BarChart3
 } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import ReportPreviewModal from '@/components/ui/ReportPreviewModal';
 import { getReportJobs } from '@/lib/mockData';
 import { useRouter } from 'next/navigation';

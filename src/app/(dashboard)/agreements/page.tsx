@@ -1,9 +1,15 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText, CheckCircle, Clock, DollarSign, Package, Percent, BarChart3 } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import {

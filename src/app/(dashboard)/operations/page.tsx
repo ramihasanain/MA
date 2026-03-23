@@ -1,9 +1,15 @@
 'use client';
 
+import '@/lib/echarts/register-bar-line-pie';
+import dynamic from 'next/dynamic';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Settings2, Truck, Package, Clock, CheckCircle, BarChart3, Undo2, ShoppingCart } from 'lucide-react';
-import ChartCard from '@/components/ui/ChartCard';
+
+const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
+    ssr: false,
+    loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
+});
 import { PRIMARY_GREEN, PRIMARY_BLUE } from '@/lib/colors';
 
 export default function OperationsPage() {
