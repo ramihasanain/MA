@@ -137,7 +137,7 @@ function ChartCard({
             borderColor: isDark ? '#334155' : '#e2e8f0',
             borderWidth: 1,
             textStyle: { color: isDark ? '#e2e8f0' : '#0f172a', fontSize: 12 },
-            extraCssText: `box-shadow: ${isDark ? '0 8px 30px rgba(0,0,0,0.5)' : '0 4px 12px rgba(0,0,0,0.12)'}; border-radius: 8px;`,
+            extraCssText: `z-index: 100002; box-shadow: ${isDark ? '0 8px 30px rgba(0,0,0,0.5)' : '0 4px 12px rgba(0,0,0,0.12)'}; border-radius: 8px;`,
         },
         xAxis: {
             axisLine: { lineStyle: { color: isDark ? '#1e293b' : '#e2e8f0' } },
@@ -155,14 +155,18 @@ function ChartCard({
 
     const mergedOption = useMemo(() => {
         const chartTooltip = (option.tooltip || {}) as Record<string, unknown>;
+        const baseTip = baseTheme.tooltip as { extraCssText?: string };
+        const lightTooltipExtra = 'z-index: 100002; box-shadow: 0 4px 12px rgba(0,0,0,0.12); border-radius: 8px;';
+        const optTooltipExtra = typeof chartTooltip.extraCssText === 'string' ? String(chartTooltip.extraCssText).trim() : '';
+        const darkTooltipExtra = [baseTip.extraCssText, optTooltipExtra].filter(Boolean).join('; ');
         const mergedTooltip = isDark
-            ? { ...baseTheme.tooltip, ...chartTooltip }
+            ? { ...baseTheme.tooltip, ...chartTooltip, extraCssText: darkTooltipExtra || baseTip.extraCssText }
             : {
                 ...chartTooltip,
                 backgroundColor: '#ffffff',
                 borderColor: '#e2e8f0',
                 textStyle: { color: '#0f172a', fontSize: 12 },
-                extraCssText: 'box-shadow: 0 4px 12px rgba(0,0,0,0.12); border-radius: 8px;',
+                extraCssText: optTooltipExtra ? `${optTooltipExtra}; ${lightTooltipExtra}` : lightTooltipExtra,
             };
 
         const merged: Record<string, unknown> = {
@@ -324,7 +328,7 @@ function ChartCard({
                     </button>
                 </div>
             </div>
-            <div style={{ height }}>
+            <div style={{ height, overflow: panelOverflow === 'visible' ? 'visible' : undefined }}>
                 {chartEl()}
             </div>
         </>

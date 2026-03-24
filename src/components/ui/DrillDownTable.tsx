@@ -13,9 +13,11 @@ interface RowData {
     name: string;
     grossSales: number;
     netSales: number;
+    invoiceCount: number;
     discountValue: number;
     discountPct: number;
     returns: number;
+    returnedItemCount: number;
     productVolume: number;
     itemCount: number;
     soldMaterialsValue: number;
@@ -42,23 +44,51 @@ const CATEGORIES = [
 
 const BRANCHES = ['سوق المنارة', 'سوق سلاح الجو', 'فرع عمّان الغربي', 'فرع إربد', 'فرع الزرقاء'];
 
-function mkRow(name: string, base: number): Omit<RowData, 'children'> {
+/** فرع واحد بإجمالي مرتجع منخفض (~٥–٨) للاختبار؛ يُوزَّع على صفوف المادة كوحدات ١ حتى تبقى المجاميع متسقة. */
+const LOW_RETURNS_TEST_BRANCH_IDX = 0;
+
+function mkRow(
+    name: string,
+    base: number,
+    branchIdx: number = 0,
+    lowReturnsBudget?: { n: number },
+): Omit<RowData, 'children'> {
     const gross = Math.round(base + sr() * base * 0.3);
     const net = Math.round(gross * (0.95 + sr() * 0.04));
-    const returns = Math.round(gross * (0.005 + sr() * 0.08));
+    const tierBoost = [0, 0.012, 0.028, 0.05, 0.082][branchIdx % 5];
+    let returns: number;
+    if (lowReturnsBudget) {
+        if (lowReturnsBudget.n > 0) {
+            lowReturnsBudget.n -= 1;
+            returns = 1;
+        } else {
+            returns = 0;
+        }
+    } else {
+        returns = Math.round(gross * Math.min(0.125, 0.002 + sr() * 0.035 + tierBoost));
+    }
     const discountValue = Math.max(0, gross - net);
     const discountPct = gross > 0 ? Number(((discountValue / gross) * 100).toFixed(2)) : 0;
     const soldMaterialsValue = Math.max(0, gross - returns);
     const vol = Math.round(gross / (1.5 + sr() * 3));
+    const returnedItemCount =
+        returns <= 0
+            ? 0
+            : lowReturnsBudget !== undefined
+                ? 1
+                : Math.max(1, Math.min(vol, Math.round(1 + sr() * 5)));
+    const invoiceCount = Math.max(1, Math.round(vol * (0.15 + sr() * 1.2)));
     const avgPrice = vol > 0 ? Number((gross / vol).toFixed(2)) : 0;
     const avgDiscRate = net > 0 ? Number(((discountValue / net) * 100).toFixed(2)) : 0;
     return {
         name,
         grossSales: gross,
         netSales: net,
+        invoiceCount,
         discountValue,
         discountPct,
         returns,
+        returnedItemCount,
         productVolume: vol,
         itemCount: 1,
         soldMaterialsValue,
@@ -73,6 +103,8 @@ function buildParent(name: string, children: RowData[]): RowData {
     const netSales = children.reduce((s, r) => s + r.netSales, 0);
     const discountValue = children.reduce((s, r) => s + r.discountValue, 0);
     const returns = children.reduce((s, r) => s + r.returns, 0);
+    const returnedItemCount = children.reduce((s, r) => s + r.returnedItemCount, 0);
+    const invoiceCount = children.reduce((s, r) => s + r.invoiceCount, 0);
     const productVolume = children.reduce((s, r) => s + r.productVolume, 0);
     const itemCount = children.reduce((s, r) => s + r.itemCount, 0);
     const soldMaterialsValue = children.reduce((s, r) => s + r.soldMaterialsValue, 0);
@@ -86,6 +118,8 @@ function buildParent(name: string, children: RowData[]): RowData {
         discountValue,
         discountPct,
         returns,
+        returnedItemCount,
+        invoiceCount,
         productVolume,
         itemCount,
         soldMaterialsValue,
@@ -97,7 +131,8 @@ function buildParent(name: string, children: RowData[]): RowData {
 
 _s = 77;
 /** التسلسل الهرمي: سوق → المجموعة الاولى → المجموعة الثانية → المجموعة الثالثة → المادة */
-const tableData: RowData[] = BRANCHES.map(branch => {
+const tableData: RowData[] = BRANCHES.map((branch, bi) => {
+    const lowReturnsBudget = bi === LOW_RETURNS_TEST_BRANCH_IDX ? { n: Math.round(5 + sr() * 3) } : undefined;
     const bBase = 40000 + sr() * 160000;
     const g1List: RowData[] = [];
     for (let g1 = 0; g1 < 2; g1++) {
@@ -118,6 +153,8 @@ const tableData: RowData[] = BRANCHES.map(branch => {
                         mkRow(
                             PRODUCTS[Math.round(sr() * 1000) % PRODUCTS.length],
                             (g3Base / pCount) * (0.4 + sr() * 0.3),
+                            bi,
+                            lowReturnsBudget,
                         ),
                     );
                 }
@@ -145,9 +182,11 @@ function collectDescendantRowKeys(row: RowData, rowKey: string): string[] {
 const COLUMNS = [
     { key: 'grossSales', label: 'إجمالي المبيعات', labelEn: 'Gross Sales' },
     { key: 'netSales', label: 'صافي المبيعات', labelEn: 'Net Sales' },
+    { key: 'invoiceCount', label: 'عدد الفواتير', labelEn: 'Invoice count' },
     { key: 'discountValue', label: 'قيمة الخصم', labelEn: 'Discount Value' },
     { key: 'discountPct', label: 'نسبة الخصم', labelEn: 'Discount %' },
     { key: 'returns', label: 'المرتجع', labelEn: 'Returns' },
+    { key: 'returnedItemCount', label: 'عدد المواد المرتجعة', labelEn: 'Returned SKUs' },
     { key: 'productVolume', label: 'الكمية', labelEn: 'Quantity' },
     { key: 'itemCount', label: 'عدد المواد', labelEn: 'SKU Count' },
     { key: 'soldMaterialsValue', label: 'سعر المواد المباعة', labelEn: 'Sold Materials Value' },
@@ -155,15 +194,22 @@ const COLUMNS = [
     { key: 'avgDiscRate', label: 'متوسط نسبة الخصم', labelEn: 'Avg. Discount %' },
 ];
 
-/** لون نص المرتجع حسب نسبة المرتجع على الإجمالي (مرتجع / إجمالي × 100). */
+/** شرائح لون عمود المرتجع: نسبة المرتجع على الإجمالي (مرتجع / إجمالي × 100). */
+const RETURNS_TIERS = [
+    { maxExclusive: 1, color: '#0a0a0a', labelAr: 'أقل من ١٪' },
+    { maxExclusive: 3, color: '#ea580c', labelAr: '١٪ – أقل من ٣٪' },
+    { maxExclusive: 5, color: '#fb7185', labelAr: '٣٪ – أقل من ٥٪' },
+    { maxExclusive: 10, color: '#dc2626', labelAr: '٥٪ – أقل من ١٠٪' },
+    { maxExclusive: Infinity, color: '#7f1d1d', labelAr: '١٠٪ فأكثر' },
+] as const;
+
 function returnsTextColor(grossSales: number, returns: number): string {
-    if (grossSales <= 0) return '#0a0a0a';
+    if (grossSales <= 0) return RETURNS_TIERS[0].color;
     const rate = (returns / grossSales) * 100;
-    if (rate < 1) return '#0a0a0a';
-    if (rate < 3) return '#ea580c';
-    if (rate < 5) return '#fb7185';
-    if (rate < 10) return '#dc2626';
-    return '#7f1d1d';
+    for (const tier of RETURNS_TIERS) {
+        if (rate < tier.maxExclusive) return tier.color;
+    }
+    return RETURNS_TIERS[RETURNS_TIERS.length - 1].color;
 }
 
 // ── MiniBar component ──
@@ -200,7 +246,7 @@ export default function DrillDownTable() {
     const totals = useMemo(() => {
         const t: Record<string, number> = {};
         COLUMNS.forEach(c => { t[c.key] = 0; });
-        const sumKeys = ['grossSales', 'netSales', 'discountValue', 'returns', 'productVolume', 'itemCount', 'soldMaterialsValue'] as const;
+        const sumKeys = ['grossSales', 'netSales', 'invoiceCount', 'discountValue', 'returns', 'returnedItemCount', 'productVolume', 'itemCount', 'soldMaterialsValue'] as const;
         tableData.forEach(b => {
             sumKeys.forEach(k => { t[k] += b[k]; });
         });
@@ -215,7 +261,7 @@ export default function DrillDownTable() {
     const fmt = (v: number, key: string) => {
         if (key === 'avgPrice') return v.toFixed(2);
         if (key === 'discountPct' || key === 'avgDiscRate') return `${v.toFixed(2)}%`;
-        if (key === 'itemCount') return Math.round(v).toLocaleString('en-US');
+        if (key === 'itemCount' || key === 'invoiceCount' || key === 'returnedItemCount') return Math.round(v).toLocaleString('en-US');
         if (key === 'returns') return v.toFixed(2);
         return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
@@ -324,15 +370,18 @@ export default function DrillDownTable() {
                     const val = (row as any)[col.key] as number;
                     const showBar = level === 0 && (col.key === 'grossSales' || col.key === 'netSales');
                     const isReturnsCol = col.key === 'returns';
-                    const isDisc = col.key === 'discountPct' || col.key === 'avgDiscRate';
+                    const isDiscPct = col.key === 'discountPct';
+                    const isAvgDisc = col.key === 'avgDiscRate';
 
                     const cellColor = isReturnsCol
                         ? returnsTextColor(row.grossSales, row.returns)
-                        : isDisc
-                            ? 'var(--accent-amber)'
-                            : level === 0
-                                ? 'var(--text-primary)'
-                                : 'var(--text-secondary)';
+                        : isDiscPct
+                            ? 'var(--text-primary)'
+                            : isAvgDisc
+                                ? 'var(--accent-amber)'
+                                : level === 0
+                                    ? 'var(--text-primary)'
+                                    : 'var(--text-secondary)';
 
                     return (
                         <td key={col.key} style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
@@ -381,12 +430,24 @@ export default function DrillDownTable() {
                     التسلسل الهرمي: سوق — المجموعة الاولى — المجموعة الثانية — المجموعة الثالثة — المادة
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                    اضغط على أي صف للتوسع • إجمالي، صافي، خصم، مرتجع، كمية وعدد المواد
+                    اضغط على أي صف للتوسع • إجمالي، صافي، عدد الفواتير، خصم، مرتجع، عدد المواد المرتجعة، كمية وعدد المواد
                 </p>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                    <span className="font-medium shrink-0" style={{ color: 'var(--text-secondary)' }}>ألوان المرتجع (نسبة المرتجع / الإجمالي):</span>
+                    {RETURNS_TIERS.map(tier => (
+                        <span key={tier.labelAr} className="inline-flex items-center gap-1">
+                            <span
+                                className="inline-block rounded-sm shrink-0"
+                                style={{ width: 10, height: 10, background: tier.color, border: '1px solid var(--border-subtle)' }}
+                            />
+                            <span>{tier.labelAr}</span>
+                        </span>
+                    ))}
+                </div>
             </div>
 
             <div className="overflow-x-auto">
-                <table className="enterprise-table" dir="rtl" style={{ minWidth: '1400px' }}>
+                <table className="enterprise-table" dir="rtl" style={{ minWidth: '1620px' }}>
                     <thead>
                         <tr>
                             <th style={{ minWidth: '160px', textAlign: 'right' }}>الاسم</th>
@@ -420,7 +481,9 @@ export default function DrillDownTable() {
                                 const totalColor =
                                     col.key === 'returns'
                                         ? returnsTextColor(totals.grossSales, totals.returns)
-                                        : 'var(--accent-green)';
+                                        : col.key === 'discountPct'
+                                            ? 'var(--text-primary)'
+                                            : 'var(--accent-green)';
                                 return (
                                     <td key={col.key} style={{ textAlign: 'right' }}>
                                         <span className="text-xs font-bold" style={{ color: totalColor }} dir="ltr">

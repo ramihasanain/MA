@@ -91,7 +91,7 @@ export default function EmployeesPage() {
     const gaugeOption = {
         series: [{
             type: 'gauge', startAngle: 200, endAngle: -20,
-            min: 0, max: 100, radius: '90%',
+            min: 0, max: 100, radius: '82%',
             pointer: { show: false },
             progress: {
                 show: true,
@@ -116,8 +116,8 @@ export default function EmployeesPage() {
             splitLine: { show: false }, axisTick: { show: false },
             axisLabel: { show: false }, title: { show: false },
             detail: {
-                valueAnimation: true, fontSize: 26, fontWeight: 'bold',
-                offsetCenter: [0, '15%'], color: scoreColor(avgScore), formatter: '{value}%',
+                valueAnimation: true, fontSize: 22, fontWeight: 'bold',
+                offsetCenter: [0, '12%'], color: scoreColor(avgScore), formatter: '{value}%',
             },
             data: [{ value: +avgScore.toFixed(1) }],
         }],
@@ -264,16 +264,28 @@ export default function EmployeesPage() {
             {/* ── Row 2: اتجاه المبيعات + Gauge + أفضل 3 ── */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                 <div className="xl:col-span-2">
-                    <ChartCard title="اتجاه مبيعات الكاشيرات" titleFlag='green' subtitle="Sales trend per cashier — 12 months" option={trendOption} height="340px" delay={1} />
+                    <ChartCard
+                        title="اتجاه مبيعات الكاشيرات"
+                        titleFlag="green"
+                        subtitle="Sales trend per cashier — 12 months"
+                        option={trendOption}
+                        height="340px"
+                        delay={1}
+                        panelOverflow="visible"
+                    />
                 </div>
 
                 <div className="glass-panel overflow-hidden flex flex-col">
                     <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                        <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>متوسط الأداء الكلي</p>
+                        <div className="flex items-center gap-2">
+                            <ChartTitleFlagBadge flag="green" size="sm" />
+                            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>متوسط الأداء الكلي</h3>
+                        </div>
                         <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Overall Cashier Performance Score</p>
                     </div>
-                    <div style={{ height: 170, flexShrink: 0 }}>
-                        <ChartCard title="" option={gaugeOption} height="170px" />
+                    {/* ChartCard = toolbar row + plot; fixed 170px wrapper was shorter than total → overlap below */}
+                    <div className="shrink-0 w-full">
+                        <ChartCard title="" option={gaugeOption} height="138px" />
                     </div>
                     <div className="flex items-center justify-center gap-2 text-[9px] py-1.5" style={{ color: 'var(--text-muted)' }}>
                         {[{ l: 'ضعيف', c: PRIMARY_RED }, { l: 'متوسط', c: '#f97316' }, { l: 'جيد', c: PRIMARY_AMBER }, { l: 'ممتاز', c: PRIMARY_GREEN }].map(x => (
@@ -315,8 +327,8 @@ export default function EmployeesPage() {
                     </div>
                     <MetricsBubblePlot
                         points={voidVsValueBubblePoints}
-                        xLabel="معدل الإلغاء %"
-                        yLabel="قيمة المواد الملغاة"
+                        xLabel="نسبة الارجاع بالنسبة لعدد الفواتير الكلية"
+                        yLabel="نسبة المبيعات المرتجعة من المبيعات الكلية"
                         variant="green"
                         plotHeight={320}
                         showDepthLegend={false}
@@ -362,7 +374,7 @@ export default function EmployeesPage() {
                     <table dir="rtl" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
-                                {['#', 'الكاشير', 'درجة الأداء', 'إجمالي المبيعات', 'عدد المعاملات', 'متوسط ATV', 'معدل الإلغاء'].map((h, i) => (
+                                {['#', 'الكاشير', 'درجة الأداء', 'إجمالي المبيعات', 'عدد المعاملات', 'متوسط قيمة الحركة', 'معدل الإلغاء'].map((h, i) => (
                                     <th key={i} style={{ padding: '9px 12px', textAlign: i <= 1 ? 'right' : 'center', fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{h}</th>
                                 ))}
                             </tr>

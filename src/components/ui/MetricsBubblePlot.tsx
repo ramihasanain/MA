@@ -17,6 +17,8 @@ export type MetricsBubblePoint = {
     price: number;
     basket: number;
     atv: number;
+    /** متوسط ربح السلة (وحدة تجريبية) — يُستخدم عند `bubbleSizing="basketProfit"` لتحديد حجم الدائرة */
+    basketProfit?: number;
 };
 
 function fk(v: number) {
@@ -80,6 +82,7 @@ export type MetricsBubbleDetailLabels = {
     price?: string;
     basket?: string;
     atv?: string;
+    basketProfit?: string;
 };
 
 export type MetricsBubblePlotProps = {
@@ -99,9 +102,10 @@ export type MetricsBubblePlotProps = {
     formatPrice?: (n: number) => string;
     /**
      * `depth`: bubble size by hierarchy level (default).
-     * `volume`: scale radius by `basket` (min–max across points), e.g. عدد المواد الملغات.
+     * `volume`: scale radius by `basket` (min–max across points).
+     * `basketProfit`: scale radius by `basketProfit` (متوسط ربح السلة).
      */
-    bubbleSizing?: 'depth' | 'volume';
+    bubbleSizing?: 'depth' | 'volume' | 'basketProfit';
     /** Min/max labels under the X axis (defaults to same compact rules as Y). */
     formatXTick?: (v: number) => string;
 };
@@ -127,6 +131,7 @@ export default function MetricsBubblePlot({
         price: detailLabels?.price ?? 'م. السعر',
         basket: detailLabels?.basket ?? 'السلة',
         atv: detailLabels?.atv ?? 'ATV',
+        basketProfit: detailLabels?.basketProfit ?? 'متوسط ربح السلة',
     };
     const fmtX = formatXTick ?? formatYTick;
     const uid = useId().replace(/:/g, '');
@@ -165,20 +170,24 @@ export default function MetricsBubblePlot({
     const yTicks = useMemo(() => axisTickValues(yAxisMeta.min, yAxisMeta.max), [yAxisMeta.min, yAxisMeta.max]);
     const xTicks = useMemo(() => axisTickValues(xAxisMeta.min, xAxisMeta.max), [xAxisMeta.min, xAxisMeta.max]);
 
-    const basketSizeRange = useMemo(() => {
-        if (points.length === 0 || bubbleSizing !== 'volume') return { min: 0, max: 1 };
-        const bs = points.map((p) => p.basket);
-        return { min: Math.min(...bs), max: Math.max(...bs) };
+    const scaleRange = useMemo(() => {
+        if (points.length === 0 || bubbleSizing === 'depth') return { min: 0, max: 1 };
+        const vals =
+            bubbleSizing === 'basketProfit'
+                ? points.map((p) => p.basketProfit ?? 0)
+                : points.map((p) => p.basket);
+        return { min: Math.min(...vals), max: Math.max(...vals) };
     }, [points, bubbleSizing]);
 
     const bubbleRadius = (p: MetricsBubblePoint, isSel: boolean) => {
         const extra = isSel ? 4 : 0;
-        if (bubbleSizing !== 'volume') {
+        if (bubbleSizing === 'depth') {
             return baseSize(p.depth) + extra;
         }
-        const { min, max } = basketSizeRange;
+        const v = bubbleSizing === 'basketProfit' ? (p.basketProfit ?? 0) : p.basket;
+        const { min, max } = scaleRange;
         const span = max - min;
-        const t = span <= 0 ? 0.5 : (p.basket - min) / span;
+        const t = span <= 0 ? 0.5 : (v - min) / span;
         const base = 12 + t * 22;
         return Math.max(10, base) + extra;
     };
@@ -475,6 +484,14 @@ export default function MetricsBubblePlot({
                                         {selected.atv.toFixed(1)}
                                     </span>
                                 </div>
+                                {selected.basketProfit != null && (
+                                    <div className="flex justify-between gap-2">
+                                        <span style={{ color: 'var(--text-muted)' }}>{dl.basketProfit}</span>
+                                        <span className="font-semibold" style={{ color: 'var(--accent-amber)' }} dir="ltr">
+                                            {selected.basketProfit.toFixed(2)}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             {selected.hasChildren && (
                                 <p className="px-3 pb-2 text-[9px]" style={{ color: 'var(--text-muted)' }}>
@@ -501,19 +518,22 @@ export default function MetricsBubblePlot({
                             { label: 'فئة', d: 1 as const },
                             { label: 'منتج', d: 2 as const },
                         ] as const
-                    ).map(({ label, d }) => (
-                        <div key={label} className="flex items-center gap-1.5">
-                            <div
-                                style={{
-                                    width: 8 + d * 2,
-                                    height: 8 + d * 2,
-                                    borderRadius: '50%',
-                                    background: depthColor(d, variant),
-                                }}
-                            />
-                            <span>{label}</span>
-                        </div>
-                    ))}
+                    ).map(({ label, d }) => {
+                        const dot = bubbleSizing === 'depth' ? 8 + d * 2 : 10;
+                        return (
+                            <div key={label} className="flex items-center gap-1.5">
+                                <div
+                                    style={{
+                                        width: dot,
+                                        height: dot,
+                                        borderRadius: '50%',
+                                        background: depthColor(d, variant),
+                                    }}
+                                />
+                                <span>{label}</span>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
             {!showDepthLegend && bubbleSizing === 'volume' && (
@@ -527,6 +547,19 @@ export default function MetricsBubblePlot({
                     </span>
                     <span>الدائرة الأكبر = أكبر عدد للمواد الملغات</span>
                     <span className="opacity-70">(عدد المواد الملغات)</span>
+                </div>
+            )}
+            {bubbleSizing === 'basketProfit' && (
+                <div
+                    className="flex flex-wrap items-center gap-2 px-4 py-2 border-t text-[9px]"
+                    style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+                    dir="rtl"
+                >
+                    <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                        دليل الحجم:
+                    </span>
+                    <span>حجم الدائرة يتناسب مع متوسط ربح السلة</span>
+                    <span className="opacity-70">(أكبر دائرة = أعلى ربح سلة)</span>
                 </div>
             )}
         </div>

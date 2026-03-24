@@ -176,7 +176,7 @@ export default function CustomersPage() {
                 ))}
             </div>
 
-            <ChartCard title="خريطة حرارية — أوقات الذروة" subtitle="كثافة العملاء حسب اليوم والساعة (Heatmap)" option={heatmapOption} height="340px" delay={1} />
+            <ChartCard title="خريطة حرارية — أوقات الذروة" titleFlag="green" subtitle="كثافة العملاء حسب اليوم والساعة (Heatmap)" option={heatmapOption} height="340px" delay={1} />
 
             <ChartCard title="تكرار المعاملات مقابل متوسط قيمة المعاملة" subtitle="Transaction Frequency vs. Average Transaction Value" option={txFreqOption} height="400px" delay={2} />
 

@@ -19,17 +19,18 @@ import BranchSalesTable from '@/components/ui/BranchSalesTable';
 import MetricsBubblePlot, { type MetricsBubblePoint } from '@/components/ui/MetricsBubblePlot';
 import { BRANCH_PRODUCT_ANALYSIS, buildProductBubbleRows, type ProductBubbleRow } from '@/lib/branchProductAnalysis';
 import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED, PRIMARY_PURPLE } from '@/lib/colors';
+import DrillDownTable from '@/components/ui/DrillDownTable';
 
-// ── بيانات الأداء المرجّح لكل فرع ──
+// ── بيانات الأداء المرجّح لكل فرع (جدول + رسوم) ──
 const branchScores = [
-    { id: 'b1', name: 'سوق المنارة', salesContrib: 77.14, transContrib: 54.3, profitMargin: 18.89, avgBasket: 18, voidVol: 3.15, score: 59 },
-    { id: 'b2', name: 'سوق سطح النجم', salesContrib: 22.87, transContrib: 28.19, profitMargin: 25.12, avgBasket: 1, voidVol: 0.15, score: 38 },
-    { id: 'b3', name: 'سوق القويسمة', salesContrib: 45.20, transContrib: 38.50, profitMargin: 21.80, avgBasket: 9, voidVol: 1.20, score: 72 },
-    { id: 'b4', name: 'سوق راس العين', salesContrib: 18.60, transContrib: 22.10, profitMargin: 19.40, avgBasket: 5, voidVol: 0.90, score: 55 },
-    { id: 'b5', name: 'سوق البقعة', salesContrib: 62.80, transContrib: 48.70, profitMargin: 23.10, avgBasket: 14, voidVol: 2.10, score: 81 },
-    { id: 'b6', name: 'سوق الدمام', salesContrib: 33.40, transContrib: 30.20, profitMargin: 17.60, avgBasket: 7, voidVol: 1.80, score: 46 },
-    { id: 'b7', name: 'سوق الخبر', salesContrib: 55.90, transContrib: 44.30, profitMargin: 26.30, avgBasket: 12, voidVol: 0.60, score: 75 },
-    { id: 'b8', name: 'سوق جدة', salesContrib: 28.10, transContrib: 25.80, profitMargin: 15.90, avgBasket: 4, voidVol: 2.40, score: 35 },
+    { id: 'b1', name: 'سوق المنارة', score: 59, profit: 428_500, sales: 2_412_000, employees: 142, returns: 2.8, growth: 6.2, discount: 4.1 },
+    { id: 'b2', name: 'سوق سطح النجم', score: 38, profit: 118_200, sales: 892_400, employees: 68, returns: 1.1, growth: -1.4, discount: 5.8 },
+    { id: 'b3', name: 'سوق القويسمة', score: 72, profit: 512_800, sales: 2_105_000, employees: 128, returns: 1.9, growth: 11.3, discount: 3.2 },
+    { id: 'b4', name: 'سوق راس العين', score: 55, profit: 95_400, sales: 618_000, employees: 52, returns: 2.4, growth: 3.1, discount: 6.4 },
+    { id: 'b5', name: 'سوق البقعة', score: 81, profit: 601_200, sales: 2_890_000, employees: 165, returns: 1.4, growth: 8.7, discount: 2.9 },
+    { id: 'b6', name: 'سوق الدمام', score: 46, profit: 156_700, sales: 1_024_500, employees: 79, returns: 3.2, growth: 0.8, discount: 5.1 },
+    { id: 'b7', name: 'سوق الخبر', score: 75, profit: 489_000, sales: 2_198_000, employees: 121, returns: 1.6, growth: 9.5, discount: 3.6 },
+    { id: 'b8', name: 'سوق جدة', score: 35, profit: 72_300, sales: 541_200, employees: 45, returns: 4.8, growth: -2.6, discount: 7.2 },
 ];
 
 // ── أداء فئات المنتجات لكل فرع ──
@@ -107,12 +108,29 @@ function getBarColor(score: number) {
     return 'var(--accent-red)';
 }
 
+const BRANCH_KEYS = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8'] as const;
+const BRANCH_CHART_COLORS = [PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER, PRIMARY_RED, '#0891b2', '#d97706'] as const;
+
+const BRANCH_PERF_QUARTER_LABELS = ['الربع الأول', 'الربع الثاني', 'الربع الثالث', 'الربع الرابع'] as const;
+const BRANCH_PERF_BIMONTH_LABELS = [
+    'يناير–فبراير', 'مارس–أبريل', 'مايو–جون',
+    'يوليو–أغسطس', 'سبتمبر–أكتوبر', 'نوفمبر–ديسمبر',
+] as const;
+
+/** Mock period scores around each branch’s annual score (demo data). */
+function branchPerfPeriodScore(baseScore: number, branchIndex: number, periodIndex: number, periodCount: number): number {
+    const wave = Math.sin((periodIndex / periodCount) * Math.PI * 2 + branchIndex * 0.65) * 7;
+    const noise = ((branchIndex * 17 + periodIndex * 11) % 9) - 4;
+    return Math.max(18, Math.min(98, Math.round(baseScore + wave + noise)));
+}
+
 export default function BranchesPage() {
     const branches = useMemo(() => getBranchData(), []);
     const regions = useMemo(() => getRegionalData(), []);
     const topBranch = [...branches].sort((a, b) => b.revenue - a.revenue)[0];
     const avgScore = Math.round(branchScores.reduce((a, b) => a + b.score, 0) / branchScores.length);
     const [expandedCats, setExpandedCats] = useState<Record<string, boolean>>({});
+    const [branchPerfGranularity, setBranchPerfGranularity] = useState<'year' | 'quarter' | 'bimonth'>('year');
 
     // ── Simple donut gauge (200×200, r=77 — scaled up from 140×140 / r=54) ──
     const gColor = avgScore >= 70 ? 'var(--accent-green)' : avgScore >= 50 ? 'var(--accent-amber)' : 'var(--accent-red)';
@@ -121,29 +139,117 @@ export default function BranchesPage() {
     const circumference = 2 * Math.PI * donutR;
     const dashOffset = circumference - (avgScore / 100) * circumference;
 
-    // ── أداء الفروع (شريط ملون) ──
-    const branchPerfOption = {
-        xAxis: {
-            type: 'category' as const,
-            data: branchScores.map(b => b.name.split(' ').slice(0, 2).join(' ')),
-            axisLabel: { rotate: branchScores.length > 4 ? 30 : 0, fontSize: 10 },
-        },
-        yAxis: { type: 'value' as const, max: 100, axisLabel: { formatter: '{value}%' } },
-        series: [{
-            type: 'bar',
-            data: branchScores.map(b => ({
-                value: b.score,
-                itemStyle: { color: getBarColor(b.score), borderRadius: [4, 4, 0, 0] },
-                label: { show: true, position: 'top', formatter: `${b.score}%`, color: getBarColor(b.score), fontSize: 11, fontWeight: 'bold' },
+    // ── أداء الفروع (شريط ملون): سنوي / ربع سنوي / كل شهرين ──
+    const branchPerfOption = useMemo(() => {
+        const shortName = (b: (typeof branchScores)[0]) => b.name.split(' ').slice(0, 2).join(' ');
+        if (branchPerfGranularity === 'year') {
+            const rotate = branchScores.length > 4 ? 30 : 0;
+            return {
+                tooltip: { trigger: 'item' as const, formatter: '{b}: {c}%' },
+                xAxis: {
+                    type: 'category' as const,
+                    data: branchScores.map(shortName),
+                    boundaryGap: true,
+                    axisTick: { alignWithLabel: true },
+                    axisLabel: {
+                        rotate,
+                        fontSize: 10,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        margin: rotate ? 14 : 10,
+                        interval: 0,
+                    },
+                },
+                yAxis: { type: 'value' as const, max: 100, axisLabel: { formatter: '{value}%' } },
+                series: [{
+                    type: 'bar' as const,
+                    data: branchScores.map(b => ({
+                        value: b.score,
+                        itemStyle: { color: getBarColor(b.score), borderRadius: [4, 4, 0, 0] },
+                        label: { show: true, position: 'top', formatter: `${b.score}%`, color: getBarColor(b.score), fontSize: 11, fontWeight: 'bold' },
+                    })),
+                    barWidth: Math.max(16, Math.min(36, 200 / branchScores.length)),
+                }],
+                grid: { top: '20%', bottom: rotate ? '22%' : '16%', left: '3%', right: '3%', containLabel: true },
+            };
+        }
+        const multiGrid = { bottom: '24%', top: '8%', left: '3%', right: '3%', containLabel: true };
+        const multiTooltip = {
+            trigger: 'axis' as const,
+            formatter: (params: { seriesName: string; value: number }[]) =>
+                params.map(p => `${p.seriesName}: <b>${p.value}%</b>`).join('<br/>'),
+        };
+        const multiLegend = {
+            data: branchScores.map(b => b.name),
+            bottom: 0,
+            textStyle: { fontSize: 8 },
+            type: 'scroll' as const,
+        };
+        const multiY = { type: 'value' as const, max: 100, axisLabel: { formatter: '{value}%', fontSize: 9 } };
+        if (branchPerfGranularity === 'quarter') {
+            const n = BRANCH_PERF_QUARTER_LABELS.length;
+            return {
+                tooltip: multiTooltip,
+                legend: multiLegend,
+                grid: multiGrid,
+                xAxis: {
+                    type: 'category' as const,
+                    data: [...BRANCH_PERF_QUARTER_LABELS],
+                    axisLabel: { fontSize: 9 },
+                },
+                yAxis: multiY,
+                series: branchScores.map((b, bi) => ({
+                    name: b.name,
+                    type: 'bar' as const,
+                    barMaxWidth: 8,
+                    data: Array.from({ length: n }, (_, qi) => {
+                        const v = branchPerfPeriodScore(b.score, bi, qi, n);
+                        return {
+                            value: v,
+                            itemStyle: { color: BRANCH_CHART_COLORS[bi], borderRadius: [2, 2, 0, 0] },
+                        };
+                    }),
+                })),
+                dataZoom: [{ type: 'inside' as const }],
+            };
+        }
+        const n = BRANCH_PERF_BIMONTH_LABELS.length;
+        return {
+            tooltip: multiTooltip,
+            legend: multiLegend,
+            grid: { ...multiGrid, bottom: '26%' },
+            xAxis: {
+                type: 'category' as const,
+                data: [...BRANCH_PERF_BIMONTH_LABELS],
+                boundaryGap: true,
+                axisTick: { alignWithLabel: true },
+                axisLabel: {
+                    rotate: 28,
+                    fontSize: 8,
+                    align: 'center',
+                    verticalAlign: 'middle',
+                    margin: 16,
+                    interval: 0,
+                },
+            },
+            yAxis: multiY,
+            series: branchScores.map((b, bi) => ({
+                name: b.name,
+                type: 'bar' as const,
+                barMaxWidth: 6,
+                data: Array.from({ length: n }, (_, mi) => {
+                    const v = branchPerfPeriodScore(b.score, bi, mi, n);
+                    return {
+                        value: v,
+                        itemStyle: { color: BRANCH_CHART_COLORS[bi], borderRadius: [2, 2, 0, 0] },
+                    };
+                }),
             })),
-            barWidth: Math.max(16, Math.min(36, 200 / branchScores.length)),
-        }],
-        grid: { bottom: '18%', top: '20%' },
-    };
+            dataZoom: [{ type: 'inside' as const }],
+        };
+    }, [branchPerfGranularity]);
 
     // ── أداء فئات المنتجات (مجمّع لكل الفروع) ──
-    const branchKeys = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8'] as const;
-    const branchColors = [PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER, PRIMARY_RED, '#0891b2', '#d97706'];
     const categoryPerfOption = {
         tooltip: {
             trigger: 'axis' as const,
@@ -173,11 +279,11 @@ export default function BranchesPage() {
             type: 'bar',
             barMaxWidth: 12,
             data: categoryScores.map(c => {
-                const val = (c as unknown as Record<string, number>)[branchKeys[bi]] ?? 0;
+                const val = (c as unknown as Record<string, number>)[BRANCH_KEYS[bi]] ?? 0;
                 return {
                     value: val,
                     itemStyle: {
-                        color: branchColors[bi],
+                        color: BRANCH_CHART_COLORS[bi],
                         borderRadius: [3, 3, 0, 0],
                         opacity: val >= 70 ? 1 : val >= 50 ? 0.85 : val >= 30 ? 0.7 : 0.55,
                     },
@@ -227,13 +333,13 @@ export default function BranchesPage() {
             symbol: 'circle',
             symbolSize: 4,
             lineStyle: { width: 2 },
-            itemStyle: { color: branchColors[i] },
+            itemStyle: { color: BRANCH_CHART_COLORS[i] },
             data,
             endLabel: {
                 show: true,
                 formatter: (p: { value: number }) => `${(p.value / 1000).toFixed(1)}K`,
                 fontSize: 9,
-                color: branchColors[i],
+                color: BRANCH_CHART_COLORS[i],
             },
         })),
     };
@@ -340,45 +446,50 @@ export default function BranchesPage() {
                             <table className="enterprise-table">
                                 <thead>
                                     <tr>
-                                        <th>اسم الفرع</th>
-                                        <th style={{ textAlign: 'center' }}>مساهمة المبيعات</th>
-                                        <th style={{ textAlign: 'center' }}>مساهمة المعاملات</th>
-                                        <th style={{ textAlign: 'center' }}>هامش الربح</th>
-                                        <th style={{ textAlign: 'center' }}>متوسط السلة</th>
-                                        <th style={{ textAlign: 'center' }}>حجم الحذف</th>
+                                        <th>الفرع</th>
+                                        <th style={{ textAlign: 'center' }}>الربح</th>
+                                        <th style={{ textAlign: 'center' }}>عدد الموظفين مقارنة بالمبيعات</th>
+                                        <th style={{ textAlign: 'center' }}>المرتجعات</th>
+                                        <th style={{ textAlign: 'center' }}>النمو</th>
+                                        <th style={{ textAlign: 'center' }}>الخصم</th>
+                                        <th style={{ textAlign: 'center' }}>المبيعات</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {branchScores.map(b => (
-                                        <tr key={b.id}>
-                                            <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{b.name}</td>
-                                            <td>
-                                                <div className="flex items-center gap-1">
-                                                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)', minWidth: '60px' }}>
-                                                        <div className="h-full rounded-full" style={{ width: `${b.salesContrib}%`, background: '#2563eb' }} />
-                                                    </div>
-                                                    <span className="text-[10px] font-semibold" style={{ color: '#2563eb' }} dir="ltr">{b.salesContrib.toFixed(2)}%</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className="flex items-center gap-1">
-                                                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)', minWidth: '60px' }}>
-                                                        <div className="h-full rounded-full" style={{ width: `${b.transContrib}%`, background: '#7c3aed' }} />
-                                                    </div>
-                                                    <span className="text-[10px] font-semibold" style={{ color: '#7c3aed' }} dir="ltr">{b.transContrib.toFixed(2)}%</span>
-                                                </div>
-                                            </td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <span className="text-xs font-semibold" style={{ color: 'var(--accent-green)' }} dir="ltr">{b.profitMargin.toFixed(2)}%</span>
-                                            </td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }} dir="ltr">{b.avgBasket}</span>
-                                            </td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <span className="text-xs" style={{ color: 'var(--accent-amber)' }} dir="ltr">{b.voidVol}</span>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {branchScores.map(b => {
+                                        const empPerM = b.sales > 0 ? (b.employees / b.sales) * 1_000_000 : 0;
+                                        return (
+                                            <tr key={b.id}>
+                                                <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{b.name}</td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <span className="text-xs font-semibold" style={{ color: 'var(--accent-green)' }} dir="ltr">
+                                                        {b.profit.toLocaleString('en-US')}
+                                                    </span>
+                                                </td>
+                                                <td style={{ textAlign: 'center' }} title="عدد الموظفين / موظف لكل مليون مبيعات">
+                                                    <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }} dir="ltr">
+                                                        {b.employees} · {empPerM.toFixed(1)}
+                                                    </span>
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }} dir="ltr">{b.returns.toFixed(1)}%</span>
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <span className="text-xs font-semibold" style={{ color: b.growth >= 0 ? 'var(--accent-green)' : 'var(--accent-amber)' }} dir="ltr">
+                                                        {b.growth >= 0 ? '+' : ''}{b.growth.toFixed(1)}%
+                                                    </span>
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <span className="text-xs font-semibold" style={{ color: 'var(--accent-blue)' }} dir="ltr">{b.discount.toFixed(1)}%</span>
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }} dir="ltr">
+                                                        {b.sales.toLocaleString('en-US')}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -389,11 +500,37 @@ export default function BranchesPage() {
             {/* ── Overall Branch Performance Score (bar chart) ── */}
             <div className="glass-panel overflow-hidden">
                 <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <div className="flex items-center gap-2">
-                        <ChartTitleFlagBadge flag="green" size="sm" />
-                        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>أداء الفروع الكلية</h3>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <ChartTitleFlagBadge flag="green" size="sm" />
+                            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>أداء الفروع الكلية</h3>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1 shrink-0" role="group" aria-label="دقة عرض الرسم">
+                            {([
+                                { id: 'year' as const, label: 'سنوي' },
+                                { id: 'quarter' as const, label: 'ربع سنوي' },
+                                { id: 'bimonth' as const, label: 'شهري (كل شهرين)' },
+                            ]).map(t => {
+                                const active = branchPerfGranularity === t.id;
+                                return (
+                                    <button
+                                        key={t.id}
+                                        type="button"
+                                        onClick={() => setBranchPerfGranularity(t.id)}
+                                        className="text-[10px] font-medium px-2.5 py-1 rounded-md border transition-colors"
+                                        style={{
+                                            borderColor: 'var(--border-subtle)',
+                                            background: active ? 'rgba(37, 99, 235, 0.12)' : 'transparent',
+                                            color: active ? 'var(--accent-blue)' : 'var(--text-muted)',
+                                        }}
+                                    >
+                                        {t.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                    <div className="flex flex-wrap items-center gap-3 mt-1 text-[10px]" style={{ color: 'var(--text-muted)' }}>
                         <span>درجة أداء الفروع</span>
                         {branchScores.map(b => (
                             <span key={b.id} className="font-semibold" style={{ color: getBarColor(b.score) }}>{b.score}%</span>
@@ -402,9 +539,20 @@ export default function BranchesPage() {
                             <div style={{ background: `linear-gradient(to right, var(--accent-red), var(--accent-amber), var(--accent-green))` }} className="w-12 h-2 rounded-full" />
                             <span>25% → 55% → 70%</span>
                         </div>
+                        {branchPerfGranularity === 'quarter' && (
+                            <span className="text-[9px] opacity-90">المحور: الأرباع — مفتاح الألوان: الفروع</span>
+                        )}
+                        {branchPerfGranularity === 'bimonth' && (
+                            <span className="text-[9px] opacity-90">المحور: أزواج أشهر — مفتاح الألوان: الفروع</span>
+                        )}
                     </div>
                 </div>
-                <ChartCard title="" option={branchPerfOption} height="280px" />
+                <ChartCard
+                    key={branchPerfGranularity}
+                    title=""
+                    option={branchPerfOption as Record<string, unknown>}
+                    height={branchPerfGranularity === 'year' ? '280px' : '320px'}
+                />
             </div>
 
             {/* ── درجة أداء فئات المنتجات ── */}
@@ -494,7 +642,52 @@ export default function BranchesPage() {
 
             {/* ── مقارنة المبيعات: السنة الحالية مقابل السنة السابقة ── */}
             {(() => {
-                const yoyData = [
+                const yoyQuarterLabels = ['الربع الأول', 'الربع الثاني', 'الربع الثالث', 'الربع الرابع'] as const;
+                const yoyQuarterMonths = [
+                    ['يناير', 'فبراير', 'مارس'],
+                    ['أبريل', 'مايو', 'جون'],
+                    ['يوليو', 'أغسطس', 'سبتمبر'],
+                    ['أكتوبر', 'نوفمبر', 'ديسمبر'],
+                ] as const;
+                const yoyWeights = [0.24, 0.25, 0.26, 0.25];
+
+                function split3Exact(total: number): [number, number, number] {
+                    const a = Math.round(total / 3);
+                    const b = Math.round((total - a) / 2);
+                    return [a, b, total - a - b];
+                }
+
+                function buildQuartersForYear(yearPy: number, yearAc: number | null) {
+                    const qpys = [0, 0, 0, 0];
+                    for (let i = 0; i < 3; i++) qpys[i] = Math.round(yearPy * yoyWeights[i]);
+                    qpys[3] = yearPy - qpys[0] - qpys[1] - qpys[2];
+                    const qacs: (number | null)[] = yearAc === null
+                        ? [null, null, null, null]
+                        : (() => {
+                            const a = [0, 0, 0, 0];
+                            for (let i = 0; i < 3; i++) a[i] = Math.round(yearAc * yoyWeights[i]);
+                            a[3] = yearAc - a[0] - a[1] - a[2];
+                            return a;
+                        })();
+                    return yoyQuarterLabels.map((label, qi) => {
+                        const qpy = qpys[qi];
+                        const qac = qacs[qi];
+                        const [m0, m1, m2] = split3Exact(qpy);
+                        const mac = qac === null ? [null, null, null] as const : split3Exact(qac);
+                        return {
+                            label,
+                            py: qpy,
+                            ac: qac,
+                            months: yoyQuarterMonths[qi].map((name, mi) => ({
+                                name,
+                                py: [m0, m1, m2][mi],
+                                ac: mac[mi],
+                            })),
+                        };
+                    });
+                }
+
+                const yoyBase = [
                     {
                         branch: 'سوق المنارة', py: 73100, ac: 24400, years: [
                             { year: '2020', py: 45200, ac: null as number | null },
@@ -552,15 +745,126 @@ export default function BranchesPage() {
                         ]
                     },
                 ];
+
+                const yoyData = yoyBase.map(d => ({
+                    branch: d.branch,
+                    py: d.py,
+                    ac: d.ac,
+                    years: d.years.map(y => ({
+                        year: y.year,
+                        py: y.py,
+                        ac: y.ac,
+                        quarters: buildQuartersForYear(y.py, y.ac),
+                    })),
+                }));
+
                 const allDeltas = yoyData.flatMap(d => {
-                    const main = d.ac - d.py;
-                    const subs = d.years.filter(y => y.ac !== null).map(y => (y.ac as number) - y.py);
-                    return [main, ...subs];
+                    const out: number[] = [d.ac - d.py];
+                    for (const y of d.years) {
+                        if (y.ac !== null) out.push(y.ac - y.py);
+                        for (const q of y.quarters) {
+                            if (q.ac !== null) out.push(q.ac - q.py);
+                            for (const m of q.months) {
+                                if (m.ac !== null) out.push(m.ac - m.py);
+                            }
+                        }
+                    }
+                    return out;
                 });
                 const maxAbsDelta = Math.max(...allDeltas.map(Math.abs), 1);
+                /** Narrow divergent bars live inside this track; column stays wide via th/td minWidth. */
+                const YOY_DELTA_TRACK_MAX_PX = 204;
+                const YOY_DELTA_BAR_MAX_PCT = 42;
                 const fmt = (v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}K` : `${v}`;
                 const fmtDelta = (v: number) => `${v >= 0 ? '+' : ''}${fmt(v)}`;
                 const pct = (ac: number, py: number) => py === 0 ? 0 : ((ac - py) / py * 100);
+
+                const yoyKey = {
+                    branch: (b: string) => `yoy_b_${b}`,
+                    year: (b: string, y: string) => `yoy_y_${b}_${y}`,
+                    quarter: (b: string, y: string, q: string) => `yoy_q_${b}_${y}_${q}`,
+                };
+
+                function renderPctCell(ac: number, py: number, small: boolean) {
+                    const p = pct(ac, py);
+                    return (
+                        <div className="flex items-center justify-center gap-1" dir="ltr">
+                            <span className={small ? 'text-[10px] font-semibold' : 'text-[11px] font-bold'} style={{ color: p >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>{p >= 0 ? '+' : ''}{p.toFixed(1)}</span>
+                            <span style={{ width: small ? 5 : 6, height: small ? 5 : 6, borderRadius: '50%', background: p >= 0 ? 'var(--accent-green)' : 'var(--accent-red)', display: 'inline-block' }} />
+                        </div>
+                    );
+                }
+
+                function chevron(open: boolean) {
+                    return (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', width: 14, height: 14, borderRadius: 3, background: open ? 'rgba(37,99,235,0.12)' : 'var(--bg-elevated)' }}>
+                            {open ? <ChevronDown size={10} style={{ color: 'var(--accent-blue)' }} /> : <ChevronLeft size={10} style={{ color: 'var(--text-muted)' }} />}
+                        </span>
+                    );
+                }
+
+                function renderYoyDeltaTrack(delta: number, tier: 'branch' | 'year' | 'quarter' | 'month') {
+                    const barW = (Math.abs(delta) / maxAbsDelta) * YOY_DELTA_BAR_MAX_PCT;
+                    const h = tier === 'branch' ? 18 : tier === 'month' ? 12 : 14;
+                    const inset = tier === 'branch' ? 2 : 1;
+                    const labelGap = tier === 'branch' ? 6 : tier === 'month' ? 3 : 4;
+                    const opacity = tier === 'branch' ? 1 : tier === 'quarter' ? 0.65 : tier === 'month' ? 0.55 : 0.7;
+                    const br = tier === 'branch' ? 3 : 2;
+                    const labelCls = tier === 'branch' ? 'text-[10px] font-bold' : tier === 'month' ? 'text-[8px] font-semibold' : 'text-[9px] font-semibold';
+                    return (
+                        <div className="w-full flex justify-center items-center" style={{ minWidth: 0 }}>
+                            <div
+                                className="relative shrink-0 mx-auto"
+                                style={{ width: '100%', maxWidth: YOY_DELTA_TRACK_MAX_PX, height: h }}
+                            >
+                                <div className="absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2" style={{ background: 'var(--border-subtle)' }} />
+                                {delta < 0 ? (
+                                    <div
+                                        className="absolute"
+                                        style={{
+                                            right: '50%',
+                                            top: inset,
+                                            bottom: inset,
+                                            width: `${barW}%`,
+                                            background: 'var(--accent-red)',
+                                            borderRadius: `${br}px 0 0 ${br}px`,
+                                            opacity,
+                                        }}
+                                    />
+                                ) : (
+                                    <div
+                                        className="absolute"
+                                        style={{
+                                            left: '50%',
+                                            top: inset,
+                                            bottom: inset,
+                                            width: `${barW}%`,
+                                            background: 'var(--accent-green)',
+                                            borderRadius: `0 ${br}px ${br}px 0`,
+                                            opacity,
+                                        }}
+                                    />
+                                )}
+                                <span
+                                    className={labelCls}
+                                    dir="ltr"
+                                    style={{
+                                        position: 'absolute',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        color: delta >= 0 ? 'var(--accent-green)' : 'var(--accent-red)',
+                                        whiteSpace: 'nowrap',
+                                        ...(delta < 0
+                                            ? { right: `calc(50% + ${barW}% + ${labelGap}px)` }
+                                            : { left: `calc(50% + ${barW}% + ${labelGap}px)` }),
+                                    }}
+                                >
+                                    {fmtDelta(delta)}
+                                </span>
+                            </div>
+                        </div>
+                    );
+                }
 
                 return (
                     <div className="glass-panel p-0 overflow-hidden">
@@ -569,102 +873,133 @@ export default function BranchesPage() {
                                 <ChartTitleFlagBadge flag="green" size="sm" />
                                 <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>مقارنة المبيعات: السنة الحالية مقابل السابقة</h3>
                             </div>
-                            <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Current Year Sales and Previous Year Sales by Year, Branch Name</p>
+                            <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>تسلسل: سوق ← سنة ← ربع سنوي ← شهر — كل مستوى مغلق افتراضياً</p>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="enterprise-table" style={{ minWidth: 700 }}>
+                        <div className="overflow-x-auto w-full min-w-0">
+                            <table className="enterprise-table w-full" style={{ minWidth: 780 }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ minWidth: 140 }}>الفرع</th>
-                                        <th style={{ textAlign: 'center', width: 70 }}>السابق</th>
-                                        <th style={{ textAlign: 'center', width: 70 }}>الفعلي</th>
-                                        <th style={{ textAlign: 'center', minWidth: 240 }}>الفرق</th>
-                                        <th style={{ textAlign: 'center', width: 80 }}>التغير%</th>
+                                        <th style={{ minWidth: 160 }}>سوق / سنة / ربع / شهر</th>
+                                        <th style={{ textAlign: 'center', minWidth: 88 }}>مبيعات العام السابق</th>
+                                        <th style={{ textAlign: 'center', minWidth: 88 }}>مبيعات العام الحالي</th>
+                                        <th style={{ textAlign: 'center', minWidth: 300, width: '32%' }}>الفرق</th>
+                                        <th style={{ textAlign: 'center', minWidth: 88 }}>التغير%</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {yoyData.map(d => {
                                         const delta = d.ac - d.py;
                                         const deltaPct = pct(d.ac, d.py);
-                                        const isOpen = expandedCats[`yoy_${d.branch}`];
-                                        const barW = Math.abs(delta) / maxAbsDelta * 50; // max 50% of cell width per side
+                                        const branchOpen = !!expandedCats[yoyKey.branch(d.branch)];
                                         return (
                                             <React.Fragment key={d.branch}>
-                                                <tr style={{ cursor: 'pointer' }} onClick={() => setExpandedCats(p => ({ ...p, [`yoy_${d.branch}`]: !p[`yoy_${d.branch}`] }))}>
+                                                <tr
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => setExpandedCats(p => ({ ...p, [yoyKey.branch(d.branch)]: !p[yoyKey.branch(d.branch)] }))}
+                                                >
                                                     <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                                                         <div className="flex items-center gap-1.5">
-                                                            <span style={{ display: 'inline-flex', alignItems: 'center', width: 14, height: 14, borderRadius: 3, background: isOpen ? 'rgba(37,99,235,0.12)' : 'var(--bg-elevated)' }}>
-                                                                {isOpen ? <ChevronDown size={10} style={{ color: 'var(--accent-blue)' }} /> : <ChevronLeft size={10} style={{ color: 'var(--text-muted)' }} />}
-                                                            </span>
+                                                            {chevron(branchOpen)}
+                                                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>سوق</span>
                                                             {d.branch}
                                                         </div>
                                                     </td>
                                                     <td style={{ textAlign: 'center', fontWeight: 500, color: 'var(--text-secondary)' }} dir="ltr">{fmt(d.py)}</td>
                                                     <td style={{ textAlign: 'center', fontWeight: 500, color: 'var(--text-secondary)' }} dir="ltr">{fmt(d.ac)}</td>
-                                                    <td style={{ padding: '4px 8px' }}>
-                                                        <div style={{ position: 'relative', height: 18, display: 'flex', alignItems: 'center' }}>
-                                                            {/* Center axis */}
-                                                            <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--border-subtle)' }} />
-                                                            {/* Bar */}
-                                                            {delta < 0 ? (
-                                                                <div style={{ position: 'absolute', right: '50%', top: 2, bottom: 2, width: `${barW}%`, background: 'var(--accent-red)', borderRadius: '3px 0 0 3px' }} />
-                                                            ) : (
-                                                                <div style={{ position: 'absolute', left: '50%', top: 2, bottom: 2, width: `${barW}%`, background: 'var(--accent-green)', borderRadius: '0 3px 3px 0' }} />
-                                                            )}
-                                                            {/* Label */}
-                                                            <span className="text-[10px] font-bold" dir="ltr" style={{
-                                                                position: 'absolute',
-                                                                color: delta >= 0 ? 'var(--accent-green)' : 'var(--accent-red)',
-                                                                ...(delta < 0 ? { right: `calc(50% + ${barW}% + 6px)` } : { left: `calc(50% + ${barW}% + 6px)` }),
-                                                                whiteSpace: 'nowrap',
-                                                            }}>{fmtDelta(delta)}</span>
-                                                        </div>
+                                                    <td style={{ padding: '6px 20px', minWidth: 300, verticalAlign: 'middle' }}>
+                                                        {renderYoyDeltaTrack(delta, 'branch')}
                                                     </td>
-                                                    <td style={{ textAlign: 'center' }}>
-                                                        <div className="flex items-center justify-center gap-1" dir="ltr">
-                                                            <span className="text-[11px] font-bold" style={{ color: deltaPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>{deltaPct >= 0 ? '+' : ''}{deltaPct.toFixed(1)}</span>
-                                                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: deltaPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)', display: 'inline-block' }} />
-                                                        </div>
-                                                    </td>
+                                                    <td style={{ textAlign: 'center' }}>{renderPctCell(d.ac, d.py, false)}</td>
                                                 </tr>
-                                                {isOpen && d.years.map(y => {
+                                                {branchOpen && d.years.map(y => {
+                                                    const yk = yoyKey.year(d.branch, y.year);
+                                                    const yearOpen = !!expandedCats[yk];
                                                     const yDelta = y.ac !== null ? (y.ac as number) - y.py : null;
                                                     const yPct = y.ac !== null ? pct(y.ac as number, y.py) : null;
-                                                    const yBarW = yDelta !== null ? Math.abs(yDelta) / maxAbsDelta * 50 : 0;
                                                     return (
-                                                        <tr key={y.year} style={{ background: 'var(--bg-elevated)' }}>
-                                                            <td style={{ paddingRight: 28, color: 'var(--text-muted)', fontSize: 12 }}>
-                                                                <span style={{ marginLeft: 4 }}>┃</span> {y.year}
-                                                            </td>
-                                                            <td style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }} dir="ltr">{fmt(y.py)}</td>
-                                                            <td style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }} dir="ltr">{y.ac !== null ? fmt(y.ac as number) : ''}</td>
-                                                            <td style={{ padding: '3px 8px' }}>
-                                                                {yDelta !== null && (
-                                                                    <div style={{ position: 'relative', height: 14, display: 'flex', alignItems: 'center' }}>
-                                                                        <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--border-subtle)' }} />
-                                                                        {yDelta < 0 ? (
-                                                                            <div style={{ position: 'absolute', right: '50%', top: 1, bottom: 1, width: `${yBarW}%`, background: 'var(--accent-red)', borderRadius: '2px 0 0 2px', opacity: 0.7 }} />
-                                                                        ) : (
-                                                                            <div style={{ position: 'absolute', left: '50%', top: 1, bottom: 1, width: `${yBarW}%`, background: 'var(--accent-green)', borderRadius: '0 2px 2px 0', opacity: 0.7 }} />
-                                                                        )}
-                                                                        <span className="text-[9px] font-semibold" dir="ltr" style={{
-                                                                            position: 'absolute',
-                                                                            color: yDelta >= 0 ? 'var(--accent-green)' : 'var(--accent-red)',
-                                                                            ...(yDelta < 0 ? { right: `calc(50% + ${yBarW}% + 4px)` } : { left: `calc(50% + ${yBarW}% + 4px)` }),
-                                                                            whiteSpace: 'nowrap',
-                                                                        }}>{fmtDelta(yDelta)}</span>
+                                                        <React.Fragment key={y.year}>
+                                                            <tr
+                                                                style={{ cursor: 'pointer', background: 'var(--bg-elevated)' }}
+                                                                onClick={e => { e.stopPropagation(); setExpandedCats(p => ({ ...p, [yk]: !p[yk] })); }}
+                                                            >
+                                                                <td style={{ paddingInlineStart: 22, color: 'var(--text-muted)', fontSize: 12 }}>
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        {chevron(yearOpen)}
+                                                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>سنة</span>
+                                                                        <span style={{ marginInlineEnd: 4 }}>┃</span>
+                                                                        {y.year}
                                                                     </div>
-                                                                )}
-                                                            </td>
-                                                            <td style={{ textAlign: 'center' }}>
-                                                                {yPct !== null && (
-                                                                    <div className="flex items-center justify-center gap-1" dir="ltr">
-                                                                        <span className="text-[10px] font-semibold" style={{ color: yPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>{yPct >= 0 ? '+' : ''}{yPct.toFixed(1)}</span>
-                                                                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: yPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)', display: 'inline-block' }} />
-                                                                    </div>
-                                                                )}
-                                                            </td>
-                                                        </tr>
+                                                                </td>
+                                                                <td style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }} dir="ltr">{fmt(y.py)}</td>
+                                                                <td style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }} dir="ltr">{y.ac !== null ? fmt(y.ac as number) : ''}</td>
+                                                                <td style={{ padding: '4px 20px', minWidth: 300, verticalAlign: 'middle' }}>
+                                                                    {yDelta !== null && renderYoyDeltaTrack(yDelta, 'year')}
+                                                                </td>
+                                                                <td style={{ textAlign: 'center' }}>
+                                                                    {yPct !== null && renderPctCell(y.ac as number, y.py, true)}
+                                                                </td>
+                                                            </tr>
+                                                            {yearOpen && y.quarters.map(q => {
+                                                                const qk = yoyKey.quarter(d.branch, y.year, q.label);
+                                                                const qOpen = !!expandedCats[qk];
+                                                                const qDelta = q.ac !== null ? q.ac - q.py : null;
+                                                                const qPct = q.ac !== null ? pct(q.ac, q.py) : null;
+                                                                return (
+                                                                    <React.Fragment key={q.label}>
+                                                                        <tr
+                                                                            style={{ cursor: 'pointer', background: 'rgba(0,0,0,0.02)' }}
+                                                                            onClick={e => { e.stopPropagation(); setExpandedCats(p => ({ ...p, [qk]: !p[qk] })); }}
+                                                                        >
+                                                                            <td style={{ paddingInlineStart: 40, color: 'var(--text-secondary)', fontSize: 12 }}>
+                                                                                <div className="flex items-center gap-1.5">
+                                                                                    {chevron(qOpen)}
+                                                                                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>ربع</span>
+                                                                                    <span style={{ marginInlineEnd: 4, color: 'var(--text-muted)' }}>┃</span>
+                                                                                    {q.label}
+                                                                                </div>
+                                                                            </td>
+                                                                            <td style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)' }} dir="ltr">{fmt(q.py)}</td>
+                                                                            <td style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)' }} dir="ltr">{q.ac !== null ? fmt(q.ac) : ''}</td>
+                                                                            <td style={{ padding: '4px 20px', minWidth: 300, verticalAlign: 'middle' }}>
+                                                                                {qDelta !== null && renderYoyDeltaTrack(qDelta, 'quarter')}
+                                                                            </td>
+                                                                            <td style={{ textAlign: 'center' }}>
+                                                                                {qPct !== null && q.ac !== null && renderPctCell(q.ac, q.py, true)}
+                                                                            </td>
+                                                                        </tr>
+                                                                        {qOpen && q.months.map(m => {
+                                                                            const mDelta = m.ac !== null ? m.ac - m.py : null;
+                                                                            const mPct = m.ac !== null ? pct(m.ac, m.py) : null;
+                                                                            return (
+                                                                                <tr key={m.name} style={{ background: 'var(--bg-elevated)' }}>
+                                                                                    <td style={{ paddingInlineStart: 58, color: 'var(--text-muted)', fontSize: 11 }}>
+                                                                                        <div className="flex items-center gap-1.5">
+                                                                                            <span style={{ display: 'inline-block', width: 14 }} />
+                                                                                            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>شهر</span>
+                                                                                            <span style={{ marginInlineEnd: 4 }}>┃</span>
+                                                                                            {m.name}
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)' }} dir="ltr">{fmt(m.py)}</td>
+                                                                                    <td style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)' }} dir="ltr">{m.ac !== null ? fmt(m.ac) : ''}</td>
+                                                                                    <td style={{ padding: '3px 20px', minWidth: 300, verticalAlign: 'middle' }}>
+                                                                                        {mDelta !== null && renderYoyDeltaTrack(mDelta, 'month')}
+                                                                                    </td>
+                                                                                    <td style={{ textAlign: 'center' }}>
+                                                                                        {mPct !== null && m.ac !== null && (
+                                                                                            <div className="flex items-center justify-center gap-1" dir="ltr">
+                                                                                                <span className="text-[9px] font-semibold" style={{ color: mPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>{mPct >= 0 ? '+' : ''}{mPct.toFixed(1)}</span>
+                                                                                                <span style={{ width: 4, height: 4, borderRadius: '50%', background: mPct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)', display: 'inline-block' }} />
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            );
+                                                                        })}
+                                                                    </React.Fragment>
+                                                                );
+                                                            })}
+                                                        </React.Fragment>
                                                     );
                                                 })}
                                             </React.Fragment>
@@ -679,20 +1014,25 @@ export default function BranchesPage() {
             {/* ── تحليل المنتجات: حجم المبيعات + متوسط السعر ── */}
             {(() => {
                 const t1 = buildProductBubbleRows(BRANCH_PRODUCT_ANALYSIS, expandedCats, setExpandedCats, 'pv');
-                const toBubble = (r: ProductBubbleRow, xValue: number, yValue: number): MetricsBubblePoint => ({
-                    key: r.key,
-                    label: r.label,
-                    depth: r.depth as 0 | 1 | 2,
-                    xValue,
-                    yValue,
-                    hasChildren: r.has,
-                    open: r.open,
-                    onClick: r.click,
-                    vol: r.vol,
-                    price: r.price,
-                    basket: r.basket,
-                    atv: r.atv,
-                });
+                const toBubble = (r: ProductBubbleRow, xValue: number, yValue: number): MetricsBubblePoint => {
+                    /** قيمة تجريبية لمتوسط ربح السلة (تُشتق من ATV والسعر وحجم السلة) لتحجيم الفقاعات */
+                    const basketProfit = Number((r.atv * 0.24 + r.price * r.basket * 0.42).toFixed(2));
+                    return {
+                        key: r.key,
+                        label: r.label,
+                        depth: r.depth as 0 | 1 | 2,
+                        xValue,
+                        yValue,
+                        hasChildren: r.has,
+                        open: r.open,
+                        onClick: r.click,
+                        vol: r.vol,
+                        price: r.price,
+                        basket: r.basket,
+                        atv: r.atv,
+                        basketProfit,
+                    };
+                };
                 const bubblePoints1 = t1.map((r) => toBubble(r, r.vol, r.price));
                 return (
                     <div className="glass-panel p-0 overflow-hidden w-full">
@@ -702,10 +1042,17 @@ export default function BranchesPage() {
                                 <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>تغير المبيعات حسب السعر</h3>
                             </div>
                             <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                                انقر على دائرة الفرع أو الفئة للتوسيع • المحور الأفقي: الحجم، العمودي: م. السعر
+                                انقر على دائرة الفرع أو الفئة للتوسيع • المحور الأفقي: الحجم، العمودي: م. السعر • حجم الدائرة: متوسط ربح السلة
                             </p>
                         </div>
-                        <MetricsBubblePlot points={bubblePoints1} xLabel="عدد مرات البيع" yLabel="م. السعر" variant="blue" plotHeight={420} />
+                        <MetricsBubblePlot
+                            points={bubblePoints1}
+                            xLabel="متوسط حجم السلة"
+                            yLabel="متوسط سعر السلة"
+                            variant="blue"
+                            plotHeight={420}
+                            bubbleSizing="basketProfit"
+                        />
                     </div>
                 );
             })()}
@@ -715,8 +1062,9 @@ export default function BranchesPage() {
                 <BranchMap />
                 <ChartCard title="صافي المبيعات عبر الزمن لكل فرع" titleFlag='green' subtitle="Net Sales Over Time by Branch" option={netSalesByBranchOption} height="460px" delay={2} />
             </div>
-
-            <BranchSalesTable />
+            {/* جدول التحليل التفصيلي — سوق / فئة / منتج */}
+            <DrillDownTable />
+            {/* <BranchSalesTable /> */}
 
             <EnterpriseTable title="دليل الفروع" columns={branchColumns} data={branches} pageSize={10} />
         </div >
