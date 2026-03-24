@@ -18,7 +18,7 @@ import BranchMap from '@/components/ui/BranchMap';
 import BranchSalesTable from '@/components/ui/BranchSalesTable';
 import MetricsBubblePlot, { type MetricsBubblePoint } from '@/components/ui/MetricsBubblePlot';
 import { BRANCH_PRODUCT_ANALYSIS, buildProductBubbleRows, type ProductBubbleRow } from '@/lib/branchProductAnalysis';
-import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED, PRIMARY_PURPLE } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 import DrillDownTable from '@/components/ui/DrillDownTable';
 
 // ── بيانات الأداء المرجّح لكل فرع (جدول + رسوم) ──
@@ -109,7 +109,6 @@ function getBarColor(score: number) {
 }
 
 const BRANCH_KEYS = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8'] as const;
-const BRANCH_CHART_COLORS = [PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER, PRIMARY_RED, '#0891b2', '#d97706'] as const;
 
 const BRANCH_PERF_QUARTER_LABELS = ['الربع الأول', 'الربع الثاني', 'الربع الثالث', 'الربع الرابع'] as const;
 const BRANCH_PERF_BIMONTH_LABELS = [
@@ -125,6 +124,11 @@ function branchPerfPeriodScore(baseScore: number, branchIndex: number, periodInd
 }
 
 export default function BranchesPage() {
+    const palette = useResolvedAnalyticsPalette();
+    const branchChartColors = useMemo(
+        () => [palette.primaryGreen, palette.primaryCyan, palette.primaryBlue, palette.primaryPurple, palette.primaryAmber, palette.primaryRed, '#0891b2', '#d97706'] as const,
+        [palette],
+    );
     const branches = useMemo(() => getBranchData(), []);
     const regions = useMemo(() => getRegionalData(), []);
     const topBranch = [...branches].sort((a, b) => b.revenue - a.revenue)[0];
@@ -206,7 +210,7 @@ export default function BranchesPage() {
                         const v = branchPerfPeriodScore(b.score, bi, qi, n);
                         return {
                             value: v,
-                            itemStyle: { color: BRANCH_CHART_COLORS[bi], borderRadius: [2, 2, 0, 0] },
+                            itemStyle: { color: branchChartColors[bi], borderRadius: [2, 2, 0, 0] },
                         };
                     }),
                 })),
@@ -241,16 +245,16 @@ export default function BranchesPage() {
                     const v = branchPerfPeriodScore(b.score, bi, mi, n);
                     return {
                         value: v,
-                        itemStyle: { color: BRANCH_CHART_COLORS[bi], borderRadius: [2, 2, 0, 0] },
+                        itemStyle: { color: branchChartColors[bi], borderRadius: [2, 2, 0, 0] },
                     };
                 }),
             })),
             dataZoom: [{ type: 'inside' as const }],
         };
-    }, [branchPerfGranularity]);
+    }, [branchPerfGranularity, branchChartColors]);
 
     // ── أداء فئات المنتجات (مجمّع لكل الفروع) ──
-    const categoryPerfOption = {
+    const categoryPerfOption = useMemo(() => ({
         tooltip: {
             trigger: 'axis' as const,
             formatter: (params: { seriesName: string; value: number }[]) =>
@@ -283,14 +287,14 @@ export default function BranchesPage() {
                 return {
                     value: val,
                     itemStyle: {
-                        color: BRANCH_CHART_COLORS[bi],
+                        color: branchChartColors[bi],
                         borderRadius: [3, 3, 0, 0],
                         opacity: val >= 70 ? 1 : val >= 50 ? 0.85 : val >= 30 ? 0.7 : 0.55,
                     },
                 };
             }),
         })),
-    };
+    }), [branchChartColors]);
 
     // ── صافي المبيعات عبر الزمن لكل فرع ──
     const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'جون', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
@@ -304,7 +308,7 @@ export default function BranchesPage() {
         'سوق الخبر': [35200, 35800, 36500, 37200, 38100, 38800, 39500, 40200, 41100, 41800, 42500, 43200],
         'سوق جدة': [15200, 14800, 14200, 13800, 13500, 13100, 12800, 12200, 11800, 11500, 11200, 10800],
     };
-    const netSalesByBranchOption = {
+    const netSalesByBranchOption = useMemo(() => ({
         tooltip: { trigger: 'axis' as const },
         legend: {
             data: Object.keys(netSalesData),
@@ -333,16 +337,16 @@ export default function BranchesPage() {
             symbol: 'circle',
             symbolSize: 4,
             lineStyle: { width: 2 },
-            itemStyle: { color: BRANCH_CHART_COLORS[i] },
+            itemStyle: { color: branchChartColors[i] },
             data,
             endLabel: {
                 show: true,
                 formatter: (p: { value: number }) => `${(p.value / 1000).toFixed(1)}K`,
                 fontSize: 9,
-                color: BRANCH_CHART_COLORS[i],
+                color: branchChartColors[i],
             },
         })),
-    };
+    }), [branchChartColors]);
 
     const branchColumns: TableColumn<BranchData>[] = [
         { key: 'nameAr', header: 'الفرع', sortable: true },

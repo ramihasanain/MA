@@ -6,7 +6,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Calendar, TrendingUp, DollarSign, BarChart3, Percent } from 'lucide-react';
 import { getMonthlySalesData } from '@/lib/mockData';
-import { PRIMARY_GREEN, PRIMARY_SLATE, PRIMARY_CYAN } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 
 const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
     ssr: false,
@@ -47,6 +47,7 @@ const selectedYear = '2025';
 const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
 export default function TimeComparePage() {
+    const palette = useResolvedAnalyticsPalette();
     const [period1] = useState({ from: '2020-02-17', to: '2021-01-27' });
     const [period2] = useState({ from: '2021-11-08', to: '2023-08-23' });
 
@@ -64,14 +65,14 @@ export default function TimeComparePage() {
                 data: currentYearData,
                 barWidth: 16,
                 barGap: '20%',
-                itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
+                itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] },
             },
             {
                 name: `${Number(selectedYear) - 1}`,
                 type: 'bar' as const,
                 data: previousYearData,
                 barWidth: 16,
-                itemStyle: { color: PRIMARY_SLATE, borderRadius: [4, 4, 0, 0] },
+                itemStyle: { color: palette.primarySlate, borderRadius: [4, 4, 0, 0] },
             },
             {
                 name: 'الفرق %',
@@ -80,8 +81,8 @@ export default function TimeComparePage() {
                 data: currentYearData.map((v, i) =>
                     Math.round(((v - previousYearData[i]) / previousYearData[i]) * 100 * 100) / 100
                 ),
-                lineStyle: { color: PRIMARY_CYAN, width: 2, type: 'dashed' as const },
-                itemStyle: { color: PRIMARY_CYAN },
+                lineStyle: { color: palette.primaryCyan, width: 2, type: 'dashed' as const },
+                itemStyle: { color: palette.primaryCyan },
                 tooltip: { valueFormatter: (v: number) => `${v}%` },
             },
         ],

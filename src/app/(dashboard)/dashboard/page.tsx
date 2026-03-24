@@ -12,9 +12,19 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
     loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
 });
 import { getKPIData, getMonthlySalesData, getCategoryDistribution, getBranchData, getRegionalData } from '@/lib/mockData';
-import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
+
+function hexToRgba(hex: string, alpha: number): string {
+    const h = hex.replace('#', '');
+    const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+    const r = parseInt(n.slice(0, 2), 16);
+    const g = parseInt(n.slice(2, 4), 16);
+    const b = parseInt(n.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
 
 export default function DashboardPage() {
+    const palette = useResolvedAnalyticsPalette();
     const kpiData = useMemo(() => getKPIData(), []);
     const salesData = useMemo(() => getMonthlySalesData(), []);
     const categories = useMemo(() => getCategoryDistribution(), []);
@@ -24,7 +34,7 @@ export default function DashboardPage() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('ar-JO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    const revenueTrendOption = {
+    const revenueTrendOption = useMemo(() => ({
         xAxis: { type: 'category' as const, data: salesData.map((d) => d.date) },
         yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000000).toFixed(1)}M` } },
         series: [
@@ -33,14 +43,14 @@ export default function DashboardPage() {
                 type: 'line',
                 data: salesData.map((d) => d.revenue),
                 smooth: true,
-                lineStyle: { color: PRIMARY_GREEN, width: 2 },
-                itemStyle: { color: PRIMARY_GREEN },
+                lineStyle: { color: palette.primaryGreen, width: 2 },
+                itemStyle: { color: palette.primaryGreen },
                 areaStyle: {
                     color: {
                         type: 'linear' as const, x: 0, y: 0, x2: 0, y2: 1,
                         colorStops: [
-                            { offset: 0, color: PRIMARY_GREEN },
-                            { offset: 1, color: 'rgba(34,197,94,0)' },
+                            { offset: 0, color: palette.primaryGreen },
+                            { offset: 1, color: hexToRgba(palette.primaryGreen, 0) },
                         ],
                     },
                 },
@@ -50,15 +60,15 @@ export default function DashboardPage() {
                 type: 'line',
                 data: salesData.map((d) => d.netRevenue),
                 smooth: true,
-                lineStyle: { color: PRIMARY_CYAN, width: 2, type: 'dashed' as const },
-                itemStyle: { color: PRIMARY_CYAN },
+                lineStyle: { color: palette.primaryCyan, width: 2, type: 'dashed' as const },
+                itemStyle: { color: palette.primaryCyan },
             },
         ],
         legend: { data: ['الإيرادات', 'صافي الإيرادات'], bottom: 0, left: 'center' },
-    };
+    }), [palette, salesData]);
 
     const topBranches = [...branches].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
-    const branchChartOption = {
+    const branchChartOption = useMemo(() => ({
         xAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000000).toFixed(1)}M` } },
         yAxis: { type: 'category' as const, data: topBranches.map((b) => b.nameAr), inverse: true },
         series: [{
@@ -66,16 +76,16 @@ export default function DashboardPage() {
             data: topBranches.map((b, i) => ({
                 value: b.revenue,
                 itemStyle: {
-                    color: [PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_PURPLE, PRIMARY_AMBER][i],
+                    color: [palette.primaryGreen, palette.primaryCyan, palette.primaryBlue, palette.primaryPurple, palette.primaryAmber][i],
                     borderRadius: [0, 4, 4, 0],
                 },
             })),
             barWidth: 20,
         }],
         grid: { left: '8%', right: '25%', top: '5%', bottom: '8%' },
-    };
+    }), [palette, topBranches]);
 
-    const categoryOption = {
+    const categoryOption = useMemo(() => ({
         legend: {
             bottom: 0,
             left: 'center' as const,
@@ -87,12 +97,12 @@ export default function DashboardPage() {
             center: ['50%', '42%'],
             data: categories.map((c) => ({ name: c.nameAr, value: c.value, itemStyle: { color: c.color } })),
             label: { show: true, position: 'outside' as const, color: '#64748b', fontSize: 11, formatter: '{b}: {d}%' },
-            labelLine: { lineStyle: { color: '#334155' } },
+            labelLine: { lineStyle: { color: palette.labelColor } },
             emphasis: { itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,0,0,0.3)' } },
         }],
-    };
+    }), [categories, palette]);
 
-    const regionOption = {
+    const regionOption = useMemo(() => ({
         xAxis: { type: 'category' as const, data: regions.map((r) => r.regionAr) },
         yAxis: [
             { type: 'value' as const, name: 'الإيرادات', axisLabel: { formatter: (v: number) => `${(v / 1000000).toFixed(0)}M` } },
@@ -103,7 +113,7 @@ export default function DashboardPage() {
                 name: 'الإيرادات',
                 type: 'bar',
                 data: regions.map((r) => r.revenue),
-                itemStyle: { color: PRIMARY_BLUE, borderRadius: [4, 4, 0, 0] },
+                itemStyle: { color: palette.primaryBlue, borderRadius: [4, 4, 0, 0] },
                 barWidth: 30,
             },
             {
@@ -111,12 +121,12 @@ export default function DashboardPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: regions.map((r) => r.growth),
-                lineStyle: { color: PRIMARY_GREEN, width: 2 },
-                itemStyle: { color: PRIMARY_GREEN },
+                lineStyle: { color: palette.primaryGreen, width: 2 },
+                itemStyle: { color: palette.primaryGreen },
             },
         ],
         legend: { data: ['الإيرادات', 'النمو'], bottom: 0, left: 'center' },
-    };
+    }), [palette, regions]);
 
     return (
         <div className="space-y-6">

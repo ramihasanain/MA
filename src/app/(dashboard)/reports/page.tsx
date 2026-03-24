@@ -16,7 +16,7 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
 import ReportPreviewModal from '@/components/ui/ReportPreviewModal';
 import { getReportJobs } from '@/lib/mockData';
 import { useRouter } from 'next/navigation';
-import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_INDIGO, PRIMARY_AMBER, PRIMARY_SLATE } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 
 // ── بيانات المعاينة ──────────────────────────────────────────────────────────
 interface PreviewRow { market: string; revenue: number; cost: number; profit: number; orders: number; growth: number; }
@@ -32,6 +32,7 @@ const previewData: PreviewRow[] = [
 ];
 
 export default function ReportsPage() {
+    const palette = useResolvedAnalyticsPalette();
     const router = useRouter();
     const reports = useMemo(() => getReportJobs(), []);
     const [viewingReport, setViewingReport] = useState<string | null>(null);
@@ -59,7 +60,7 @@ export default function ReportsPage() {
     };
 
     // مخططات المعاينة
-    const previewChartOption = {
+    const previewChartOption = useMemo(() => ({
         xAxis: { type: 'category' as const, data: previewData.map(d => d.market.split(' ')[0]), axisLabel: { fontSize: 10 } },
         yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000000).toFixed(1)}M` } },
         series: [
@@ -68,7 +69,7 @@ export default function ReportsPage() {
                 type: 'bar',
                 data: previewData.map(d => ({
                     value: d.revenue,
-                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 16,
             },
@@ -77,7 +78,7 @@ export default function ReportsPage() {
                 type: 'bar',
                 data: previewData.map(d => ({
                     value: d.cost,
-                    itemStyle: { color: PRIMARY_SLATE, borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: palette.primarySlate, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 16,
             },
@@ -85,26 +86,26 @@ export default function ReportsPage() {
                 name: 'الأرباح',
                 type: 'line',
                 data: previewData.map(d => d.profit),
-                lineStyle: { color: PRIMARY_CYAN, width: 2 },
-                itemStyle: { color: PRIMARY_CYAN },
+                lineStyle: { color: palette.primaryCyan, width: 2 },
+                itemStyle: { color: palette.primaryCyan },
             },
         ],
         legend: { data: ['الإيرادات', 'التكلفة', 'الأرباح'], top: 0, left: 0 },
-    };
+    }), [palette]);
 
-    const previewPieOption = {
+    const previewPieOption = useMemo(() => ({
         series: [{
             type: 'pie', radius: ['40%', '70%'],
             data: previewData.slice(0, 5).map((d, i) => ({
                 name: d.market.split(' ')[0],
                 value: d.revenue,
                 itemStyle: {
-                    color: [PRIMARY_GREEN, PRIMARY_BLUE, PRIMARY_INDIGO, PRIMARY_AMBER, PRIMARY_CYAN][i],
+                    color: [palette.primaryGreen, palette.primaryBlue, palette.primaryIndigo, palette.primaryAmber, palette.primaryCyan][i],
                 },
             })),
-            label: { color: '#94a3b8', fontSize: 11 }, labelLine: { lineStyle: { color: '#334155' } },
+            label: { color: '#94a3b8', fontSize: 11 }, labelLine: { lineStyle: { color: palette.labelColor } },
         }],
-    };
+    }), [palette]);
 
     const formatN = (n: number) => new Intl.NumberFormat('en-US').format(n);
 

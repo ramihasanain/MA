@@ -14,19 +14,7 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import { getProductData, type ProductData } from '@/lib/mockData';
-import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_INDIGO, PRIMARY_AMBER, PRIMARY_RED, GREEN_SCALE } from '@/lib/colors';
-
-// ── ألوان الفئات ──
-const CAT_COLORS = [
-    PRIMARY_GREEN,
-    PRIMARY_CYAN,
-    PRIMARY_BLUE,
-    PRIMARY_INDIGO,
-    PRIMARY_AMBER,
-    PRIMARY_RED,
-    '#0d9488',
-    '#059669',
-];
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 
 const categories = [
     { name: 'منتجات غذائية', netSales: 248170, volume: 150240, margin: 38.2 },
@@ -92,6 +80,20 @@ const maxBottom = Math.max(...bottom10.map(p => p.profit));
 const fmtK = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(2)}K` : String(n);
 
 export default function ProductsPage() {
+    const palette = useResolvedAnalyticsPalette();
+    const catColors = useMemo(
+        () => [
+            palette.primaryGreen,
+            palette.primaryCyan,
+            palette.primaryBlue,
+            palette.primaryIndigo,
+            palette.primaryAmber,
+            palette.primaryRed,
+            '#0d9488',
+            '#059669',
+        ],
+        [palette],
+    );
     const products = useMemo(() => getProductData(), []);
     const [activeKpi, setActiveKpi] = useState<number | null>(null);
 
@@ -106,10 +108,10 @@ export default function ProductsPage() {
             data: categories.map((c, i) => ({
                 value: c.netSales,
                 itemStyle: {
-                    color: { type: 'linear' as const, x: 0, y: 1, x2: 0, y2: 0, colorStops: [{ offset: 0, color: `${CAT_COLORS[i]}22` }, { offset: 1, color: CAT_COLORS[i] }] },
+                    color: { type: 'linear' as const, x: 0, y: 1, x2: 0, y2: 0, colorStops: [{ offset: 0, color: `${catColors[i]}22` }, { offset: 1, color: catColors[i] }] },
                     borderRadius: [6, 6, 0, 0],
                 },
-                label: { show: true, position: 'top' as const, fontSize: 9, fontWeight: 'bold', color: CAT_COLORS[i], formatter: (p: { value: number }) => `${(p.value / 1000).toFixed(1)}K` },
+                label: { show: true, position: 'top' as const, fontSize: 9, fontWeight: 'bold', color: catColors[i], formatter: (p: { value: number }) => `${(p.value / 1000).toFixed(1)}K` },
             })),
         }],
     };
@@ -139,7 +141,7 @@ export default function ProductsPage() {
             type: 'scatter',
             symbolSize: (d: number[]) => Math.max(14, Math.sqrt(d[0] / 600)),
             data: categories.map(c => [c.volume, c.margin, c.name]),
-            itemStyle: { color: (p: { dataIndex: number }) => CAT_COLORS[p.dataIndex % CAT_COLORS.length], opacity: 0.85, borderWidth: 0 },
+            itemStyle: { color: (p: { dataIndex: number }) => catColors[p.dataIndex % catColors.length], opacity: 0.85, borderWidth: 0 },
             label: { show: false },
             emphasis: {
                 label: {
@@ -156,7 +158,7 @@ export default function ProductsPage() {
 
     // ── مخطط أفضل 10 (أشرطة أفقية تدرج) ──
     const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-    const greenTones = GREEN_SCALE;
+    const greenTones = palette.greenScale;
     const redTones = ['#dc2626', '#ef4444', '#f97316', '#d97706', '#b91c1c', '#9a3412', '#c2410c', '#ea580c', '#e11d48', '#be123c'];
 
     const top10Option = {

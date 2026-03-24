@@ -2,7 +2,7 @@
 
 import '@/lib/echarts/register-bar-line-pie';
 import dynamic from 'next/dynamic';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Settings2, Truck, Package, Clock, CheckCircle, BarChart3, Undo2, ShoppingCart } from 'lucide-react';
 import { ChartTitleFlagBadge } from '@/components/ui/ChartTitleFlagBadge';
@@ -13,10 +13,46 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
     ssr: false,
     loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
 });
-import { PRIMARY_GREEN, PRIMARY_BLUE } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
+
+function hexToRgba(hex: string, alpha: number): string {
+    const h = hex.replace('#', '');
+    const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+    const r = parseInt(n.slice(0, 2), 16);
+    const g = parseInt(n.slice(2, 4), 16);
+    const b = parseInt(n.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
 
 export default function OperationsPage() {
+    const palette = useResolvedAnalyticsPalette();
     const [expandedBasketAtv, setExpandedBasketAtv] = useState<Record<string, boolean>>({});
+
+    const annualProfitOption = useMemo(() => ({
+        xAxis: { type: 'category' as const, data: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'] },
+        yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K` } },
+        series: [{
+            name: 'الأرباح',
+            type: 'line',
+            smooth: true,
+            data: [580000, 620000, 710000, 680000, 720000, 840000, 790000, 810000, 870000, 830000, 920000, 980000],
+            lineStyle: { color: palette.primaryGreen, width: 3 },
+            itemStyle: { color: palette.primaryGreen },
+            areaStyle: {
+                color: {
+                    type: 'linear' as const,
+                    x: 0,
+                    y: 0,
+                    x2: 0,
+                    y2: 1,
+                    colorStops: [
+                        { offset: 0, color: hexToRgba(palette.primaryGreen, 0.18) },
+                        { offset: 1, color: hexToRgba(palette.primaryGreen, 0) },
+                    ],
+                },
+            },
+        }],
+    }), [palette]);
 
     const operationalKPIs = [
         { icon: BarChart3, label: 'الأرباح', value: '8.6M', sublabel: 'صافي الأرباح', color: 'var(--accent-green)' },
@@ -26,33 +62,6 @@ export default function OperationsPage() {
         { icon: CheckCircle, label: 'هامش الربح', value: '34.9%', sublabel: 'متوسط الهامش', color: 'var(--accent-green)' },
         { icon: Clock, label: 'متوسط المعالجة', value: '2.4 س', sublabel: 'وقت الطلب', color: 'var(--accent-amber)' },
     ];
-
-    // ── مخطط الأرباح السنوي ──
-    const annualProfitOption = {
-        xAxis: { type: 'category' as const, data: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'] },
-        yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K` } },
-        series: [{
-            name: 'الأرباح',
-            type: 'line',
-            smooth: true,
-            data: [580000, 620000, 710000, 680000, 720000, 840000, 790000, 810000, 870000, 830000, 920000, 980000],
-            lineStyle: { color: PRIMARY_GREEN, width: 3 },
-            itemStyle: { color: PRIMARY_GREEN },
-            areaStyle: {
-                color: {
-                    type: 'linear' as const,
-                    x: 0,
-                    y: 0,
-                    x2: 0,
-                    y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(34,197,94,0.18)' },
-                        { offset: 1, color: 'rgba(34,197,94,0)' },
-                    ],
-                },
-            },
-        }],
-    };
 
     // ── أسباب المرتجعات حسب المنتج ──
     const returnsReasonsOption = {
@@ -75,7 +84,7 @@ export default function OperationsPage() {
     };
 
     // ── تحليل السلة الشرائية: عدد المواد وقيمتها ──
-    const basketAnalysisOption = {
+    const basketAnalysisOption = useMemo(() => ({
         xAxis: { type: 'category' as const, data: ['1-3 مواد', '4-6 مواد', '7-10 مواد', '11-15 مواد', '16-20 مواد', '20+ مواد'] },
         yAxis: [
             { type: 'value' as const, name: 'الفواتير', axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K` } },
@@ -87,7 +96,7 @@ export default function OperationsPage() {
                 type: 'bar',
                 data: [45000, 52000, 38000, 24000, 15000, 10500].map((v) => ({
                     value: v,
-                    itemStyle: { color: PRIMARY_BLUE, borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: palette.primaryBlue, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 28,
             },
@@ -96,15 +105,15 @@ export default function OperationsPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: [28, 65, 115, 178, 245, 380],
-                lineStyle: { color: PRIMARY_GREEN, width: 2 },
-                itemStyle: { color: PRIMARY_GREEN },
+                lineStyle: { color: palette.primaryGreen, width: 2 },
+                itemStyle: { color: palette.primaryGreen },
             },
         ],
         legend: { data: ['عدد الفواتير', 'متوسط القيمة'], bottom: 0, left: 'center' },
-    };
+    }), [palette]);
 
     // ── المبيعات والقيمة لكل منتج ──
-    const productPerformanceOption = {
+    const productPerformanceOption = useMemo(() => ({
         xAxis: { type: 'category' as const, data: ['أرز', 'زيت زيتون', 'دجاج', 'سكر', 'حليب', 'منظفات', 'تونة', 'حفاضات'], axisLabel: { fontSize: 10 } },
         yAxis: [
             { type: 'value' as const, name: 'الوحدات', axisLabel: { formatter: (v: number) => `${(v / 1000).toFixed(0)}K` } },
@@ -125,13 +134,13 @@ export default function OperationsPage() {
                 type: 'bar',
                 data: [360000, 315000, 285000, 110000, 93000, 196000, 128000, 234000].map((v) => ({
                     value: v,
-                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] },
                 })),
                 barWidth: 16,
             },
         ],
         legend: { data: ['عدد الوحدات', 'القيمة المادية'], bottom: 0, left: 'center' },
-    };
+    }), [palette]);
 
     return (
         <div className="space-y-6">

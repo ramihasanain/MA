@@ -13,13 +13,14 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
 });
 import { buildThreeYearMonthQuarterYearXAxes } from '@/components/ui/ChartCard';
 import { getMonthlySalesData, getProductData, type ProductData } from '@/lib/mockData';
-import { PRIMARY_GREEN, PRIMARY_RED, PRIMARY_AMBER, PRIMARY_SLATE, PRIMARY_CYAN, PRIMARY_BLUE } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
 import TreeDrillDown from '@/components/ui/TreeDrillDown';
 import DrillDownTable from '@/components/ui/DrillDownTable';
 
 export default function SalesPage() {
+    const palette = useResolvedAnalyticsPalette();
     const salesData = useMemo(() => getMonthlySalesData(), []);
     const products = useMemo(() => getProductData(), []);
     const totalRevenue = salesData.reduce((a, b) => a + b.revenue, 0);
@@ -56,22 +57,22 @@ export default function SalesPage() {
                 data: currentYearData,
                 barWidth: 16,
                 barGap: '20%',
-                itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
+                itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] },
             },
             {
                 name: `${Number(selectedYear) - 1}`,
                 type: 'bar',
                 data: previousYearData,
                 barWidth: 16,
-                itemStyle: { color: PRIMARY_SLATE, borderRadius: [4, 4, 0, 0] },
+                itemStyle: { color: palette.primarySlate, borderRadius: [4, 4, 0, 0] },
             },
             {
                 name: 'الفرق %',
                 type: 'line',
                 yAxisIndex: 0,
                 data: currentYearData.map((v, i) => Math.round(((v - previousYearData[i]) / previousYearData[i]) * 100 * 100) / 100),
-                lineStyle: { color: PRIMARY_CYAN, width: 2, type: 'dashed' as const },
-                itemStyle: { color: PRIMARY_CYAN },
+                lineStyle: { color: palette.primaryCyan, width: 2, type: 'dashed' as const },
+                itemStyle: { color: palette.primaryCyan },
                 tooltip: { valueFormatter: (v: number) => `${v}%` },
             },
         ],
@@ -145,7 +146,7 @@ export default function SalesPage() {
         data: drillData.values,
         barWidth: drillLevel === 'month' ? 6 : drillLevel === 'quarter' ? 14 : 40,
         ...(drillLevel === 'month' ? { barMaxWidth: 12 } : {}),
-        itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
+        itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] },
         ...(drillMonthHierarchy ? { xAxisIndex: 0 } : {}),
     };
     const profitLineSeries = {
@@ -153,8 +154,8 @@ export default function SalesPage() {
         type: 'line' as const,
         yAxisIndex: drillSeriesMode === 'both' ? 1 : 0,
         data: drillData.profits,
-        lineStyle: { color: PRIMARY_CYAN, width: 2.5 },
-        itemStyle: { color: PRIMARY_CYAN, borderWidth: 2 },
+        lineStyle: { color: palette.primaryCyan, width: 2.5 },
+        itemStyle: { color: palette.primaryCyan, borderWidth: 2 },
         symbol: 'circle' as const,
         symbolSize: 8,
         smooth: true,
@@ -216,7 +217,7 @@ export default function SalesPage() {
                 name: 'الكمية المباعة',
                 type: 'bar',
                 data: products.slice(0, 8).map((p) => p.unitsSold),
-                itemStyle: { color: PRIMARY_BLUE, borderRadius: [4, 4, 0, 0] },
+                itemStyle: { color: palette.primaryBlue, borderRadius: [4, 4, 0, 0] },
                 barWidth: 16,
             },
             {
@@ -224,8 +225,8 @@ export default function SalesPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: products.slice(0, 8).map((p) => Math.round(p.revenue * p.margin / 100)),
-                lineStyle: { color: PRIMARY_GREEN, width: 2 },
-                itemStyle: { color: PRIMARY_GREEN },
+                lineStyle: { color: palette.primaryGreen, width: 2 },
+                itemStyle: { color: palette.primaryGreen },
             },
         ],
         legend: { data: ['الكمية المباعة', 'الأرباح'], bottom: 0, left: 'center' },
@@ -239,13 +240,13 @@ export default function SalesPage() {
         series: [{
             type: 'bar',
             data: [
-                { value: totalRevenue, itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] } },
-                { value: totalCost, itemStyle: { color: PRIMARY_RED, borderRadius: [4, 4, 0, 0] } },
-                { value: totalDiscount, itemStyle: { color: PRIMARY_AMBER, borderRadius: [4, 4, 0, 0] } },
-                { value: totalReturns * 50, itemStyle: { color: PRIMARY_RED, borderRadius: [4, 4, 0, 0] } },
+                { value: totalRevenue, itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] } },
+                { value: totalCost, itemStyle: { color: palette.primaryRed, borderRadius: [4, 4, 0, 0] } },
+                { value: totalDiscount, itemStyle: { color: palette.primaryAmber, borderRadius: [4, 4, 0, 0] } },
+                { value: totalReturns * 50, itemStyle: { color: palette.primaryRed, borderRadius: [4, 4, 0, 0] } },
                 {
                     value: totalRevenue - totalCost - totalDiscount - totalReturns * 50,
-                    itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
+                    itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] },
                 },
             ],
             barWidth: 36,
@@ -265,7 +266,7 @@ export default function SalesPage() {
         <div className="space-y-6">
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="flex items-center gap-3 mb-1">
-                    <TrendingUp size={24} style={{ color: PRIMARY_GREEN }} />
+                    <TrendingUp size={24} style={{ color: palette.primaryGreen }} />
                     <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>أداء المبيعات</h1>
                 </div>
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>تحليل شامل للمبيعات — التقرير الأول</p>
@@ -307,8 +308,8 @@ export default function SalesPage() {
                                     className="px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-colors"
                                     style={{
                                         background: drillSeriesMode === mode ? 'rgba(14,165,233,0.15)' : 'var(--bg-elevated)',
-                                        color: drillSeriesMode === mode ? PRIMARY_CYAN : 'var(--text-muted)',
-                                        border: `1px solid ${drillSeriesMode === mode ? PRIMARY_CYAN : 'var(--border-subtle)'}`,
+                                        color: drillSeriesMode === mode ? palette.primaryCyan : 'var(--text-muted)',
+                                        border: `1px solid ${drillSeriesMode === mode ? palette.primaryCyan : 'var(--border-subtle)'}`,
                                     }}
                                 >
                                     {label}

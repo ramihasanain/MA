@@ -12,7 +12,7 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
     loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
 });
 import AIBadge from '@/components/ui/AIBadge';
-import { PRIMARY_GREEN } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 
 // ── أسماء المنتجات ──
 const products = [
@@ -47,6 +47,7 @@ const rules = [
 ];
 
 export default function AIBasketPage() {
+    const palette = useResolvedAnalyticsPalette();
     // ── شبكة ارتباط المنتجات (الرئيسية) ──
     const networkOption = {
         tooltip: {
@@ -152,7 +153,7 @@ export default function AIBasketPage() {
                 { name: 'دجاج', symbolSize: 20, itemStyle: { color: '#f97316' } },
                 { name: 'زيت', symbolSize: 19, itemStyle: { color: '#8b5cf6' } },
                 { name: 'أرز', symbolSize: 23, itemStyle: { color: '#06b6d4' } },
-                { name: 'بيض', symbolSize: 17, itemStyle: { color: PRIMARY_GREEN } },
+                { name: 'بيض', symbolSize: 17, itemStyle: { color: palette.primaryGreen } },
                 { name: 'صابون', symbolSize: 15, itemStyle: { color: '#ec4899' } },
                 { name: 'تونة', symbolSize: 16, itemStyle: { color: '#a855f7' } },
                 { name: 'سكر', symbolSize: 14, itemStyle: { color: '#14b8a6' } },
@@ -254,7 +255,7 @@ export default function AIBasketPage() {
                                             <span style={{ position: 'relative', fontSize: 9.5, fontWeight: 600, color: 'var(--text-secondary)' }} dir="ltr">{rule.confB.toFixed(2)}</span>
                                         </td>
                                         <td style={{ padding: '6px 10px', textAlign: 'center', position: 'relative' as const }}>
-                    <div style={{ position: 'absolute', left: 4, top: '50%', transform: 'translateY(-50%)', width: `${(rule.lift / maxLift) * 80}%`, height: 14, background: PRIMARY_GREEN, opacity: 0.25, borderRadius: 2 }} />
+                    <div style={{ position: 'absolute', left: 4, top: '50%', transform: 'translateY(-50%)', width: `${(rule.lift / maxLift) * 80}%`, height: 14, background: palette.primaryGreen, opacity: 0.25, borderRadius: 2 }} />
                                             <span style={{ position: 'relative', fontSize: 9.5, fontWeight: 700, color: 'var(--accent-green)' }} dir="ltr">{rule.lift.toFixed(2)}</span>
                                         </td>
                                     </tr>

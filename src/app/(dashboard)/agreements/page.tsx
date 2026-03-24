@@ -2,7 +2,7 @@
 
 import '@/lib/echarts/register-bar-line-pie';
 import dynamic from 'next/dynamic';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, CheckCircle, Clock, DollarSign, Package, Percent, BarChart3 } from 'lucide-react';
 
@@ -12,14 +12,7 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
 });
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
 import type { TableColumn } from '@/components/ui/EnterpriseTable';
-import {
-    PRIMARY_GREEN,
-    PRIMARY_CYAN,
-    PRIMARY_BLUE,
-    PRIMARY_INDIGO,
-    PRIMARY_AMBER,
-    PRIMARY_SLATE,
-} from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 
 interface Agreement { name: string; partner: string; typeAr: string; value: number; status: string; statusAr: string; materials: number; profitMargin: number; discountRate: number; start: string; end: string;[key: string]: unknown; }
 
@@ -33,8 +26,9 @@ const agreements: Agreement[] = [
 ];
 
 export default function AgreementsPage() {
+    const palette = useResolvedAnalyticsPalette();
     // ── المواد والأرباح والخصومات ──
-    const materialsAnalysisOption = {
+    const materialsAnalysisOption = useMemo(() => ({
         xAxis: {
             type: 'category' as const,
             data: agreements.filter((a) => a.materials > 0).map((a) => a.partner.split(' ').slice(0, 2).join(' ')),
@@ -52,7 +46,7 @@ export default function AgreementsPage() {
                     .filter((a) => a.materials > 0)
                     .map((a) => ({
                         value: a.materials,
-                        itemStyle: { color: PRIMARY_BLUE, borderRadius: [4, 4, 0, 0] },
+                        itemStyle: { color: palette.primaryBlue, borderRadius: [4, 4, 0, 0] },
                     })),
                 barWidth: 24,
             },
@@ -61,55 +55,55 @@ export default function AgreementsPage() {
                 type: 'line',
                 yAxisIndex: 1,
                 data: agreements.filter((a) => a.materials > 0).map((a) => a.profitMargin),
-                lineStyle: { color: PRIMARY_GREEN, width: 2 },
-                itemStyle: { color: PRIMARY_GREEN },
+                lineStyle: { color: palette.primaryGreen, width: 2 },
+                itemStyle: { color: palette.primaryGreen },
             },
             {
                 name: 'نسبة الخصم',
                 type: 'line',
                 yAxisIndex: 1,
                 data: agreements.filter((a) => a.materials > 0).map((a) => a.discountRate),
-                lineStyle: { color: PRIMARY_AMBER, width: 2, type: 'dashed' as const },
-                itemStyle: { color: PRIMARY_AMBER },
+                lineStyle: { color: palette.primaryAmber, width: 2, type: 'dashed' as const },
+                itemStyle: { color: palette.primaryAmber },
             },
         ],
         legend: { data: ['المواد', 'هامش الربح', 'نسبة الخصم'], bottom: 0, left: 'center' },
         grid: { left: '14%', right: '14%', top: '12%', bottom: '22%', containLabel: true },
-    };
+    }), [palette]);
 
     // ── القيمة حسب النوع ──
-    const valueByTypeOption = {
+    const valueByTypeOption = useMemo(() => ({
         xAxis: { type: 'category' as const, data: ['مشتريات', 'توزيع', 'خدمات', 'تسويق'] },
         yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => `${(v / 1000000).toFixed(1)}M` } },
         series: [{
             type: 'bar',
             data: [
-                { value: 2160000, itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] } },
-                { value: 850000, itemStyle: { color: PRIMARY_CYAN, borderRadius: [4, 4, 0, 0] } },
-                { value: 180000, itemStyle: { color: PRIMARY_INDIGO, borderRadius: [4, 4, 0, 0] } },
-                { value: 450000, itemStyle: { color: PRIMARY_AMBER, borderRadius: [4, 4, 0, 0] } },
+                { value: 2160000, itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] } },
+                { value: 850000, itemStyle: { color: palette.primaryCyan, borderRadius: [4, 4, 0, 0] } },
+                { value: 180000, itemStyle: { color: palette.primaryIndigo, borderRadius: [4, 4, 0, 0] } },
+                { value: 450000, itemStyle: { color: palette.primaryAmber, borderRadius: [4, 4, 0, 0] } },
             ],
             barWidth: 40,
         }],
-    };
+    }), [palette]);
 
     // ── مجموعات المنتجات حسب الاتفاقية ──
-    const productGroupsOption = {
+    const productGroupsOption = useMemo(() => ({
         series: [{
             type: 'pie',
             radius: ['36%', '54%'],
             center: ['50%', '42%'],
             data: [
-                { name: 'بقالة (أرز)', value: 35, itemStyle: { color: PRIMARY_GREEN } },
-                { name: 'ألبان', value: 25, itemStyle: { color: PRIMARY_BLUE } },
-                { name: 'منظفات', value: 20, itemStyle: { color: PRIMARY_INDIGO } },
-                { name: 'لحوم', value: 12, itemStyle: { color: PRIMARY_AMBER } },
-                { name: 'أخرى', value: 8, itemStyle: { color: PRIMARY_SLATE } },
+                { name: 'بقالة (أرز)', value: 35, itemStyle: { color: palette.primaryGreen } },
+                { name: 'ألبان', value: 25, itemStyle: { color: palette.primaryBlue } },
+                { name: 'منظفات', value: 20, itemStyle: { color: palette.primaryIndigo } },
+                { name: 'لحوم', value: 12, itemStyle: { color: palette.primaryAmber } },
+                { name: 'أخرى', value: 8, itemStyle: { color: palette.primarySlate } },
             ],
             label: { color: '#94a3b8', fontSize: 11 },
-            labelLine: { lineStyle: { color: '#334155' } },
+            labelLine: { lineStyle: { color: palette.labelColor } },
         }],
-    };
+    }), [palette]);
 
     const columns: TableColumn<Agreement>[] = [
         { key: 'name', header: 'الاتفاقية', sortable: true },

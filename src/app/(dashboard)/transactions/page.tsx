@@ -10,7 +10,7 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
     ssr: false,
     loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
 });
-import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 
 // ── بيانات الفروع مع sub و sub al sub ──
 const branchData = [
@@ -153,6 +153,7 @@ const fmtK = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toFixed(
 const fmt = (n: number) => new Intl.NumberFormat('en-US').format(n);
 
 export default function TransactionsPage() {
+    const palette = useResolvedAnalyticsPalette();
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
     const toggleRow = (key: string) => {
@@ -209,7 +210,7 @@ export default function TransactionsPage() {
         { year: '2022', branches: [{ name: 'سوق المنارة', val: 28000 }, { name: 'سوق سلاح الجو', val: 21000 }, { name: 'سوق العساكرة', val: 15500 }] },
     ];
     const allBranchNames = ['سوق المنارة', 'سوق سلاح الجو', 'سوق العساكرة'];
-    const branchColors = [PRIMARY_GREEN, PRIMARY_BLUE, PRIMARY_AMBER];
+    const branchColors = useMemo(() => [palette.primaryGreen, palette.primaryBlue, palette.primaryAmber], [palette]);
 
     const waterfallOption = {
         tooltip: { trigger: 'axis' as const },
@@ -257,13 +258,13 @@ export default function TransactionsPage() {
             {
                 name: 'صافي المبيعات',
                 type: 'bar' as const,
-                data: qNetSales.map(v => ({ value: v, itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] } })),
+                data: qNetSales.map(v => ({ value: v, itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] } })),
                 barWidth: 18,
             },
             {
                 name: 'قيمة الربح',
                 type: 'bar' as const,
-                data: qProfit.map(v => ({ value: v, itemStyle: { color: PRIMARY_CYAN, borderRadius: [4, 4, 0, 0] } })),
+                data: qProfit.map(v => ({ value: v, itemStyle: { color: palette.primaryCyan, borderRadius: [4, 4, 0, 0] } })),
                 barWidth: 18,
             },
             {
@@ -271,8 +272,8 @@ export default function TransactionsPage() {
                 type: 'line' as const,
                 yAxisIndex: 1,
                 data: qAtv,
-                lineStyle: { color: PRIMARY_RED, width: 2 },
-                itemStyle: { color: PRIMARY_RED },
+                lineStyle: { color: palette.primaryRed, width: 2 },
+                itemStyle: { color: palette.primaryRed },
                 smooth: true,
             },
         ],

@@ -10,7 +10,7 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
     ssr: false,
     loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
 });
-import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 
 // ── بيانات نوع الدفع ──
 const paymentRows = [
@@ -26,6 +26,7 @@ const salesTypeRows = [
 ];
 
 export default function SalesMethodPage() {
+    const palette = useResolvedAnalyticsPalette();
 
     // ── مخطط طرق الدفع (أعمدة + خط للكمية) ──
     const paymentTypeOption = {
@@ -41,7 +42,7 @@ export default function SalesMethodPage() {
                 data: paymentRows.map((r, i) => ({
                     value: r.sales,
                     itemStyle: {
-                        color: [PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE][i],
+                        color: [palette.primaryGreen, palette.primaryCyan, palette.primaryBlue][i],
                         borderRadius: [4, 4, 0, 0],
                     },
                     label: {
@@ -82,7 +83,7 @@ export default function SalesMethodPage() {
                 data: salesTypeRows.map((r, i) => ({
                     value: r.sales,
                     itemStyle: {
-                        color: [PRIMARY_GREEN, PRIMARY_CYAN][i],
+                        color: [palette.primaryGreen, palette.primaryCyan][i],
                         borderRadius: [4, 4, 0, 0],
                     },
                     label: {
@@ -120,8 +121,8 @@ export default function SalesMethodPage() {
                 stack: 'total',
                 data: [850000, 820000, 900000, 880000, 870000, 950000, 920000, 910000, 980000, 940000, 1000000, 1100000],
                 areaStyle: { opacity: 0.3 },
-                lineStyle: { color: PRIMARY_GREEN, width: 2 },
-                itemStyle: { color: PRIMARY_GREEN },
+                lineStyle: { color: palette.primaryGreen, width: 2 },
+                itemStyle: { color: palette.primaryGreen },
             },
             {
                 name: 'فيزا/ماستركارد',
@@ -129,8 +130,8 @@ export default function SalesMethodPage() {
                 stack: 'total',
                 data: [560000, 580000, 620000, 600000, 630000, 700000, 680000, 690000, 730000, 720000, 780000, 850000],
                 areaStyle: { opacity: 0.3 },
-                lineStyle: { color: PRIMARY_CYAN, width: 2 },
-                itemStyle: { color: PRIMARY_CYAN },
+                lineStyle: { color: palette.primaryCyan, width: 2 },
+                itemStyle: { color: palette.primaryCyan },
             },
             {
                 name: 'كوبون / قسيمة',
@@ -138,8 +139,8 @@ export default function SalesMethodPage() {
                 stack: 'total',
                 data: [80000, 90000, 100000, 110000, 95000, 120000, 115000, 108000, 125000, 118000, 130000, 145000],
                 areaStyle: { opacity: 0.3 },
-                lineStyle: { color: PRIMARY_AMBER, width: 2 },
-                itemStyle: { color: PRIMARY_AMBER },
+                lineStyle: { color: palette.primaryAmber, width: 2 },
+                itemStyle: { color: palette.primaryAmber },
             },
             {
                 name: 'دفع لاحق',
@@ -192,7 +193,7 @@ export default function SalesMethodPage() {
                 name: 'بطاقة عسكرية',
                 type: 'bar',
                 data: [2200000, 2150000, 2400000, 2350000, 2300000, 2600000, 2500000, 2450000, 2700000, 2600000, 2800000, 3100000].map(
-                    (v) => ({ value: v, itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] } })
+                    (v) => ({ value: v, itemStyle: { color: palette.primaryGreen, borderRadius: [4, 4, 0, 0] } })
                 ),
                 barWidth: 14,
                 barGap: '20%',
@@ -201,7 +202,7 @@ export default function SalesMethodPage() {
                 name: 'مدني',
                 type: 'bar',
                 data: [850000, 830000, 950000, 940000, 920000, 1050000, 1000000, 990000, 1100000, 1050000, 1150000, 1280000].map(
-                    (v) => ({ value: v, itemStyle: { color: PRIMARY_CYAN, borderRadius: [4, 4, 0, 0] } })
+                    (v) => ({ value: v, itemStyle: { color: palette.primaryCyan, borderRadius: [4, 4, 0, 0] } })
                 ),
                 barWidth: 14,
             },

@@ -3,7 +3,7 @@
 import '@/lib/echarts/register-bar-line-pie';
 import '@/lib/echarts/register-gauge';
 import dynamic from 'next/dynamic';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Users, DollarSign, ShoppingCart, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { ChartTitleFlagBadge } from '@/components/ui/ChartTitleFlagBadge';
@@ -13,7 +13,7 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
     ssr: false,
     loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
 });
-import { PRIMARY_GREEN, PRIMARY_CYAN, PRIMARY_BLUE, PRIMARY_AMBER, PRIMARY_RED, PRIMARY_PURPLE, PRIMARY_SLATE } from '@/lib/colors';
+import { useResolvedAnalyticsPalette } from '@/hooks/useResolvedAnalyticsPalette';
 
 // ── بيانات الكاشيرات ──
 const cashiersBase = [
@@ -60,13 +60,6 @@ const fmtN = (n: number) => new Intl.NumberFormat('en-US').format(n);
 const fmt2 = (n: number) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 const fmtK = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(2)}K` : fmt2(n);
 
-function scoreColor(s: number) {
-    if (s >= 63) return PRIMARY_GREEN; // high score
-    if (s >= 55) return PRIMARY_AMBER;
-    if (s >= 45) return '#f97316';
-    return PRIMARY_RED;
-}
-
 /** Rank gradient: top row (index 0) = green, bottom = red. Returns RGB for rgba() / solid fills (never append hex alpha to rgb()). */
 function rankGradientRgb(index: number, total: number): [number, number, number] {
     if (total <= 1) return [34, 197, 94];
@@ -76,11 +69,20 @@ function rankGradientRgb(index: number, total: number): [number, number, number]
     return from.map((c, j) => Math.round(c + (to[j] - c) * t)) as [number, number, number];
 }
 
+const EMPLOYEE_TREND_MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'] as const;
+
 const maxSales = Math.max(...cashiers.map(c => c.sales));
 const maxTrans = Math.max(...cashiers.map(c => c.transactions));
 const maxAtv = Math.max(...cashiers.map(c => c.atv));
 
 export default function EmployeesPage() {
+    const palette = useResolvedAnalyticsPalette();
+    const scoreColor = (s: number) => {
+        if (s >= 63) return palette.primaryGreen;
+        if (s >= 55) return palette.primaryAmber;
+        if (s >= 45) return '#f97316';
+        return palette.primaryRed;
+    };
     const [sortKey, setSortKey] = useState<'score' | 'sales' | 'transactions'>('score');
     const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
@@ -88,71 +90,17 @@ export default function EmployeesPage() {
     const toggleSort = (k: typeof sortKey) => { if (sortKey === k) setSortDir(d => d === 'desc' ? 'asc' : 'desc'); else { setSortKey(k); setSortDir('desc'); } };
 
     // ── Gauge الأداء الكلي ──
-    const gaugeOption = {
-        series: [{
-            type: 'gauge', startAngle: 200, endAngle: -20,
-            min: 0, max: 100, radius: '82%',
-            pointer: { show: false },
-            progress: {
-                show: true,
-                roundCap: true,
-                width: 16,
-                itemStyle: {
-                    color: {
-                        type: 'linear' as const,
-                        x: 0,
-                        y: 0,
-                        x2: 1,
-                        y2: 0,
-                        colorStops: [
-                            { offset: 0, color: PRIMARY_RED },
-                            { offset: 0.5, color: PRIMARY_AMBER },
-                            { offset: 1, color: PRIMARY_GREEN },
-                        ],
-                    },
-                },
-            },
-            axisLine: { lineStyle: { width: 16, color: [[1, '#1e293b']] } },
-            splitLine: { show: false }, axisTick: { show: false },
-            axisLabel: { show: false }, title: { show: false },
-            detail: {
-                valueAnimation: true, fontSize: 22, fontWeight: 'bold',
-                offsetCenter: [0, '12%'], color: scoreColor(avgScore), formatter: '{value}%',
-            },
-            data: [{ value: +avgScore.toFixed(1) }],
-        }],
-    };
-
-    // ── ترتيب الكاشيرات (أفقي): الأعلى = الأفضل (أخضر) → الأسفل = الأضعف (أحمر) ──
-    const ranked = [...cashiers].sort((a, b) => b.score - a.score);
-    const perfBarCount = ranked.length;
-    const perfRowPx = 40;
-    const perfChartHeightPx = Math.max(120, 24 + perfBarCount * perfRowPx);
-
-    const perfOption = {
-        tooltip: {
-            trigger: 'item' as const,
-            formatter: (p: { name: string; value: number }) =>
-                `${p.name}: <b style="color:${PRIMARY_GREEN}">${p.value}%</b>`,
-        },
-        grid: { left: '26%', right: '14%', top: '2%', bottom: '2%' },
-        xAxis: { type: 'value' as const, max: 80, axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
-        yAxis: {
-            type: 'category' as const,
-            data: ranked.map(c => c.short),
-            inverse: true,
-            axisLabel: { fontSize: 10, color: '#94a3b8' },
-            axisLine: { show: false },
-            axisTick: { show: false },
-        },
-        series: [{
-            type: 'bar', barMaxWidth: 20,
-            data: ranked.map((c, i) => {
-                const [r, g, b] = rankGradientRgb(i, perfBarCount);
-                const solid = `rgb(${r},${g},${b})`;
-                return {
-                    name: c.short,
-                    value: +c.score.toFixed(2),
+    const gaugeOption = useMemo(() => {
+        const gaugeDetailColor = avgScore >= 63 ? palette.primaryGreen : avgScore >= 55 ? palette.primaryAmber : avgScore >= 45 ? '#f97316' : palette.primaryRed;
+        return {
+            series: [{
+                type: 'gauge', startAngle: 200, endAngle: -20,
+                min: 0, max: 100, radius: '82%',
+                pointer: { show: false },
+                progress: {
+                    show: true,
+                    roundCap: true,
+                    width: 16,
                     itemStyle: {
                         color: {
                             type: 'linear' as const,
@@ -161,36 +109,96 @@ export default function EmployeesPage() {
                             x2: 1,
                             y2: 0,
                             colorStops: [
-                                { offset: 0, color: `rgba(${r},${g},${b},0.35)` },
-                                { offset: 1, color: `rgba(${r},${g},${b},1)` },
+                                { offset: 0, color: palette.primaryRed },
+                                { offset: 0.5, color: palette.primaryAmber },
+                                { offset: 1, color: palette.primaryGreen },
                             ],
                         },
-                        borderRadius: [0, 6, 6, 0],
                     },
-                    label: { show: true, position: 'right' as const, formatter: `${c.score.toFixed(2)}%`, fontSize: 10, fontWeight: 'bold', color: solid },
-                };
-            }),
-        }],
-    };
+                },
+                axisLine: { lineStyle: { width: 16, color: [[1, '#1e293b']] } },
+                splitLine: { show: false }, axisTick: { show: false },
+                axisLabel: { show: false }, title: { show: false },
+                detail: {
+                    valueAnimation: true, fontSize: 22, fontWeight: 'bold',
+                    offsetCenter: [0, '12%'], color: gaugeDetailColor, formatter: '{value}%',
+                },
+                data: [{ value: +avgScore.toFixed(1) }],
+            }],
+        };
+    }, [palette, avgScore]);
+
+    // ── ترتيب الكاشيرات (أفقي): الأعلى = الأفضل (أخضر) → الأسفل = الأضعف (أحمر) ──
+    const ranked = [...cashiers].sort((a, b) => b.score - a.score);
+    const perfBarCount = ranked.length;
+    const perfRowPx = 40;
+    const perfChartHeightPx = Math.max(120, 24 + perfBarCount * perfRowPx);
+
+    const perfOption = useMemo(() => {
+        const rnk = [...cashiers].sort((a, b) => b.score - a.score);
+        const n = rnk.length;
+        return {
+            tooltip: {
+                trigger: 'item' as const,
+                formatter: (p: { name: string; value: number }) =>
+                    `${p.name}: <b style="color:${palette.primaryGreen}">${p.value}%</b>`,
+            },
+            grid: { left: '26%', right: '14%', top: '2%', bottom: '2%' },
+            xAxis: { type: 'value' as const, max: 80, axisLabel: { formatter: '{value}%', fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
+            yAxis: {
+                type: 'category' as const,
+                data: rnk.map(c => c.short),
+                inverse: true,
+                axisLabel: { fontSize: 10, color: '#94a3b8' },
+                axisLine: { show: false },
+                axisTick: { show: false },
+            },
+            series: [{
+                type: 'bar', barMaxWidth: 20,
+                data: rnk.map((c, i) => {
+                    const [r, g, b] = rankGradientRgb(i, n);
+                    const solid = `rgb(${r},${g},${b})`;
+                    return {
+                        name: c.short,
+                        value: +c.score.toFixed(2),
+                        itemStyle: {
+                            color: {
+                                type: 'linear' as const,
+                                x: 0,
+                                y: 0,
+                                x2: 1,
+                                y2: 0,
+                                colorStops: [
+                                    { offset: 0, color: `rgba(${r},${g},${b},0.35)` },
+                                    { offset: 1, color: `rgba(${r},${g},${b},1)` },
+                                ],
+                            },
+                            borderRadius: [0, 6, 6, 0],
+                        },
+                        label: { show: true, position: 'right' as const, formatter: `${c.score.toFixed(2)}%`, fontSize: 10, fontWeight: 'bold', color: solid },
+                    };
+                }),
+            }],
+        };
+    }, [palette]);
 
     // ── اتجاه المبيعات ──
-    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-    const trendColors = [
-        PRIMARY_GREEN,
-        PRIMARY_CYAN,
-        PRIMARY_BLUE,
-        PRIMARY_PURPLE,
-        PRIMARY_AMBER,
-        PRIMARY_RED,
+    const trendColors = useMemo(() => [
+        palette.primaryGreen,
+        palette.primaryCyan,
+        palette.primaryBlue,
+        palette.primaryPurple,
+        palette.primaryAmber,
+        palette.primaryRed,
         '#0891b2',
-        PRIMARY_GREEN,
+        palette.primaryGreen,
         '#d97706',
-    ];
-    const trendOption = {
+    ], [palette]);
+    const trendOption = useMemo(() => ({
         tooltip: { trigger: 'axis' as const, backgroundColor: '#1a2035', borderColor: '#1e293b', textStyle: { color: '#e2e8f0', fontSize: 11 } },
-        legend: { data: cashiers.map(c => c.short), bottom: 0, textStyle: { color: PRIMARY_GREEN, fontSize: 8 }, type: 'scroll' as const, pageIconColor: PRIMARY_GREEN, pageTextStyle: { color: PRIMARY_GREEN } },
+        legend: { data: cashiers.map(c => c.short), bottom: 0, textStyle: { color: palette.primaryGreen, fontSize: 8 }, type: 'scroll' as const, pageIconColor: palette.primaryGreen, pageTextStyle: { color: palette.primaryGreen } },
         grid: { bottom: '22%', top: '5%', left: '2%', right: '2%', containLabel: true },
-        xAxis: { type: 'category' as const, data: months, axisLabel: { fontSize: 9, color: PRIMARY_GREEN, rotate: 30 }, axisLine: { lineStyle: { color: PRIMARY_SLATE } }, splitLine: { show: false } },
+        xAxis: { type: 'category' as const, data: [...EMPLOYEE_TREND_MONTHS], axisLabel: { fontSize: 9, color: palette.primaryGreen, rotate: 30 }, axisLine: { lineStyle: { color: palette.primarySlate } }, splitLine: { show: false } },
         yAxis: { type: 'value' as const, axisLabel: { formatter: (v: number) => fmtK(v), fontSize: 9, color: '#64748b' }, splitLine: { lineStyle: { color: '#1e293b' } } },
         series: cashiers.map((c, i) => ({
             name: c.short,
@@ -200,7 +208,7 @@ export default function EmployeesPage() {
             lineStyle: { color: trendColors[i % trendColors.length], width: 1.5 },
             itemStyle: { color: trendColors[i % trendColors.length] },
         })),
-    };
+    }), [palette, trendColors]);
 
     const SortBtn = ({ k, label }: { k: typeof sortKey; label: string }) => {
         const active = sortKey === k;
@@ -210,10 +218,10 @@ export default function EmployeesPage() {
                 onClick={() => toggleSort(k)}
                 className="flex items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all"
                 style={{
-                    background: active ? PRIMARY_GREEN : 'var(--bg-elevated)',
+                    background: active ? palette.primaryGreen : 'var(--bg-elevated)',
                     color: active ? '#ffffff' : 'var(--text-muted)',
                     border: '1px solid',
-                    borderColor: active ? PRIMARY_GREEN : 'var(--border-subtle)',
+                    borderColor: active ? palette.primaryGreen : 'var(--border-subtle)',
                 }}
             >
                 {label}
@@ -230,7 +238,7 @@ export default function EmployeesPage() {
                     <Users size={22} style={{ color: 'var(--text-primary)' }} />
                     <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>الموظفين</h1>
                     <div className="flex items-center gap-1.5 mr-2">
-                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: PRIMARY_GREEN }} />
+                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: palette.primaryGreen }} />
                         <span className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>بيانات مباشرة</span>
                     </div>
                 </div>
@@ -288,7 +296,7 @@ export default function EmployeesPage() {
                         <ChartCard title="" option={gaugeOption} height="138px" />
                     </div>
                     <div className="flex items-center justify-center gap-2 text-[9px] py-1.5" style={{ color: 'var(--text-muted)' }}>
-                        {[{ l: 'ضعيف', c: PRIMARY_RED }, { l: 'متوسط', c: '#f97316' }, { l: 'جيد', c: PRIMARY_AMBER }, { l: 'ممتاز', c: PRIMARY_GREEN }].map(x => (
+                        {[{ l: 'ضعيف', c: palette.primaryRed }, { l: 'متوسط', c: '#f97316' }, { l: 'جيد', c: palette.primaryAmber }, { l: 'ممتاز', c: palette.primaryGreen }].map(x => (
                             <div key={x.l} className="flex items-center gap-0.5">
                                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: x.c }} />
                                 <span>{x.l}</span>

@@ -23,6 +23,7 @@ import {
     ShoppingBasket,
     Clock,
     FileBarChart,
+    Palette,
     ChevronRight,
     ChevronLeft,
     Sun,
@@ -55,6 +56,7 @@ const navItems: NavItem[] = [
     { id: 'ai-basket', label: 'السلة الذكية', icon: ShoppingBasket, href: '/ai-basket', isAI: true },
     { id: 'time-compare', label: 'المقارنة الزمنية', icon: Clock, href: '/time-compare' },
     { id: 'reports', label: 'مركز التقارير', icon: FileBarChart, href: '/reports', dividerBefore: true },
+    { id: 'chart-colors', label: 'ألوان الرسوم', icon: Palette, href: '/chart-colors' },
 ];
 
 const MD_BREAKPOINT = 768;
