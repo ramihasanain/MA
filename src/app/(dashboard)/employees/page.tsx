@@ -358,7 +358,7 @@ export default function EmployeesPage() {
                     </div>
                 </div>
                 <div className="overflow-x-auto">
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table dir="rtl" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
                                 {['#', 'الكاشير', 'درجة الأداء', 'إجمالي المبيعات', 'عدد المعاملات', 'متوسط ATV', 'معدل الإلغاء'].map((h, i) => (

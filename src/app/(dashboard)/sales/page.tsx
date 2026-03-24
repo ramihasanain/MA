@@ -11,6 +11,7 @@ const ChartCard = dynamic(() => import('@/components/ui/ChartCard'), {
     ssr: false,
     loading: () => <div style={{ height: 320 }}>Loading chart...</div>,
 });
+import { buildThreeYearMonthQuarterYearXAxes } from '@/components/ui/ChartCard';
 import { getMonthlySalesData, getProductData, type ProductData } from '@/lib/mockData';
 import { PRIMARY_GREEN, PRIMARY_RED, PRIMARY_AMBER, PRIMARY_SLATE, PRIMARY_CYAN, PRIMARY_BLUE } from '@/lib/colors';
 import EnterpriseTable from '@/components/ui/EnterpriseTable';
@@ -82,17 +83,43 @@ export default function SalesPage() {
         },
     };
 
-    // ── Drill-down: بيانات حسب المستوى ──
+    // ── Drill-down: بيانات حسب المستوى (ثلاث سنوات: 2023–2025) ──
+    const DRILL_YEARS = ['2023', '2024', '2025'] as const;
+    const yearRevenueMultipliers: Record<(typeof DRILL_YEARS)[number], number> = {
+        '2023': 0.82,
+        '2024': 0.92,
+        '2025': 1,
+    };
+    const monthlyForYear = (y: (typeof DRILL_YEARS)[number]) =>
+        currentYearData.map((v) => Math.round(v * yearRevenueMultipliers[y]));
+
     const getDrillData = () => {
         if (drillLevel === 'year') {
-            const values = [22000000, 24500000, totalRevenue];
-            return { labels: ['2023', '2024', '2025'], values, profits: values.map((v, i) => Math.round(v * [0.22, 0.25, 0.28][i])) };
+            const values = DRILL_YEARS.map((y) => monthlyForYear(y).reduce((a, b) => a + b, 0));
+            return {
+                labels: [...DRILL_YEARS],
+                values,
+                profits: values.map((v, i) => Math.round(v * [0.22, 0.25, 0.28][i])),
+            };
         }
         if (drillLevel === 'quarter') {
-            const values = [totalRevenue * 0.22, totalRevenue * 0.26, totalRevenue * 0.24, totalRevenue * 0.28];
-            return { labels: ['الربع 1', 'الربع 2', 'الربع 3', 'الربع 4'], values, profits: values.map((v, i) => Math.round(v * [0.24, 0.29, 0.26, 0.31][i])) };
+            const quarterLabels = [...DRILL_YEARS].flatMap((y) => [
+                `الربع 1 ${y}`,
+                `الربع 2 ${y}`,
+                `الربع 3 ${y}`,
+                `الربع 4 ${y}`,
+            ]);
+            const quarterValues = [...DRILL_YEARS].flatMap((y) => {
+                const mv = monthlyForYear(y);
+                return [0, 1, 2, 3].map((qi) => mv.slice(qi * 3, qi * 3 + 3).reduce((a, b) => a + b, 0));
+            });
+            const quarterProfits = quarterValues.map((v, i) => Math.round(v * (0.24 + (i % 4) * 0.018)));
+            return { labels: quarterLabels, values: quarterValues, profits: quarterProfits };
         }
-        return { labels: months, values: currentYearData, profits: currentYearData.map((v) => Math.round(v * (0.22 + Math.random() * 0.12))) };
+        const values = [...DRILL_YEARS].flatMap((y) => monthlyForYear(y));
+        const profits = values.map((v, i) => Math.round(v * (0.22 + (i % 12) * 0.004)));
+        const labels = [...DRILL_YEARS].flatMap((y) => months.map((m) => `${m} ${y.slice(2)}`));
+        return { labels, values, profits };
     };
     const drillData = getDrillData();
 
@@ -106,12 +133,20 @@ export default function SalesPage() {
         name: 'الأرباح',
         axisLabel: { formatter: (v: number) => `${(v / 1000000).toFixed(1)}M` },
     };
+    const drillMonthHierarchy = drillLevel === 'month';
+    const drillXAxis = drillMonthHierarchy
+        ? buildThreeYearMonthQuarterYearXAxes({ monthNames: months, years: DRILL_YEARS })
+        : { type: 'category' as const, data: drillData.labels };
+    const drillGridBottom = drillMonthHierarchy ? '38%' : drillLevel === 'quarter' ? '18%' : '15%';
+
     const salesBarSeries = {
         name: 'المبيعات',
         type: 'bar' as const,
         data: drillData.values,
-        barWidth: drillLevel === 'month' ? 18 : 40,
+        barWidth: drillLevel === 'month' ? 6 : drillLevel === 'quarter' ? 14 : 40,
+        ...(drillLevel === 'month' ? { barMaxWidth: 12 } : {}),
         itemStyle: { color: PRIMARY_GREEN, borderRadius: [4, 4, 0, 0] },
+        ...(drillMonthHierarchy ? { xAxisIndex: 0 } : {}),
     };
     const profitLineSeries = {
         name: 'الأرباح',
@@ -124,46 +159,49 @@ export default function SalesPage() {
         symbolSize: 8,
         smooth: true,
         areaStyle: { color: 'rgba(8,145,178,0.08)' },
+        ...(drillMonthHierarchy ? { xAxisIndex: 0 } : {}),
     };
+
+    const drillLegendBottom = drillMonthHierarchy ? 8 : 0;
 
     const drillDownOption =
         drillSeriesMode === 'both'
             ? {
-                xAxis: { type: 'category' as const, data: drillData.labels },
+                xAxis: drillXAxis,
                 yAxis: [salesYAxis, profitYAxis],
                 series: [salesBarSeries, profitLineSeries],
                 legend: {
                     data: ['المبيعات', 'الأرباح'],
-                    bottom: 0,
+                    bottom: drillLegendBottom,
                     left: 'center',
                     textStyle: { color: '#94a3b8', fontSize: 11 },
                 },
-                grid: { bottom: '15%' },
+                grid: { bottom: drillGridBottom },
             }
             : drillSeriesMode === 'sales'
                 ? {
-                    xAxis: { type: 'category' as const, data: drillData.labels },
+                    xAxis: drillXAxis,
                     yAxis: salesYAxis,
                     series: [salesBarSeries],
                     legend: {
                         data: ['المبيعات'],
-                        bottom: 0,
+                        bottom: drillLegendBottom,
                         left: 'center',
                         textStyle: { color: '#94a3b8', fontSize: 11 },
                     },
-                    grid: { bottom: '15%' },
+                    grid: { bottom: drillGridBottom },
                 }
                 : {
-                    xAxis: { type: 'category' as const, data: drillData.labels },
+                    xAxis: drillXAxis,
                     yAxis: profitYAxis,
                     series: [profitLineSeries],
                     legend: {
                         data: ['الأرباح'],
-                        bottom: 0,
+                        bottom: drillLegendBottom,
                         left: 'center',
                         textStyle: { color: '#94a3b8', fontSize: 11 },
                     },
-                    grid: { bottom: '15%' },
+                    grid: { bottom: drillGridBottom },
                 };
 
     // ── مبيعات مقابل أرباح حسب المنتج ──
@@ -296,6 +334,7 @@ export default function SalesPage() {
                 }
                 option={drillDownOption}
                 height="280px"
+                panelOverflow={drillMonthHierarchy ? 'visible' : 'hidden'}
             />
 
             {/* مبيعات مقابل أرباح + شلال */}
@@ -323,7 +362,7 @@ export default function SalesPage() {
                                 <th>السنة</th>
                                 <th>الربع</th>
                                 <th>الشهر</th>
-                                <th style={{ textAlign: 'left' }}>صافي المبيعات</th>
+                                <th style={{ textAlign: 'center' }}>صافي المبيعات</th>
                                 <th style={{ textAlign: 'center' }}>نمو YoY%</th>
                                 <th style={{ textAlign: 'center' }}>نمو MoM%</th>
                                 <th style={{ textAlign: 'center' }}>عدد الفواتير</th>

@@ -499,7 +499,7 @@ export default function DiscountsPage() {
                     <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Discount Category Comparison — مع/بدون خصومات</p>
                 </div>
                 <div className="overflow-x-auto">
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table dir="rtl" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
                                 <th style={{ padding: '9px 12px', textAlign: 'right', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', minWidth: 150 }}>فئة الخصم</th>
@@ -617,7 +617,7 @@ export default function DiscountsPage() {
                     <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Branch Discount Performance Details</p>
                 </div>
                 <div className="overflow-x-auto">
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table dir="rtl" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
                                 {['الفرع', 'الفواتير', 'ف. مخصومة', '% الفواتير المخصومة', 'ف. بدون خصم', 'متوسط الخصم', 'مبيعات مخصومة', 'حجم مخصوم', 'صافي المبيعات', 'الخصومات المطبقة', '% الاستخدام', 'متوسط % الخصم'].map((h, i) => (

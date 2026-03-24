@@ -168,7 +168,7 @@ export default function AIForecastPage() {
                     <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>المبيعات الفعلية مقابل المتوقعة — Actual vs Predicted Daily</p>
                 </div>
                 <div className="overflow-x-auto">
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table dir="rtl" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
                                 {['التاريخ', 'المبيعات الفعلية', 'المبيعات المتوقعة', 'الانحراف', 'فرق الانحراف'].map((h, i) => (

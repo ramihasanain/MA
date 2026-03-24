@@ -56,43 +56,79 @@ function mkRow(name: string, base: number): Omit<RowData, 'children'> {
     return { name, grossSales: gross, netSales: net, nonDiscNetSales: nonDiscNet, discNetSales: discNet, voidSales, productVolume: vol, nonDiscVolume: nonDiscVol, discVolume: discVol, avgPrice, avgDiscRate };
 }
 
+/** Aggregate metrics from child rows (سوق → مجموعات → مادة). */
+function buildParent(name: string, children: RowData[]): RowData {
+    const grossSales = children.reduce((s, r) => s + r.grossSales, 0);
+    const netSales = children.reduce((s, r) => s + r.netSales, 0);
+    const nonDiscNetSales = children.reduce((s, r) => s + r.nonDiscNetSales, 0);
+    const discNetSales = children.reduce((s, r) => s + r.discNetSales, 0);
+    const voidSales = children.reduce((s, r) => s + r.voidSales, 0);
+    const productVolume = children.reduce((s, r) => s + r.productVolume, 0);
+    const nonDiscVolume = children.reduce((s, r) => s + r.nonDiscVolume, 0);
+    const discVolume = children.reduce((s, r) => s + r.discVolume, 0);
+    const avgPrice = productVolume > 0 ? Number((grossSales / productVolume).toFixed(2)) : 0;
+    const avgDiscRate = netSales > 0 ? Number((discNetSales / netSales * 100).toFixed(2)) : 0;
+    return {
+        name,
+        grossSales,
+        netSales,
+        nonDiscNetSales,
+        discNetSales,
+        voidSales,
+        productVolume,
+        nonDiscVolume,
+        discVolume,
+        avgPrice,
+        avgDiscRate,
+        children,
+    };
+}
+
 _s = 77;
+/** التسلسل الهرمي: سوق → المجموعة الاولى → المجموعة الثانية → المجموعة الثالثة → المادة */
 const tableData: RowData[] = BRANCHES.map(branch => {
     const bBase = 40000 + sr() * 160000;
-    const cats: RowData[] = CATEGORIES.map(cat => {
-        const cBase = bBase / CATEGORIES.length * (0.5 + sr());
-        const prods: RowData[] = [];
-        const pCount = 3 + Math.round(sr() * 4);
-        for (let p = 0; p < pCount; p++) {
-            prods.push(mkRow(PRODUCTS[(Math.round(sr() * 1000)) % PRODUCTS.length], cBase / pCount * (0.5 + sr())));
+    const g1List: RowData[] = [];
+    for (let g1 = 0; g1 < 2; g1++) {
+        const g1Base = (bBase / 2) * (0.45 + sr() * 0.15);
+        const g1Name = `المجموعة الاولى — ${CATEGORIES[(g1 * 3) % CATEGORIES.length]}`;
+        const g2List: RowData[] = [];
+        for (let g2 = 0; g2 < 2; g2++) {
+            const g2Base = (g1Base / 2) * (0.45 + sr() * 0.15);
+            const g2Name = `المجموعة الثانية — ${CATEGORIES[(g1 + g2 * 2) % CATEGORIES.length]}`;
+            const g3List: RowData[] = [];
+            for (let g3 = 0; g3 < 2; g3++) {
+                const g3Base = (g2Base / 2) * (0.45 + sr() * 0.15);
+                const g3Name = `المجموعة الثالثة — ${CATEGORIES[(g1 + g2 + g3) % CATEGORIES.length]}`;
+                const prods: RowData[] = [];
+                const pCount = 2 + Math.round(sr() * 3);
+                for (let p = 0; p < pCount; p++) {
+                    prods.push(
+                        mkRow(
+                            PRODUCTS[Math.round(sr() * 1000) % PRODUCTS.length],
+                            (g3Base / pCount) * (0.4 + sr() * 0.3),
+                        ),
+                    );
+                }
+                g3List.push(buildParent(g3Name, prods));
+            }
+            g2List.push(buildParent(g2Name, g3List));
         }
-        const catRow = mkRow(cat, cBase);
-        // Sum children values into category
-        catRow.grossSales = prods.reduce((s, r) => s + r.grossSales, 0);
-        catRow.netSales = prods.reduce((s, r) => s + r.netSales, 0);
-        catRow.nonDiscNetSales = prods.reduce((s, r) => s + r.nonDiscNetSales, 0);
-        catRow.discNetSales = prods.reduce((s, r) => s + r.discNetSales, 0);
-        catRow.voidSales = prods.reduce((s, r) => s + r.voidSales, 0);
-        catRow.productVolume = prods.reduce((s, r) => s + r.productVolume, 0);
-        catRow.nonDiscVolume = prods.reduce((s, r) => s + r.nonDiscVolume, 0);
-        catRow.discVolume = prods.reduce((s, r) => s + r.discVolume, 0);
-        catRow.avgPrice = Number((catRow.grossSales / catRow.productVolume).toFixed(2));
-        catRow.avgDiscRate = Number((catRow.discNetSales / catRow.netSales * 100).toFixed(2));
-        return { ...catRow, children: prods };
-    });
-    const branchRow = mkRow(branch, bBase);
-    branchRow.grossSales = cats.reduce((s, r) => s + r.grossSales, 0);
-    branchRow.netSales = cats.reduce((s, r) => s + r.netSales, 0);
-    branchRow.nonDiscNetSales = cats.reduce((s, r) => s + r.nonDiscNetSales, 0);
-    branchRow.discNetSales = cats.reduce((s, r) => s + r.discNetSales, 0);
-    branchRow.voidSales = cats.reduce((s, r) => s + r.voidSales, 0);
-    branchRow.productVolume = cats.reduce((s, r) => s + r.productVolume, 0);
-    branchRow.nonDiscVolume = cats.reduce((s, r) => s + r.nonDiscVolume, 0);
-    branchRow.discVolume = cats.reduce((s, r) => s + r.discVolume, 0);
-    branchRow.avgPrice = Number((branchRow.grossSales / branchRow.productVolume).toFixed(2));
-    branchRow.avgDiscRate = Number((branchRow.discNetSales / branchRow.netSales * 100).toFixed(2));
-    return { ...branchRow, children: cats };
+        g1List.push(buildParent(g1Name, g2List));
+    }
+    return buildParent(branch, g1List);
 });
+
+/** Keys of this row and every nested row (same pattern as `root-0-1-…` in render). */
+function collectDescendantRowKeys(row: RowData, rowKey: string): string[] {
+    const keys: string[] = [];
+    if (!row.children?.length) return keys;
+    row.children.forEach((child, ci) => {
+        const childKey = `${rowKey}-${ci}`;
+        keys.push(childKey, ...collectDescendantRowKeys(child, childKey));
+    });
+    return keys;
+}
 
 // ── Columns definition ──
 const COLUMNS = [
@@ -120,10 +156,22 @@ function MiniBar({ value, max, color = 'var(--accent-blue)' }: { value: number; 
 
 // ── Main Component ──
 export default function DrillDownTable() {
+    /** Only `true` means open; missing/`false` = closed (default closed for every row). */
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-    const toggle = (key: string) => {
-        setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
+    const toggle = (rowKey: string, row: RowData) => {
+        setExpanded(prev => {
+            const isOpen = prev[rowKey] === true;
+            if (isOpen) {
+                const next: Record<string, boolean> = { ...prev };
+                next[rowKey] = false;
+                for (const d of collectDescendantRowKeys(row, rowKey)) {
+                    delete next[d];
+                }
+                return next;
+            }
+            return { ...prev, [rowKey]: true };
+        });
     };
 
     // Compute totals
@@ -147,24 +195,51 @@ export default function DrillDownTable() {
         return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
-    const renderRow = (row: RowData, level: number, parentKey: string, idx: number) => {
+    /** Zebra striping: even ≈ white/surface, odd ≈ gray (theme-aware). */
+    const STRIPE_EVEN = 'var(--bg-surface)';
+    const STRIPE_ODD = 'rgba(148, 163, 184, 0.09)';
+
+    const renderRow = (
+        row: RowData,
+        level: number,
+        parentKey: string,
+        idx: number,
+        stripeCounter: { n: number } = { n: 0 },
+    ) => {
         const key = `${parentKey}-${idx}`;
         const hasChildren = row.children && row.children.length > 0;
-        const isOpen = expanded[key];
+        const isOpen = expanded[key] === true;
         const indent = level * 24;
-
-        // ألوان الخلفية لكل مستوى (فرع → فئة → منتج) متناسقة مع جداول الخصومات / العمليات
-        const bgColors = [
-            'transparent',                       // Branch row
-            'rgba(4,120,87,0.02)',               // Category level (خفيف أخضر)
-            'rgba(8,145,178,0.02)',              // Product level (خفيف سماوي)
-        ];
+        const stripeIndex = stripeCounter.n++;
+        const stripeBg = stripeIndex % 2 === 0 ? STRIPE_EVEN : STRIPE_ODD;
 
         const levelColors = [
-            'var(--text-primary)',               // Branch name
-            'var(--accent-cyan)',                // Category name
-            'var(--text-secondary)',             // Product name
+            'var(--text-primary)',    // سوق
+            'var(--accent-green)',    // المجموعة الاولى
+            'var(--accent-cyan)',     // المجموعة الثانية
+            'var(--accent-blue)',     // المجموعة الثالثة
+            'var(--text-secondary)',  // المادة
         ];
+        const chevronOpenBg = [
+            'rgba(0,229,160,0.15)',
+            'rgba(0,229,160,0.11)',
+            'rgba(8,145,178,0.12)',
+            'rgba(59,130,246,0.12)',
+        ];
+        const chevronIconOpen = [
+            'var(--accent-green)',
+            'var(--accent-green)',
+            'var(--accent-cyan)',
+            'var(--accent-blue)',
+        ];
+        const rowHoverBg = [
+            'rgba(0,229,160,0.08)',
+            'rgba(0,229,160,0.06)',
+            'rgba(8,145,178,0.08)',
+            'rgba(59,130,246,0.08)',
+        ];
+        const colorIdx = Math.min(level, levelColors.length - 1);
+        const chevronIdx = Math.min(level, chevronOpenBg.length - 1);
 
         const rows: React.ReactNode[] = [];
 
@@ -172,18 +247,18 @@ export default function DrillDownTable() {
             <tr
                 key={key}
                 style={{
-                    background: bgColors[level] || 'transparent',
+                    background: stripeBg,
                     cursor: hasChildren ? 'pointer' : 'default',
                     transition: 'background 0.15s',
                 }}
-                onClick={() => hasChildren && toggle(key)}
+                onClick={() => hasChildren && toggle(key, row)}
                 onMouseEnter={(e) => {
                     if (hasChildren) {
                         (e.currentTarget as HTMLElement).style.background =
-                            level === 0 ? 'rgba(0,229,160,0.06)' : level === 1 ? 'rgba(8,145,178,0.06)' : 'rgba(148,163,184,0.06)';
+                            rowHoverBg[chevronIdx] ?? 'rgba(148,163,184,0.12)';
                     }
                 }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = bgColors[level] || 'transparent'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = stripeBg; }}
             >
                 {/* Name column */}
                 <td style={{ paddingRight: `${indent + 12}px`, whiteSpace: 'nowrap' }}>
@@ -197,17 +272,14 @@ export default function DrillDownTable() {
                                     width: '16px',
                                     height: '16px',
                                     borderRadius: '4px',
-                                    background:
-                                        level === 0
-                                            ? (isOpen ? 'rgba(0,229,160,0.15)' : 'var(--bg-elevated)')
-                                            : (isOpen ? 'rgba(8,145,178,0.12)' : 'var(--bg-elevated)'),
+                                    background: isOpen ? chevronOpenBg[chevronIdx] : 'var(--bg-elevated)',
                                     transition: 'all 0.2s',
                                 }}
                             >
                                 {isOpen ? (
                                     <ChevronDown
                                         size={11}
-                                        style={{ color: level === 0 ? 'var(--accent-green)' : 'var(--accent-cyan)' }}
+                                        style={{ color: chevronIconOpen[chevronIdx] }}
                                     />
                                 ) : (
                                     <ChevronLeft size={11} style={{ color: 'var(--text-muted)' }} />
@@ -216,7 +288,7 @@ export default function DrillDownTable() {
                         ) : (
                             <span style={{ width: '16px', display: 'inline-block' }} />
                         )}
-                        <span className="text-xs font-medium" style={{ color: levelColors[level] }}>
+                        <span className="text-xs font-medium" style={{ color: levelColors[colorIdx] }}>
                             {row.name}
                         </span>
                     </div>
@@ -230,7 +302,7 @@ export default function DrillDownTable() {
                     const isDisc = col.key === 'avgDiscRate';
 
                     return (
-                        <td key={col.key} style={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
+                        <td key={col.key} style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                             <div className="flex items-center gap-1">
                                 {showBar && (
                                     <MiniBar
@@ -265,7 +337,7 @@ export default function DrillDownTable() {
         // Render children
         if (hasChildren && isOpen) {
             row.children!.forEach((child, ci) => {
-                rows.push(...renderRow(child, level + 1, key, ci));
+                rows.push(...renderRow(child, level + 1, key, ci, stripeCounter));
             });
         }
 
@@ -278,21 +350,24 @@ export default function DrillDownTable() {
                 <div className="flex items-center gap-2">
                     <ChartTitleFlagBadge flag="green" size="sm" />
                     <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        تحليل المبيعات التفصيلي — سوق / فئة / منتج
+                        تحليل المبيعات التفصيلي — سوق / مجموعات / مادة
                     </h3>
                 </div>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    التسلسل الهرمي: سوق — المجموعة الاولى — المجموعة الثانية — المجموعة الثالثة — المادة
+                </p>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
                     اضغط على أي صف للتوسع • إجمالي ← صافي ← خصومات ← حجم المنتجات
                 </p>
             </div>
 
             <div className="overflow-x-auto">
-                <table className="enterprise-table" style={{ minWidth: '1200px' }}>
+                <table className="enterprise-table" dir="rtl" style={{ minWidth: '1200px' }}>
                     <thead>
                         <tr>
                             <th style={{ minWidth: '160px', textAlign: 'right' }}>الاسم</th>
                             {COLUMNS.map(col => (
-                                <th key={col.key} style={{ textAlign: 'left', minWidth: '110px', fontSize: '10px', lineHeight: '1.3' }}>
+                                <th key={col.key} style={{ textAlign: 'right', minWidth: '110px', fontSize: '10px', lineHeight: '1.3' }}>
                                     <div>{col.label}</div>
                                     <div style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '9px' }}>{col.labelEn}</div>
                                 </th>
@@ -300,7 +375,10 @@ export default function DrillDownTable() {
                         </tr>
                     </thead>
                     <tbody>
-                        {tableData.map((branch, bi) => renderRow(branch, 0, 'root', bi))}
+                        {(() => {
+                            const stripeCounter = { n: 0 };
+                            return tableData.flatMap((branch, bi) => renderRow(branch, 0, 'root', bi, stripeCounter));
+                        })()}
 
                         {/* Total row */}
                         <tr
@@ -315,7 +393,7 @@ export default function DrillDownTable() {
                                 </span>
                             </td>
                             {COLUMNS.map(col => (
-                                <td key={col.key} style={{ textAlign: 'left' }}>
+                                <td key={col.key} style={{ textAlign: 'right' }}>
                                     <span className="text-xs font-bold" style={{ color: 'var(--accent-green)' }} dir="ltr">
                                         {fmt(totals[col.key], col.key)}
                                     </span>

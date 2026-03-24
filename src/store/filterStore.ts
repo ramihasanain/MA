@@ -3,8 +3,8 @@
 import { create } from 'zustand';
 
 export interface FilterState {
-    // ── فلاتر لحظية (فرع + فترة) ──
-    activeBranch: string;
+    // ── فلاتر لحظية (فروع متعددة + فترة) ── [] = كل الفروع
+    activeBranches: string[];
     activePeriod: string;
 
     // ── فلاتر متقدمة ──
@@ -30,7 +30,7 @@ export interface FilterState {
 }
 
 interface FilterActions {
-    setActiveBranch: (branch: string) => void;
+    setActiveBranches: (branches: string[]) => void;
     setActivePeriod: (period: string) => void;
     setFilter: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
     applyFilters: () => void;
@@ -39,7 +39,7 @@ interface FilterActions {
 }
 
 const defaultFilters: FilterState = {
-    activeBranch: 'all',
+    activeBranches: [],
     activePeriod: 'month',
     year: new Date().getFullYear().toString(),
     quarter: '',
@@ -64,7 +64,7 @@ const defaultFilters: FilterState = {
 
 export const useFilterStore = create<FilterState & FilterActions>((set) => ({
     ...defaultFilters,
-    setActiveBranch: (branch) => set({ activeBranch: branch }),
+    setActiveBranches: (branches) => set({ activeBranches: branches }),
     setActivePeriod: (period) => set({ activePeriod: period }),
     setFilter: (key, value) => set({ [key]: value, isApplied: false }),
     applyFilters: () => set({ isApplied: true, isLoading: true }),

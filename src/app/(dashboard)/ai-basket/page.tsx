@@ -229,7 +229,7 @@ export default function AIBasketPage() {
                         <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>الدعم، الثقة، الرفع — Association Rules</p>
                     </div>
                     <div className="overflow-x-auto" style={{ maxHeight: 360, overflowY: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <table dir="rtl" style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)', position: 'sticky' as const, top: 0, zIndex: 2 }}>
                                     {['السلة', 'الدعم', 'ثقة المنتج الأول', 'ثقة المنتج الثاني', 'الرفع'].map((h, i) => (

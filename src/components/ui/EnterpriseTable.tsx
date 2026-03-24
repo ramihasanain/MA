@@ -188,7 +188,7 @@ export default function EnterpriseTable<T extends Record<string, unknown>>({
 
             {/* الجدول */}
             <div className="overflow-x-auto">
-                <table className="enterprise-table">
+                <table className="enterprise-table" dir="rtl">
                     <thead>
                         <tr>
                             {expandable && <th style={{ width: '40px' }} />}

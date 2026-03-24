@@ -101,7 +101,7 @@ export default function Sidebar() {
                             className="overflow-hidden whitespace-nowrap"
                         >
                             <p className="text-xs font-bold tracking-wider" style={{ color: 'var(--sidebar-logo-text)' }}>
-                                م.إ.ع
+                               المؤسسة الاستهلاكية العسكرية
                             </p>
                             <p className="text-[10px]" style={{ color: 'var(--sidebar-logo-sub)' }}>
                                 منصة البيانات

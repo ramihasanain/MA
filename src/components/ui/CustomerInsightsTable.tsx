@@ -132,7 +132,7 @@ export default function CustomerInsightsTable() {
 
             {/* الجدول */}
             <div className="overflow-x-auto">
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table dir="rtl" style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>
                             <Th label="اسم العميل" k="name" align="right" />
